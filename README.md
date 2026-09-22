@@ -22,6 +22,16 @@ python proofground.py gate --baseline 0.812 --oracle 0.830 --se 0.019      # NO-
 Python 3.9+, **no dependencies**, nothing to configure. Works with Claude Code,
 Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 
+> **Never used a coding agent before?**
+> → [**Getting started**](docs/getting-started.md) · [**上手指南（中文）**](docs/getting-started.zh.md)
+>
+> From installing Claude Code or Codex to running a whole project with one —
+> including the case every other tutorial skips: **a shared cluster node with no
+> direct route to the internet.** The reverse tunnel, the `no_proxy` entry that
+> makes `git clone` hang on a socket that will never open, why the IDE panel
+> disconnects while the CLI on the same machine is fine, and how to share a GPU
+> node with people who are not you.
+
 | command | what it refuses |
 |---|---|
 | `proofground gate` | a direction whose ceiling, baseline, random arm or positive control already answers it |
