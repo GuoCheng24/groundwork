@@ -40,8 +40,8 @@ pre-registration committed after its results is a write-up.
 ## 2. Find the capacity that is actually free
 
 ```bash
-proofground cluster survey --nodes node15 node16 node17 node18
-proofground cluster plan --nodes node16 node18 --need-gb 20 --shards 4 \
+proofground cluster survey --nodes gpu01 gpu02 gpu03 gpu04
+proofground cluster plan --nodes gpu01 gpu03 --need-gb 20 --shards 4 \
     --command 'python eval.py --data data/subset.jsonl'
 ```
 

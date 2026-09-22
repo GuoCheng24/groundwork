@@ -18,17 +18,18 @@ came from**, which is why it is a gate and not a suggestion.
 
 ## What it cost the second time, after the rule existed
 
-A later project *did* measure its oracle ceiling on day one: 0.5836 against a
-baseline of 0.5305, an apparent 2.7× of headroom, gate passed.
+A later project *did* measure its oracle ceiling on day one, and saw an apparent
+**2.7× of headroom**. Gate passed.
 
 The baseline it compared against was **its own, untuned**. The correct
-comparison was three numbers read directly from the same region — area, maximum
-and mean — which together scored **0.6307**. The oracle ceiling *lost to the
-trivial baseline by 0.047*. The project should have died that morning.
+comparison was three numbers read directly from the same region of the same
+data — an area, a maximum and a mean. Together they **beat the oracle ceiling by
+0.047**. The project should have died that morning.
 
 Instead it passed six further adversarial checks over two weeks, and not one of
 them asked whether the control had been tuned. After giving the baseline the
-same budget: baseline 0.6148, proposed method 0.6124, **gain −0.0024**.
+same budget, the proposed method's gain over it was **−0.0024** —
+indistinguishable from nothing, in the wrong direction.
 
 So the rule has a second half, and it is the half that matters:
 

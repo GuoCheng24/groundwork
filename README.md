@@ -116,14 +116,14 @@ closed — there was nothing for any method to win. Measured in session one, eve
 conclusion of that project was available in a day, and the other nine sessions
 need never have happened.
 
-A later project did measure the ceiling on day one: 0.5836 against a baseline of
-0.5305, an apparent 2.7× of headroom, gate passed. The baseline it compared
-against was **its own, untuned**. The right comparison was three numbers read
-straight from the same region, which scored **0.6307** — the oracle ceiling lost
-to the trivial baseline, and the project should have died that morning. It went
-on to pass six further adversarial checks over two weeks, and **not one of them
-asked whether the control had been tuned**. Given the same budget, the baseline
-scored 0.6148 and the proposed method 0.6124: a gain of **−0.0024**.
+A later project did measure the ceiling on day one and saw an apparent **2.7× of
+headroom**, so the gate passed. The baseline it compared against was **its own,
+untuned**. The right comparison — three numbers read straight from the same
+region of the same data — **beat the oracle ceiling by 0.047**. The project
+should have died that morning. It went on to pass six further adversarial checks
+over two weeks, and **not one of them asked whether the control had been
+tuned**. Given the same budget, the final gain over that baseline was
+**−0.0024**: indistinguishable from nothing, in the wrong direction.
 
 So the rule has a second half, and it is the half that matters: *the baseline
 gets the same tuning budget as the method.* A baseline nobody tried to make win
@@ -217,14 +217,14 @@ seeing a partial score is not disqualified, an undisclosed one is.
 ### and launched wherever the GPUs actually are
 
 ```console
-$ proofground cluster survey --nodes node15 node16 node17 node18
-node18:
+$ proofground cluster survey --nodes gpu01 gpu02 gpu03 gpu04
+gpu03:
    [0] NVIDIA L40                   16.2 GB free of  45.0   util  97%
    [1] NVIDIA L40                   48.0 GB free of  48.0   util   0%   idle
 ...
 14 idle card(s) across 3 reachable node(s).
 
-$ proofground cluster plan --nodes node16 node18 --need-gb 20 --shards 4 \
+$ proofground cluster plan --nodes gpu01 gpu03 --need-gb 20 --shards 4 \
       --command 'python eval.py'
 ```
 

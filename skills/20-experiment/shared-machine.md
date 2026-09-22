@@ -10,7 +10,7 @@ the idlest card at start-up, by free memory **and** utilisation, and fall back
 rather than crash:
 
 ```bash
-proofground cluster pick --nodes node16 node17 node18 --need-gb 20 --count 1
+proofground cluster pick --nodes gpu01 gpu02 gpu03 --need-gb 20 --count 1
 ```
 
 And do not default a small model to the CPU to be polite. The CPU is shared too,

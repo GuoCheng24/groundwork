@@ -20,8 +20,12 @@ import lit  # noqa: E402
 import prereg  # noqa: E402
 from gate import detectable_effect, required_se, verdict  # noqa: E402
 
-IDENT = ["-c", "user.name=Guo Cheng",
-         "-c", "user.email=224264187+GuoCheng24@users.noreply.github.com"]
+# A throwaway repository created by a test is not anybody's work, so it gets a
+# neutral identity. Some environments install a global hook that enforces a
+# personal one; the documented escape hatch covers exactly this case.
+IDENT = ["-c", "user.name=proofground-test",
+         "-c", "user.email=test@example.invalid"]
+TEST_ENV = {**os.environ, "ALLOW_OTHER_GIT_IDENTITY": "1"}
 
 
 class Gate(unittest.TestCase):
@@ -78,7 +82,8 @@ class Prereg(unittest.TestCase):
     @staticmethod
     def _commit(d, *paths):
         subprocess.run(["git", "add", *paths], cwd=d, check=True)
-        subprocess.run(["git", *IDENT, "commit", "-qm", "x"], cwd=d, check=True)
+        subprocess.run(["git", *IDENT, "commit", "-qm", "x"], cwd=d, check=True,
+                       env=TEST_ENV)
 
     def _make(self, d, name="PREREG.md"):
         p = os.path.join(d, name)

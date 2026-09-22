@@ -13,7 +13,7 @@ best.
 2. **The trivial baseline, tuned.** Not the untuned one. See
    [`../00-gate/ceiling-first.md`](../00-gate/ceiling-first.md): a project
    compared its oracle ceiling against its own untuned baseline, saw 2.7× of
-   headroom, and shipped a final gain of −0.0024 once the baseline was given the
+   headroom, and ended with a gain of −0.0024 once the baseline was given the
    same budget.
 3. **The capacity control.** If the proposed component adds parameters or
    compute, an arm with the same budget spent on nothing in particular tells you
