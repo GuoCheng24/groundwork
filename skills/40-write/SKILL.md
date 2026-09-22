@@ -1,5 +1,5 @@
 ---
-name: proofground-write
+name: groundwork-write
 description: >
   Write the paper from claims that have already survived checking, with figures
   and tables regenerated from data rather than transcribed. Triggers: "write the

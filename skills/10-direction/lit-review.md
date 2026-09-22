@@ -25,7 +25,7 @@ rather than within them.
   drags a search into adjacent fields.
 - **Query for recency explicitly.** An agent surveying from its own weights
   surveys the year its training stopped, and relevance sorting favours
-  highly-cited old work. `proofground lit latest` exists for this.
+  highly-cited old work. `groundwork lit latest` exists for this.
 - Do not stop at the abstract for anything that could be the same idea in other
   words. Abstract-level matching finds a small fraction of what is there.
 - Search **older** literature for mechanisms. A qualitative result occupied by a

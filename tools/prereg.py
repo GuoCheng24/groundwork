@@ -129,7 +129,7 @@ def cmd_new(a):
     with open(a.path, "w", encoding="utf-8") as fh:
         fh.write(TEMPLATE.format(title=a.title, when=when))
     print(f"wrote {a.path}")
-    print("Fill every section, then: proofground prereg seal " + a.path)
+    print("Fill every section, then: groundwork prereg seal " + a.path)
     print("Commit it BEFORE the run. `verify` checks that with git and there is")
     print("no flag to turn that off.")
     return 0
@@ -206,7 +206,7 @@ def cmd_verify(a):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="proofground prereg")
+    ap = argparse.ArgumentParser(prog="groundwork prereg")
     sub = ap.add_subparsers(dest="cmd", required=True)
     n = sub.add_parser("new", help="scaffold a pre-registration")
     n.add_argument("path")

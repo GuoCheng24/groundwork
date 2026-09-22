@@ -23,7 +23,7 @@ from gate import detectable_effect, required_se, verdict  # noqa: E402
 # A throwaway repository created by a test is not anybody's work, so it gets a
 # neutral identity. Some environments install a global hook that enforces a
 # personal one; the documented escape hatch covers exactly this case.
-IDENT = ["-c", "user.name=proofground-test",
+IDENT = ["-c", "user.name=groundwork-test",
          "-c", "user.email=test@example.invalid"]
 TEST_ENV = {**os.environ, "ALLOW_OTHER_GIT_IDENTITY": "1"}
 
@@ -66,7 +66,7 @@ class Gate(unittest.TestCase):
 
     def test_the_cli_exit_code_carries_the_verdict(self):
         def run(*args):
-            return subprocess.run([sys.executable, os.path.join(ROOT, "proofground.py"),
+            return subprocess.run([sys.executable, os.path.join(ROOT, "groundwork.py"),
                                    "gate", *args], capture_output=True, text=True).returncode
         self.assertEqual(run("--baseline", ".5", "--oracle", ".75", "--se", ".011"), 0)
         self.assertEqual(run("--baseline", ".8", "--oracle", ".81", "--se", ".01"), 1)

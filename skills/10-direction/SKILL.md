@@ -1,5 +1,5 @@
 ---
-name: proofground-direction
+name: groundwork-direction
 description: >
   Turn a research direction into candidate projects that can survive the gate:
   survey what exists, generate candidates, and kill the ones that are already
@@ -52,7 +52,7 @@ Three cheap kills, in the order that costs least:
    of novelty; succeeding saves the week.
 3. **Occupancy.** The mechanism, in older literature, in other vocabularies.
 
-Then run `proofground gate`. Then, and only then, write code that is not a
+Then run `groundwork gate`. Then, and only then, write code that is not a
 measurement.
 
 ## 4. Decide the venue from the claim, not the ambition

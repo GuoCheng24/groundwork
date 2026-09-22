@@ -134,7 +134,7 @@ no_proxy="" git -c http.proxy=socks5h://127.0.0.1:17899 clone <url>
 ### 2.5 先验证，再相信
 
 ```bash
-python proofground.py reach --targets github.com api.openai.com api.anthropic.com \
+python groundwork.py reach --targets github.com api.openai.com api.anthropic.com \
                                       pypi.org api.openalex.org arxiv.org
 ```
 
@@ -192,8 +192,8 @@ claude            # 或者 codex
 
 | 阶段 | 让它做什么 | 工具 |
 |---|---|---|
-| 决定做不做 | 天花板、**调过参的**平凡基线、随机臂、正对照 | [`proofground gate`](../skills/00-gate/) |
-| 查文献 | 谁已经占了这个 claim，以及**你能不能判断** | [`proofground lit`](../skills/10-direction/) |
+| 决定做不做 | 天花板、**调过参的**平凡基线、随机臂、正对照 | [`groundwork gate`](../skills/00-gate/) |
+| 查文献 | 谁已经占了这个 claim，以及**你能不能判断** | [`groundwork lit`](../skills/10-direction/) |
 | 做实验 | 先封印预注册，再摊到空闲 GPU 上跑 | [`prereg`](../skills/20-experiment/) · `cluster` |
 | 定结论 | 三层互相看不见对方盲区的核查 | [`doubleblind`](https://github.com/GuoCheng24/doubleblind) |
 | 写论文 | 先 claim 再散文，图要审，表要生成 | [`40-write`](../skills/40-write/) |
@@ -243,7 +243,7 @@ pip install -i <你的镜像> <包名>
 ## 六、这台机器不是你一个人的
 
 ```bash
-python proofground.py cluster survey --nodes gpu01 gpu02 gpu03
+python groundwork.py cluster survey --nodes gpu01 gpu02 gpu03
 ```
 
 - **绝不写死设备号。** 启动时挑最闲的卡。

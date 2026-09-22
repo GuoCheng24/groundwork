@@ -31,7 +31,7 @@ chips of the same architecture and by several points on the third.
    from the runtime rather than typed. A results file that does not say which
    GPU produced it cannot be compared with anything.
 2. **Never split one experimental arm across two GPU models.** It is a
-   confounded arm. `proofground cluster plan` refuses unless told the split is
+   confounded arm. `groundwork cluster plan` refuses unless told the split is
    only a throughput knob — and then it records that it was told.
 3. **A difference smaller than the hardware spread is not a finding.** Before
    comparing arms run on different machines, you need the spread; if you have

@@ -63,7 +63,7 @@ metric carried no information at all.
 ## In practice
 
 ```bash
-proofground gate --baseline <strongest trivial, tuned> \
+groundwork gate --baseline <strongest trivial, tuned> \
                  --oracle <perfect access to the estimated quantity> \
                  --se <standard error of a difference on this split> \
                  --random <shuffled or randomly assigned arm>

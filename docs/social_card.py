@@ -66,6 +66,6 @@ if __name__ == "__main__":
          headline="Most directions should not be started",
          evidence=f"{TOTAL} ways a direction dies, and where each is caught",
          chart=chart,
-         footer="github.com/GuoCheng24/proofground",
+         footer="github.com/GuoCheng24/groundwork",
          headline_size=44)
     print("wrote", out)

@@ -146,7 +146,7 @@ use the `http://` form, and then the target host must not be in `no_proxy`.
 ### 2.5 Verify before you trust it
 
 ```bash
-python proofground.py reach --targets github.com api.openai.com api.anthropic.com \
+python groundwork.py reach --targets github.com api.openai.com api.anthropic.com \
                                       pypi.org api.openalex.org arxiv.org
 ```
 
@@ -216,9 +216,9 @@ one stage at a time.
 
 | stage | ask for | the tool |
 |---|---|---|
-| deciding what to work on | the ceiling, the tuned baseline, a random arm, a positive control | [`proofground gate`](../skills/00-gate/) |
-| the literature | who already occupies this claim, and can you tell | [`proofground lit`](../skills/10-direction/) |
-| the experiment | a sealed pre-registration, then a launch across idle GPUs | [`proofground prereg`](../skills/20-experiment/), `cluster` |
+| deciding what to work on | the ceiling, the tuned baseline, a random arm, a positive control | [`groundwork gate`](../skills/00-gate/) |
+| the literature | who already occupies this claim, and can you tell | [`groundwork lit`](../skills/10-direction/) |
+| the experiment | a sealed pre-registration, then a launch across idle GPUs | [`groundwork prereg`](../skills/20-experiment/), `cluster` |
 | the claims | three layers that are blind to different defects | [`doubleblind`](https://github.com/GuoCheng24/doubleblind) |
 | the paper | claims first, figures audited, tables generated | [`40-write`](../skills/40-write/) |
 | submission | hard specs as a file that fails; the rebuttal | [`50-submit`](../skills/50-submit/) |
@@ -278,7 +278,7 @@ points apart.
 Somebody else is on that node.
 
 ```bash
-python proofground.py cluster survey --nodes gpu01 gpu02 gpu03
+python groundwork.py cluster survey --nodes gpu01 gpu02 gpu03
 ```
 
 - **Never hard-code a device.** Pick the idlest card at start-up.

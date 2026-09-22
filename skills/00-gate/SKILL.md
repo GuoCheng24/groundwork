@@ -1,5 +1,5 @@
 ---
-name: proofground-gate
+name: groundwork-gate
 description: >
   Decide whether a research direction is allowed to cost a week. Run this BEFORE
   the first real experiment, before the literature deep-dive, before any code
@@ -32,7 +32,7 @@ Run these on the same split, in the same pipeline, before anything else.
 Then:
 
 ```bash
-proofground gate --baseline 0.812 --oracle 0.838 --se 0.019 \
+groundwork gate --baseline 0.812 --oracle 0.838 --se 0.019 \
     --random 0.500 --positive-control 0.80 --positive-control-floor 0.70
 ```
 

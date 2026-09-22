@@ -54,7 +54,7 @@ MAILTO = os.environ.get("PROOFGROUND_MAILTO", "")
 S2KEY = os.environ.get("PROOFGROUND_S2KEY")
 DOI_RE = r"10\.\d{4,9}/[-._;()/:A-Za-z0-9]+"
 ARXIV_RE = r"\d{4}\.\d{4,5}(?:v\d+)?"
-UA = "proofground-lit/0.1" + (f" (mailto:{MAILTO})" if MAILTO else "")
+UA = "groundwork-lit/0.1" + (f" (mailto:{MAILTO})" if MAILTO else "")
 
 _NET_FAILURES = 0          # distinguishes "nothing found" from "nothing reachable"
 
@@ -432,7 +432,7 @@ def cmd_journal(a):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        prog="proofground lit",
+        prog="groundwork lit",
         description="Literature grounding and occupancy search that can be checked.")
     sub = ap.add_subparsers(dest="cmd", required=True)
 

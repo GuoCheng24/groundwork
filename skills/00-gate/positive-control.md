@@ -34,7 +34,7 @@ you are looking for a reason to disbelieve your own result.
 The control needs a number it must clear, written before it runs:
 
 ```bash
-proofground gate --baseline ... --oracle ... --se ... \
+groundwork gate --baseline ... --oracle ... --se ... \
     --positive-control 0.80 --positive-control-floor 0.70
 ```
 

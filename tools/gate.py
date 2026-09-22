@@ -21,8 +21,8 @@ This computes what those four say and refuses the direction when they say no.
 It is deliberately unaware of what the proposed method is: a gate that knows
 what you are hoping for is not a gate.
 
-    proofground gate --baseline 0.812 --oracle 0.838 --se 0.019
-    proofground gate --config gate.json
+    groundwork gate --baseline 0.812 --oracle 0.838 --se 0.019
+    groundwork gate --config gate.json
 """
 from __future__ import annotations
 
@@ -115,7 +115,7 @@ def verdict(baseline, oracle, se, random_arm=None, positive_control=None,
 
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        prog="proofground gate",
+        prog="groundwork gate",
         description="Refuse a direction whose ceiling, baseline or controls already answer it.")
     ap.add_argument("--config", help="JSON file with the same keys as the flags")
     ap.add_argument("--baseline", type=float, help="strongest trivial method, tuned")

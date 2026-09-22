@@ -23,11 +23,11 @@ jobs:
 
       # A gate that has never been seen refusing is decoration.
       - name: The gate passes a direction with room
-        run: python proofground.py gate --baseline 0.50 --oracle 0.75 --se 0.011
+        run: python groundwork.py gate --baseline 0.50 --oracle 0.75 --se 0.011
 
       - name: The gate refuses a direction without room
         run: |
-          if python proofground.py gate --baseline 0.812 --oracle 0.830 --se 0.019; then
+          if python groundwork.py gate --baseline 0.812 --oracle 0.830 --se 0.019; then
             echo "::error::the gate passed a direction with 0.95 SE of headroom"
             exit 1
           fi

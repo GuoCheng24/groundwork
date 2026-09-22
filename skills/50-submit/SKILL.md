@@ -1,5 +1,5 @@
 ---
-name: proofground-submit
+name: groundwork-submit
 description: >
   Everything after the draft: venue compliance, rebuttal, resubmission to a new
   venue, and the talk. Triggers: "submit", "rebuttal", "reviewer", "resubmit",

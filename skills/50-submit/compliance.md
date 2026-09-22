@@ -32,7 +32,7 @@ journal's guidelines were reachable **only through an archived snapshot**.
 So: fetch the page, and *check that what you got is content*:
 
 ```bash
-proofground reach --targets <venue host>
+groundwork reach --targets <venue host>
 ```
 
 A `CHALLENGE` tier means the status code was fine and the body is a bot wall.

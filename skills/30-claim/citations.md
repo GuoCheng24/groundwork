@@ -7,7 +7,7 @@ every check a word processor performs.
 ## Verify every entry against an index, before submission
 
 ```bash
-scholarcheck refs.bib          # or: proofground lit verify "<title>"
+scholarcheck refs.bib          # or: groundwork lit verify "<title>"
 ```
 
 Three verdicts, and the middle one is the one that matters:

@@ -47,6 +47,6 @@ So a kill is recorded with:
   said so got revived.
 
 ```bash
-proofground ledger kill --id <slug> --cause ceiling-too-low \
+groundwork ledger kill --id <slug> --cause ceiling-too-low \
     --what "..." --settled-by "..." --reopen-if "a split large enough to resolve 2 points"
 ```

@@ -15,14 +15,14 @@ check that fails on a deliberately broken input is worth every future one. The
 entries that *cannot* convert are worth recording too, because they are the map
 of where the mechanical layer stops.
 
-    proofground ledger kill   --id topo-repair --cause ceiling-too-low \
+    groundwork ledger kill   --id topo-repair --cause ceiling-too-low \
                               --what "oracle beat the baseline by 1.7 points" \
                               --settled-by "oracle + strongest baseline, one afternoon"
-    proofground ledger defect --id stale-pdf --missed-by mechanical \
+    groundwork ledger defect --id stale-pdf --missed-by mechanical \
                               --what "the built PDF quoted replaced figures" \
                               --why "every check read the source" \
                               --check "re-extract from the artifact and match"
-    proofground ledger roll
+    groundwork ledger roll
 """
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ LAYERS = ("mechanical", "reviewer", "figure", "both", "all")
 
 def _load(path, key):
     if not os.path.exists(path):
-        return {"schema": f"proofground-{key}/1", key: []}
+        return {"schema": f"groundwork-{key}/1", key: []}
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
 
@@ -159,7 +159,7 @@ def cmd_roll(a):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="proofground ledger")
+    ap = argparse.ArgumentParser(prog="groundwork ledger")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     k = sub.add_parser("kill", help="record a direction that died, with its cause")

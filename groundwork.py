@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""proofground — one entry point over the gates.
+"""groundwork — one entry point over the gates.
 
-    proofground gate    ...   should this direction be started at all
-    proofground prereg  ...   is the pre-registration real, and older than the results
-    proofground cluster ...   where is the idle capacity, and how to split across it
+    groundwork gate    ...   should this direction be started at all
+    groundwork prereg  ...   is the pre-registration real, and older than the results
+    groundwork cluster ...   where is the idle capacity, and how to split across it
 
 Each subcommand is a standalone script under tools/ and can be run directly.
 """
@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.join(HERE, "tools"))
 COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "reach",
             "lit": "lit", "ledger": "ledger"}
 
-USAGE = """usage: proofground {gate,prereg,cluster,reach,lit,ledger} ...
+USAGE = """usage: groundwork {gate,prereg,cluster,reach,lit,ledger} ...
 
   gate     refuse a direction whose ceiling, baseline or controls already answer it
   prereg   scaffold, seal and verify a pre-registration - including that it was
@@ -26,7 +26,7 @@ USAGE = """usage: proofground {gate,prereg,cluster,reach,lit,ledger} ...
   lit      literature grounding and occupancy search that can be checked
   ledger   record what died and what got through, and roll it up
 
-`proofground <command> --help` for each."""
+`groundwork <command> --help` for each."""
 
 
 def main(argv=None):

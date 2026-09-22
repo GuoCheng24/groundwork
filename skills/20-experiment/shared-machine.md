@@ -10,7 +10,7 @@ the idlest card at start-up, by free memory **and** utilisation, and fall back
 rather than crash:
 
 ```bash
-proofground cluster pick --nodes gpu01 gpu02 gpu03 --need-gb 20 --count 1
+groundwork cluster pick --nodes gpu01 gpu02 gpu03 --need-gb 20 --count 1
 ```
 
 And do not default a small model to the CPU to be polite. The CPU is shared too,
@@ -57,6 +57,6 @@ Rules that follow:
 
 ## Leave something behind you
 
-`proofground cluster` holds back one idle card per node by default, and holds
+`groundwork cluster` holds back one idle card per node by default, and holds
 back an *idle* one rather than the scraps. If you take everything every night,
 the next request for capacity is a conversation rather than a command.

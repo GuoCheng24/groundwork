@@ -1,10 +1,10 @@
-# proofground ⛰️🔬
+# groundwork ⛰️🔬
 
-[![ci](https://github.com/GuoCheng24/proofground/actions/workflows/ci.yml/badge.svg)](https://github.com/GuoCheng24/proofground/actions/workflows/ci.yml)
+[![ci](https://github.com/GuoCheng24/groundwork/actions/workflows/ci.yml/badge.svg)](https://github.com/GuoCheng24/groundwork/actions/workflows/ci.yml)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![deps](https://img.shields.io/badge/dependencies-none-2e7d32)](#)
 [![licence](https://img.shields.io/badge/licence-MIT-green)](LICENSE)
-[![stars](https://img.shields.io/github/stars/GuoCheng24/proofground?style=flat&color=gold)](https://github.com/GuoCheng24/proofground/stargazers)
+[![stars](https://img.shields.io/github/stars/GuoCheng24/groundwork?style=flat&color=gold)](https://github.com/GuoCheng24/groundwork/stargazers)
 
 **Your agent can hand you a paper by morning. The harder question is whether the
 project should have existed — and that one is answerable in ten minutes, before
@@ -15,8 +15,8 @@ paper, submission, memory — with the stage every other toolkit is missing: **o
 that returns NO-GO.**
 
 ```bash
-git clone https://github.com/GuoCheng24/proofground && cd proofground
-python proofground.py gate --baseline 0.812 --oracle 0.830 --se 0.019      # NO-GO, in ten seconds
+git clone https://github.com/GuoCheng24/groundwork && cd groundwork
+python groundwork.py gate --baseline 0.812 --oracle 0.830 --se 0.019      # NO-GO, in ten seconds
 ```
 
 Python 3.9+, **no dependencies**, nothing to configure. Works with Claude Code,
@@ -34,12 +34,12 @@ Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 
 | command | what it refuses |
 |---|---|
-| `proofground gate` | a direction whose ceiling, baseline, random arm or positive control already answers it |
-| `proofground lit` | an occupancy verdict when the index that would have found the competitor did not answer |
-| `proofground prereg` | a pre-registration that version control says is younger than its own results |
-| `proofground cluster` | a card whose free memory is somebody else's leftovers, and one arm split across two GPU models |
-| `proofground ledger` | a cause of death that is free text nobody can count |
-| `proofground reach` | a bot-challenge page being read as a paper |
+| `groundwork gate` | a direction whose ceiling, baseline, random arm or positive control already answers it |
+| `groundwork lit` | an occupancy verdict when the index that would have found the competitor did not answer |
+| `groundwork prereg` | a pre-registration that version control says is younger than its own results |
+| `groundwork cluster` | a card whose free memory is somebody else's leftovers, and one arm split across two GPU models |
+| `groundwork ledger` | a cause of death that is free text nobody can count |
+| `groundwork reach` | a bot-challenge page being read as a paper |
 | [`doubleblind`](https://github.com/GuoCheng24/doubleblind) | a number that exists in no file, a brief that tells the reviewer what to conclude, a caption nobody can read |
 
 Every one of those refusals exists because the unrefused version shipped.
@@ -84,7 +84,7 @@ pre-registered "clean hardware test" that was not clean until a control existed.
 ## The gate: four numbers, ten minutes, before anything
 
 ```console
-$ proofground gate --baseline 0.812 --oracle 0.830 --se 0.019
+$ groundwork gate --baseline 0.812 --oracle 0.830 --se 0.019
 
   headroom            +0.0180  (oracle 0.8300 - baseline 0.8120)
   one standard error  0.0190
@@ -167,7 +167,7 @@ written down.
 ## The occupancy gate: a silent index is not an empty literature
 
 ```console
-$ proofground lit occupancy "bfloat16 batch invariance importance ratio" -n 6
+$ groundwork lit occupancy "bfloat16 batch invariance importance ratio" -n 6
  1. 2025  ...
  ...
 # backends: arxiv: ok, openalex: NO ANSWER, semanticscholar: ok
@@ -203,11 +203,11 @@ three from the official number.
 ## The experiment stage: sealed first, then launched
 
 ```bash
-proofground prereg new prereg/PREREG_run3.md --title "run 3"   # six required sections
-proofground prereg seal prereg/PREREG_run3.md
+groundwork prereg new prereg/PREREG_run3.md --title "run 3"   # six required sections
+groundwork prereg seal prereg/PREREG_run3.md
 git commit -m "Pre-register run 3"                              # BEFORE any generation
 ...
-proofground prereg verify prereg/PREREG_run3.md --results results/metrics_run3.json
+groundwork prereg verify prereg/PREREG_run3.md --results results/metrics_run3.json
 ```
 
 `verify` checks the seal, checks every section is filled in, and **checks with
@@ -227,14 +227,14 @@ seeing a partial score is not disqualified, an undisclosed one is.
 ### and launched wherever the GPUs actually are
 
 ```console
-$ proofground cluster survey --nodes gpu01 gpu02 gpu03 gpu04
+$ groundwork cluster survey --nodes gpu01 gpu02 gpu03 gpu04
 gpu03:
    [0] NVIDIA L40                   16.2 GB free of  45.0   util  97%
    [1] NVIDIA L40                   48.0 GB free of  48.0   util   0%   idle
 ...
 14 idle card(s) across 3 reachable node(s).
 
-$ proofground cluster plan --nodes gpu01 gpu03 --need-gb 20 --shards 4 \
+$ groundwork cluster plan --nodes gpu01 gpu03 --need-gb 20 --shards 4 \
       --command 'python eval.py'
 ```
 
@@ -290,7 +290,7 @@ Not a bibliography — repositories where these rules run in CI on every push.
 The stages are plain Markdown under [`skills/`](skills/) — no framework, no MCP
 server, no second subscription.
 
-- **Claude Code** — `ln -s .../proofground/skills/* .claude/skills/`, then ask
+- **Claude Code** — `ln -s .../groundwork/skills/* .claude/skills/`, then ask
   for a stage by name.
 - **Codex CLI** — `codex exec < skills/00-gate/SKILL.md` for a fresh session.
 - **DeepSeek / Kimi / any OpenAI-compatible endpoint** — the skill file is the
@@ -303,7 +303,7 @@ reviewer that is genuinely a *different* model for the claim stage.
 
 ## What is here, and what is not
 
-`proofground` is not a promise that an agent will produce a publishable paper
+`groundwork` is not a promise that an agent will produce a publishable paper
 unattended. The gate exists because most directions should not be started, and a
 pipeline that never returns NO-GO is selling something.
 
@@ -312,7 +312,7 @@ toolkits. Honestly, side by side with
 [ARIS](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep), which
 is careful work and worth using:
 
-| | ARIS | proofground |
+| | ARIS | groundwork |
 |---|---|---|
 | a stage that returns **NO-GO** before the work | — | **yes**, from four measurements |
 | an archive of **how directions die**, each with the test that would have caught it | failed ideas as anti-repetition memory | **ten causes**, with the cheap test and the cost |
@@ -332,7 +332,7 @@ is careful work and worth using:
 | patents | five skills | one skill, written from a live prosecution |
 
 **If you already use ARIS, the useful move is not to switch.** Run
-`proofground gate` before its pipeline starts, and the `30-claim` layers before
+`groundwork gate` before its pipeline starts, and the `30-claim` layers before
 anything leaves. Those are the two places it has nothing, and they are the two
 places the expensive mistakes are.
 

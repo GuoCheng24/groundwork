@@ -1,5 +1,5 @@
 ---
-name: proofground-memory
+name: groundwork-memory
 description: >
   The running record that makes the next project cheaper: a ledger of what was
   decided, an archive of what died and why, and an index small enough to be

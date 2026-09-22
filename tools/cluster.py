@@ -6,9 +6,9 @@ night queued behind somebody else's job. A shared academic cluster usually has
 far more capacity than the node you habitually use - the constraint is knowing
 where it is at 1 a.m. and being a good enough neighbour to be allowed back.
 
-    proofground cluster survey  --nodes gpu01 gpu02 gpu03
-    proofground cluster pick    --nodes gpu01 gpu02 gpu03 --need-gb 20 --count 4
-    proofground cluster plan    --nodes gpu01 gpu02 gpu03 --need-gb 20 --shards 4
+    groundwork cluster survey  --nodes gpu01 gpu02 gpu03
+    groundwork cluster pick    --nodes gpu01 gpu02 gpu03 --need-gb 20 --count 4
+    groundwork cluster plan    --nodes gpu01 gpu02 gpu03 --need-gb 20 --shards 4
 
 Three habits are built in, each of them learnt the hard way:
 
@@ -160,7 +160,7 @@ def cmd_plan(a):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="proofground cluster")
+    ap = argparse.ArgumentParser(prog="groundwork cluster")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     def add(name, help):

@@ -10,8 +10,8 @@ that is genuinely a *different* model.
 ```bash
 # attach every stage to a project
 mkdir -p .claude/skills
-for d in /path/to/proofground/skills/*/; do
-  ln -s "$d" ".claude/skills/proofground-$(basename "$d")"
+for d in /path/to/groundwork/skills/*/; do
+  ln -s "$d" ".claude/skills/groundwork-$(basename "$d")"
 done
 ```
 
@@ -67,5 +67,5 @@ One request, one message. Sending history is the thing you are avoiding.
 Record, next to any review verdict, the **model id that answered** and the
 **sha256 of the packet it was given** (`doubleblind review` prints it). Without
 both, "a different model checked it" is a claim about a conversation nobody can
-inspect — and `proofground` deliberately cannot prove it for you, because it has
+inspect — and `groundwork` deliberately cannot prove it for you, because it has
 no access to your session.

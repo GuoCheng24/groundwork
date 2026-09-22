@@ -1,5 +1,5 @@
 ---
-name: proofground-claim
+name: groundwork-claim
 description: >
   Turn results into claims that survive somebody checking. Three layers that are
   blind to different defects: re-derive every number, hand the artifact to a

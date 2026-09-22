@@ -17,8 +17,8 @@ than retry:
     TIMEOUT     no answer within the budget
     PROXY-ONLY  fails directly, succeeds through the configured proxy
 
-    proofground reach --targets arxiv.org api.openalex.org doi.org
-    proofground reach --targets-file targets.txt --proxy socks5h://127.0.0.1:1080
+    groundwork reach --targets arxiv.org api.openalex.org doi.org
+    groundwork reach --targets-file targets.txt --proxy socks5h://127.0.0.1:1080
 """
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ def _fetch(url, timeout, proxy=None):
         opener = urllib.request.build_opener(handler)
     else:
         opener = urllib.request.build_opener()
-    req = urllib.request.Request(url, headers={"User-Agent": "proofground-reach/0.1"})
+    req = urllib.request.Request(url, headers={"User-Agent": "groundwork-reach/0.1"})
     try:
         with opener.open(req, timeout=timeout) as r:
             body = r.read(4096).decode("utf-8", "replace").lower()
@@ -88,7 +88,7 @@ def classify(target, timeout=12, proxy=None):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="proofground reach")
+    ap = argparse.ArgumentParser(prog="groundwork reach")
     ap.add_argument("--targets", nargs="*", default=None)
     ap.add_argument("--targets-file")
     ap.add_argument("--proxy", help="try this proxy when a target fails directly")

@@ -1,5 +1,5 @@
 ---
-name: proofground-experiment
+name: groundwork-experiment
 description: >
   Run the experiment the way it can still be believed afterwards: pre-registered
   and sealed before generation, launched across whatever GPUs are actually idle,
@@ -12,9 +12,9 @@ description: >
 ## 1. Pre-register, seal, commit — in that order
 
 ```bash
-proofground prereg new prereg/PREREG_run3.md --title "run 3"
+groundwork prereg new prereg/PREREG_run3.md --title "run 3"
 # fill every section, then
-proofground prereg seal prereg/PREREG_run3.md
+groundwork prereg seal prereg/PREREG_run3.md
 git add prereg/ && git commit -m "Pre-register run 3"      # BEFORE any generation
 ```
 
@@ -30,7 +30,7 @@ and why the arm is being run, and the work survives a reader who notices.
 Afterwards:
 
 ```bash
-proofground prereg verify prereg/PREREG_run3.md --results results/metrics_run3.json
+groundwork prereg verify prereg/PREREG_run3.md --results results/metrics_run3.json
 ```
 
 which checks the seal, checks every section is filled, and checks with git that
@@ -40,8 +40,8 @@ pre-registration committed after its results is a write-up.
 ## 2. Find the capacity that is actually free
 
 ```bash
-proofground cluster survey --nodes gpu01 gpu02 gpu03 gpu04
-proofground cluster plan --nodes gpu01 gpu03 --need-gb 20 --shards 4 \
+groundwork cluster survey --nodes gpu01 gpu02 gpu03 gpu04
+groundwork cluster plan --nodes gpu01 gpu03 --need-gb 20 --shards 4 \
     --command 'python eval.py --data data/subset.jsonl'
 ```
 
