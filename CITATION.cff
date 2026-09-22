@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If this was useful in your work, please cite it."
+title: "proofground: a research pipeline whose first stage refuses the project"
+abstract: "Autonomous research pipelines are cheap at everything downstream of a decision to proceed - survey, ideation, implementation, writing - and the expensive failures are all upstream of it. This is a seven-stage pipeline for coding agents whose first stage is a gate: four measurements taken before the first real experiment (a strongest trivial baseline, an oracle, a random arm, a positive control) that refuse a direction when the headroom is under two standard errors, when a perfect method would still be reported as null on the available split, when a random policy reaches the baseline, or when a positive control fails to recover. It ships an archive of ten ways a direction dies, each with the cheap test that would have ended it sooner; a pre-registration tool that checks with version control that the registration was committed before the results it governs; cluster tooling that places work on genuinely idle hardware and refuses to split one experimental arm across two GPU models; and three verification layers that are blind to different classes of defect."
+type: software
+authors:
+  - family-names: Cheng
+    given-names: Guo
+    orcid: "https://orcid.org/0009-0006-7813-0114"
+repository-code: "https://github.com/GuoCheng24/proofground"
+license: MIT
+version: 0.1.0
+date-released: 2026-09-23
+keywords:
+  - research automation
+  - AI agents
+  - pre-registration
+  - reproducibility
+  - experiment design
+  - claude-code

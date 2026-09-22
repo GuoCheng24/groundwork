@@ -1,0 +1,80 @@
+---
+name: proofground-experiment
+description: >
+  Run the experiment the way it can still be believed afterwards: pre-registered
+  and sealed before generation, launched across whatever GPUs are actually idle,
+  resume-safe, and analysed by the plan that was written first. Triggers: "run
+  the experiment", "launch", "train", "evaluate", "预注册", "跑实验", "扫超参".
+---
+
+# Experiment — sealed first, then launched
+
+## 1. Pre-register, seal, commit — in that order
+
+```bash
+proofground prereg new prereg/PREREG_run3.md --title "run 3"
+# fill every section, then
+proofground prereg seal prereg/PREREG_run3.md
+git add prereg/ && git commit -m "Pre-register run 3"      # BEFORE any generation
+```
+
+Six sections are required because these are the six that get quietly dropped:
+what is held fixed, what changes, the pre-stated analysis, **the stopping rule**,
+**what gets written if it comes out the other way**, and **what was already known
+when this was written**.
+
+That last one is not a confession box. An arm launched after seeing a partial
+score is not disqualified — an *undisclosed* one is. Say plainly what was known
+and why the arm is being run, and the work survives a reader who notices.
+
+Afterwards:
+
+```bash
+proofground prereg verify prereg/PREREG_run3.md --results results/metrics_run3.json
+```
+
+which checks the seal, checks every section is filled, and checks with git that
+the pre-registration was committed **before** the results it governs. A
+pre-registration committed after its results is a write-up.
+
+## 2. Find the capacity that is actually free
+
+```bash
+proofground cluster survey --nodes node15 node16 node17 node18
+proofground cluster plan --nodes node16 node18 --need-gb 20 --shards 4 \
+    --command 'python eval.py --data data/subset.jsonl'
+```
+
+Three habits, each learnt by losing a night:
+
+- **Somebody else's job is not free memory.** A card with 19 GB in use and 5 GB
+  free is not idle; a job placed there dies at 3 a.m. after the queue has moved.
+- **Leave a card per node.** Shared clusters are social, and the idlest card is
+  the one to leave, not the scraps.
+- **One arm, one GPU model.** The same weights on two different cards do not
+  always produce the same number — measured, not assumed. `plan` refuses to
+  split an arm across models unless told the split is only a throughput knob.
+
+## 3. Make the harness resume-safe before you need it
+
+- append one record per item and **flush**, so a crash costs one item;
+- skip items already present in the output, keyed by a stable id;
+- when sharding, slice the item list **before** the already-done filter. Slicing
+  the filtered list makes ownership depend on how far each shard has got, and
+  two shards restarted at different points then take the same item while a third
+  is taken by nobody — silently, because every shard file looks complete alone.
+
+Launch detached (`nohup`), confirm the process is alive at 90 seconds, and read
+the head of the log. A background job nobody looked at for an hour is an hour
+you may have to spend again.
+
+## 4. Analyse the plan that was written first
+
+Run the pre-stated analysis and report it whichever way it comes out. Then, and
+only then, look at anything else — and label it exploratory.
+
+**Measure the noise floor of your own scorer before quoting a difference.** An
+official benchmark scorer, run ten times on one unchanged file, spanned 0.37
+points and disagreed with itself on two prompts of 541. Three runs had said it
+was stable. Any arm-to-arm difference smaller than that is not a finding about
+the arms.

@@ -1,0 +1,70 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "${{ matrix.python-version }}"}
+
+      - name: Git identity for the pre-registration tests
+        run: |
+          git config --global user.name "ci"
+          git config --global user.email "ci@example.invalid"
+
+      - name: Tests
+        run: python -m unittest discover -s tests -v
+
+      # A gate that has never been seen refusing is decoration.
+      - name: The gate passes a direction with room
+        run: python proofground.py gate --baseline 0.50 --oracle 0.75 --se 0.011
+
+      - name: The gate refuses a direction without room
+        run: |
+          if python proofground.py gate --baseline 0.812 --oracle 0.830 --se 0.019; then
+            echo "::error::the gate passed a direction with 0.95 SE of headroom"
+            exit 1
+          fi
+
+      - name: The archive is well-formed and every cause names a gate
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          d = json.load(open("archive/causes-of-death.json"))
+          causes = d["causes"]
+          assert len({c["id"] for c in causes}) == len(causes), "duplicate cause id"
+          bad = []
+          for c in causes:
+              for k in ("name", "what_happened", "cheap_test", "gate", "rule", "cost_when_missed"):
+                  if not c.get(k):
+                      bad.append(f"{c['id']}: empty {k}")
+              stage = c["gate"].split("/")[0]
+              if not os.path.isdir(os.path.join("skills", stage)):
+                  bad.append(f"{c['id']}: gate {c['gate']} names no stage under skills/")
+          print(f"{len(causes)} causes checked")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          PY
+
+      - name: Every stage skill has frontmatter and a trigger list
+        run: |
+          python - <<'PY'
+          import glob, sys
+          bad = []
+          files = sorted(glob.glob("skills/*/SKILL.md"))
+          for f in files:
+              s = open(f, encoding="utf-8").read()
+              if not s.startswith("---\n"):
+                  bad.append(f"{f}: no frontmatter")
+              if "Triggers:" not in s and "triggers:" not in s:
+                  bad.append(f"{f}: no triggers in the description")
+          print(f"{len(files)} stage skills checked")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          PY

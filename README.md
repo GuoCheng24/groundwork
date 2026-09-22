@@ -1,0 +1,229 @@
+# proofground ⛰️🔬
+
+**Your agent can hand you a paper by morning. The harder question is whether the
+project should have existed — and that one is answerable in about ten minutes,
+before the night is spent.**
+
+`proofground` is a full research pipeline for coding agents — direction, gate,
+experiment, claim, paper, submission, memory. It covers the same ground as the
+autonomous-research toolkits that write papers while you sleep, with two things
+those do not have:
+
+- **a gate at the front that refuses directions**, from four measurements taken
+  before the first real experiment;
+- **an archive of how research actually dies**, so a direction that was killed
+  stays killed instead of being re-proposed in four months by the same good
+  taste that proposed it the first time.
+
+Everything here has been run. Every rule links to a public repository where it
+is enforced by CI, not to a paragraph of advice.
+
+```bash
+git clone https://github.com/GuoCheng24/proofground
+python proofground/proofground.py gate --baseline 0.812 --oracle 0.838 --se 0.019
+```
+
+Python 3.9+, standard library only. Works with Claude Code, Codex CLI, DeepSeek,
+Kimi, or any agent that can read a Markdown instruction and run a shell command.
+
+---
+
+## The pipeline
+
+```
+ 00-gate ──▶ 10-direction ──▶ 20-experiment ──▶ 30-claim ──▶ 40-write ──▶ 50-submit
+   │             │                  │               │            │            │
+ refuse      candidates       pre-register,     three layers   claims     compliance,
+ the         that can         seal, commit,     blind to       first,     rebuttal,
+ direction   survive it       then launch       different      figures    resubmit,
+                              across idle       defects        audited    talk
+                              GPUs
+   └────────────────────── 90-memory: the archive of what died, and why ──────────┘
+```
+
+Seven stages, not 189 skill files. Each stage decides whether you are
+allowed into the next one. A menu of skills asks you to know which one to call;
+a gate tells you.
+
+---
+
+## The gate: four numbers, ten minutes, before anything
+
+```console
+$ proofground gate --baseline 0.812 --oracle 0.830 --se 0.019
+
+  headroom            +0.0180  (oracle 0.8300 - baseline 0.8120)
+  one standard error  0.0190
+  headroom in SEs     0.95
+  smallest detectable 0.0532  (80% power, two-sided 0.05)
+
+NO-GO.
+  * Headroom is 0.95 SE, under the 2 SE this gate requires. Even a method that
+    captured the entire gap would not separate from the baseline on this split.
+
+Record it in archive/ with the cause, so the next person who has this
+idea - including you, in four months - finds the verdict before the work.
+```
+
+Four measurements, on the same split, before the first real experiment:
+
+| # | measurement | what it rules out |
+|---|---|---|
+| 1 | **strongest trivial baseline**, tuned as hard as the proposal | the signal was never structural |
+| 2 | **oracle** — perfect access to whatever the proposal estimates | there was no headroom to win |
+| 3 | **random arm** — shuffled labels or random assignment | the task never needed a learned policy |
+| 4 | **positive control** — a case where the effect must be recovered | a null would measure your pipeline |
+
+The gate does not ask what the method is. **A gate that knows what you are
+hoping for is not a gate.**
+
+It refuses when headroom is under two standard errors, when a perfect method
+would still be reported as null on this split, when the random arm reaches the
+baseline, or when the positive control does not recover. When it passes, it
+prints the share of the headroom a method must capture to be detectable at
+all — a number worth knowing before the work rather than after.
+
+---
+
+## The archive: ten ways a direction dies
+
+[`archive/causes-of-death.json`](archive/causes-of-death.json) records ten, each
+with the cheap test that would have ended it sooner and what it cost when it did
+not. They are not hypothetical:
+
+| cause | what happened | cost |
+|---|---|---|
+| ceiling too low | the method worked; an oracle beat the baseline by 1.6–1.8 points, so the whole space available to any method was inside the noise | weeks |
+| a thick baseline absorbed it | a structured encoding reproduced across cohorts; a dense local baseline with no structure reached the same number | weeks |
+| positive control collapsed | the main analysis returned a clean null, and so did the case where the effect is known to exist | the whole study |
+| reduces to known | a failure mode that looked new was a known balance condition under a change of variables | weeks |
+| already occupied | a qualitative mechanism published in 2017, its closed form in 2003 | days–weeks |
+| a random arm won | every learned repair policy was compared against the others and looked ordered; random assignment beat all of them | weeks |
+| external validation collapsed | strong in development, absent in the external cohort | months |
+| our own supplement | the "new paper" was a table in the group's own supplementary material | days |
+| leakage flattered it | perfect discrimination from selecting features before splitting; redone correctly, chance | a submission |
+| its ceiling was a smaller venue | it genuinely worked, and both routes to a flagship claim collapsed onto things already known | a rejection cycle |
+
+Directions die in batches. One programme killed 32 of 32 candidates at this
+stage; another 16 of 16. That is the gate working — but only if the verdicts are
+written down.
+
+---
+
+## The experiment stage: sealed first, then launched
+
+```bash
+proofground prereg new prereg/PREREG_run3.md --title "run 3"   # six required sections
+proofground prereg seal prereg/PREREG_run3.md
+git commit -m "Pre-register run 3"                              # BEFORE any generation
+...
+proofground prereg verify prereg/PREREG_run3.md --results results/metrics_run3.json
+```
+
+`verify` checks the seal, checks every section is filled in, and **checks with
+git that the pre-registration was committed before the results it governs**.
+
+```console
+  FAIL results.json was committed BEFORE the pre-registration was committed.
+       A pre-registration written after its results is a write-up.
+```
+
+The six required sections are the six that get quietly dropped: what is held
+fixed, what changes, the pre-stated analysis, **the stopping rule**, **what gets
+written if it comes out the other way**, and **what was already known when this
+was written**. That last one is not a confession box — an arm launched after
+seeing a partial score is not disqualified, an undisclosed one is.
+
+### and launched wherever the GPUs actually are
+
+```console
+$ proofground cluster survey --nodes node15 node16 node17 node18
+node18:
+   [0] NVIDIA L40                   16.2 GB free of  45.0   util  97%
+   [1] NVIDIA L40                   48.0 GB free of  48.0   util   0%   idle
+...
+14 idle card(s) across 3 reachable node(s).
+
+$ proofground cluster plan --nodes node16 node18 --need-gb 20 --shards 4 \
+      --command 'python eval.py'
+```
+
+Three habits, each learnt by losing a night: **somebody else's job is not free
+memory** (a card with 5 GB free is not idle, and a job placed there dies at 3
+a.m.); **leave a card per node**, and leave an idle one rather than the scraps;
+and **one arm, one GPU model** — `plan` refuses to split an arm across models
+unless told the split is only a throughput knob.
+
+That last refusal is not caution. The same weights, the same seed, greedy
+decoding, the same batch size and the same scorer, on two different GPU models,
+[scored 76.89% and 75.42%](https://github.com/GuoCheng24/ifeval-reproduction) —
+1.48 points from changing nothing but the card. The same arm repeated on a
+second card of the *same* model reproduced 541 of 541 generations byte for byte.
+
+---
+
+## The claim stage: three layers, blind to different things
+
+| layer | finds | cannot see |
+|---|---|---|
+| re-derivation | a number that exists in no file; a bound stated tighter than the interval | a **correct number inside a sentence that does not follow from it** |
+| a reader with no context | claims that do not follow; a comparison pointing the wrong way | a fabricated number that looks plausible |
+| the rendered figure | labels that read as one word; a caption unreadable at the size it will be seen | whether the shape a reader takes from the figure is the shape the data supports |
+
+Implemented in [**doubleblind**](https://github.com/GuoCheng24/doubleblind),
+installable on its own. Its ledger records 20 real defects with the layer that
+missed each one; 9 were caught by a person looking at the rendered artifact,
+which is the number the third layer exists to shrink.
+
+And the rule that decides what to ask a reviewer: **ask what the evidence
+supports, never ask it to verify that X.** The first question has the answer in
+it, and `doubleblind lint` finds the phrases that carry it before the request is
+sent.
+
+---
+
+## Where every rule was paid for
+
+Not a bibliography — repositories where these rules run in CI on every push.
+
+| repository | what it demonstrates |
+|---|---|
+| [batch-logprob-gap](https://github.com/GuoCheng24/batch-logprob-gap) | the same measurement on three GPUs across two architectures; the effect is on all three and fp32 removes it on all three; the control is a re-run of the original card that must reproduce it cell for cell |
+| [ifeval-reproduction](https://github.com/GuoCheng24/ifeval-reproduction) | a pre-registration chain CI re-hashes on every push; an official scorer measured against itself — ten runs on one unchanged file span 0.37 points and disagree on 2 prompts of 541 |
+| [taichu-eval-reproduction](https://github.com/GuoCheng24/taichu-eval-reproduction) | a reproduction whose verdict turned on how eleven truncated generations were counted, and which says so |
+| [doubleblind](https://github.com/GuoCheng24/doubleblind) | the three claim layers, each with a test asserting the defect it *cannot* catch |
+
+---
+
+## Using it with your agent
+
+The stages are plain Markdown under [`skills/`](skills/) — no framework, no MCP
+server, no second subscription.
+
+- **Claude Code** — `ln -s .../proofground/skills/* .claude/skills/`, then ask
+  for a stage by name.
+- **Codex CLI** — `codex exec < skills/00-gate/SKILL.md` for a fresh session.
+- **DeepSeek / Kimi / any OpenAI-compatible endpoint** — the skill file is the
+  system prompt; the tools are shell commands.
+
+See [`adapters/`](adapters/) for the exact invocations, including how to get a
+reviewer that is genuinely a *different* model for the claim stage.
+
+---
+
+## What this is not
+
+It is not a promise that an agent will produce a publishable paper unattended.
+The gate exists because most directions should not be started, and a pipeline
+that never returns NO-GO is selling something.
+
+If you want the generative side at maximum breadth — literature ingestion,
+ideation, patent and grant tracks, poster and talk generation —
+[ARIS](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep) has
+87 skill directories, 189 skill files in all, and a careful cross-model review
+gate, and it is good work. `proofground` covers the same pipeline with fewer, larger stages, and
+spends its first ten minutes trying to kill the project.
+
+## Licence
+
+MIT.
