@@ -146,7 +146,7 @@ use the `http://` form, and then the target host must not be in `no_proxy`.
 ### 2.5 Verify before you trust it
 
 ```bash
-python groundwork.py reach --targets github.com api.openai.com api.anthropic.com \
+python -m groundwork reach --targets github.com api.openai.com api.anthropic.com \
                                       pypi.org api.openalex.org arxiv.org
 ```
 
@@ -278,7 +278,7 @@ points apart.
 Somebody else is on that node.
 
 ```bash
-python groundwork.py cluster survey --nodes gpu01 gpu02 gpu03
+python -m groundwork cluster survey --nodes gpu01 gpu02 gpu03
 ```
 
 - **Never hard-code a device.** Pick the idlest card at start-up.

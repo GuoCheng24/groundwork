@@ -1,0 +1,2 @@
+[console_scripts]
+groundwork = groundwork.cli:main

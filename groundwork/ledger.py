@@ -32,10 +32,20 @@ import json
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ARCHIVE = os.path.join(ROOT, "archive", "killed.json")
-LEDGER = os.path.join(ROOT, "archive", "ledger.json")
-CAUSES = os.path.join(ROOT, "archive", "causes-of-death.json")
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+# The record belongs to YOUR project, so it is written under ./archive/ in the
+# directory you run from - not into wherever this package happens to be
+# installed. The taxonomy is the opposite: it ships with the package, because a
+# closed taxonomy that each project edits separately stops being countable.
+ARCHIVE = os.path.join("archive", "killed.json")
+LEDGER = os.path.join("archive", "ledger.json")
+_CAUSE_CANDIDATES = [
+    os.path.join(HERE, "causes-of-death.json"),                     # installed
+    os.path.join(os.path.dirname(HERE), "archive", "causes-of-death.json"),  # repo
+    os.path.join("archive", "causes-of-death.json"),                # your own copy
+]
+CAUSES = next((p for p in _CAUSE_CANDIDATES if os.path.exists(p)), _CAUSE_CANDIDATES[0])
 LAYERS = ("mechanical", "reviewer", "figure", "both", "all")
 
 

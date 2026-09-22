@@ -1,3 +1,22 @@
+Metadata-Version: 2.4
+Name: groundwork-research
+Version: 0.1.0
+Summary: The research pipeline for coding agents that spends its first ten minutes trying to kill your project: a gate that returns NO-GO, a pre-registration version control can date, and an archive of how directions actually die.
+Author: Guo Cheng
+License: MIT
+Project-URL: Homepage, https://github.com/GuoCheng24/groundwork
+Project-URL: Getting started, https://github.com/GuoCheng24/groundwork/blob/main/docs/getting-started.md
+Keywords: research,agents,llm,claude-code,codex,reproducibility,pre-registration,experiment-design,research-automation
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
 # groundwork ⛰️🔬
 
 [![ci](https://github.com/GuoCheng24/groundwork/actions/workflows/ci.yml/badge.svg)](https://github.com/GuoCheng24/groundwork/actions/workflows/ci.yml)
@@ -24,9 +43,6 @@ Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 
 > **Never used a coding agent before?**
 > → [**Getting started**](docs/getting-started.md) · [**上手指南（中文）**](docs/getting-started.zh.md)
-> → [**A worked example**](docs/worked-example.md) — one direction, from idea to
-> killed, in an afternoon. It ends in a NO-GO, which is the outcome this exists
-> to produce cheaply and the one no other walkthrough shows you.
 >
 > From installing Claude Code or Codex to running a whole project with one —
 > including the case every other tutorial skips: **a shared cluster node with no
@@ -60,7 +76,7 @@ Every one of those refusals exists because the unrefused version shipped.
    └────────────────────── 90-memory: the archive of what died, and why ──────────┘
 ```
 
-Seven stages, forty-three files. Each stage decides whether you are allowed into
+Seven stages, forty-two files. Each stage decides whether you are allowed into
 the next one: a menu asks you to know which skill to call, a gate tells you.
 
 Every file carries the failure that produced its rules, because the rules are

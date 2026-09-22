@@ -7,11 +7,8 @@
 
 Each subcommand is a standalone script under tools/ and can be run directly.
 """
-import os
+import importlib
 import sys
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "tools"))
 
 COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "reach",
             "lit": "lit", "ledger": "ledger"}
@@ -38,9 +35,9 @@ def main(argv=None):
     if cmd not in COMMANDS:
         print(f"unknown command {cmd!r}\n\n{USAGE}", file=sys.stderr)
         return 2
-    mod = __import__(COMMANDS[cmd])
+    mod = importlib.import_module("." + COMMANDS[cmd], __package__)
     return mod.main(argv)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":      # pragma: no cover
     sys.exit(main())

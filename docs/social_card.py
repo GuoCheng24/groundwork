@@ -61,8 +61,8 @@ def chart(ax, accent):
 if __name__ == "__main__":
     out = ROOT / ".github" / "assets" / "social-preview.png"
     out.parent.mkdir(parents=True, exist_ok=True)
-    card(out=str(out), accent=ACCENT, badge="pg",
-         kicker="PROOFGROUND",
+    card(out=str(out), accent=ACCENT, badge="gw",
+         kicker="GROUNDWORK",
          headline="Most directions should not be started",
          evidence=f"{TOTAL} ways a direction dies, and where each is caught",
          chart=chart,

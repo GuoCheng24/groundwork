@@ -18,16 +18,34 @@ jobs:
           git config --global user.name "ci"
           git config --global user.email "ci@example.invalid"
 
+      - name: Install
+        run: python -m pip install -e .
+
       - name: Tests
         run: python -m unittest discover -s tests -v
 
+      # Installed into a clean environment and run from somewhere else entirely.
+      # A quickstart that only works in the directory its author was standing in
+      # is a quickstart nobody can follow.
+      - name: Stranger test - install and run from an unrelated directory
+        run: |
+          python -m venv /tmp/fresh
+          /tmp/fresh/bin/pip install -q .
+          mkdir -p /tmp/elsewhere && cd /tmp/elsewhere
+          /tmp/fresh/bin/groundwork | head -3
+          /tmp/fresh/bin/groundwork gate --baseline 0.50 --oracle 0.75 --se 0.011
+          /tmp/fresh/bin/groundwork ledger kill --id ci --cause ceiling-too-low \
+              --what "a check that the taxonomy ships with the package" \
+              --settled-by "this step"
+          test -f archive/killed.json
+
       # A gate that has never been seen refusing is decoration.
       - name: The gate passes a direction with room
-        run: python groundwork.py gate --baseline 0.50 --oracle 0.75 --se 0.011
+        run: python -m groundwork gate --baseline 0.50 --oracle 0.75 --se 0.011
 
       - name: The gate refuses a direction without room
         run: |
-          if python groundwork.py gate --baseline 0.812 --oracle 0.830 --se 0.019; then
+          if python -m groundwork gate --baseline 0.812 --oracle 0.830 --se 0.019; then
             echo "::error::the gate passed a direction with 0.95 SE of headroom"
             exit 1
           fi

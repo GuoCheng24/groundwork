@@ -62,3 +62,4 @@ would notice must be in the paper, stated by you first.
 - [`structure.md`](structure.md) — write the paper the venue actually prints
 - [`diagrams.md`](diagrams.md) — the overview figure is buildable; layout is the hard part
 - [`theory.md`](theory.md) — attacking a stated open problem across days
+- [`revision.md`](revision.md) — auditing a manuscript, including somebody else's

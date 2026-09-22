@@ -134,7 +134,7 @@ no_proxy="" git -c http.proxy=socks5h://127.0.0.1:17899 clone <url>
 ### 2.5 先验证，再相信
 
 ```bash
-python groundwork.py reach --targets github.com api.openai.com api.anthropic.com \
+python -m groundwork reach --targets github.com api.openai.com api.anthropic.com \
                                       pypi.org api.openalex.org arxiv.org
 ```
 
@@ -243,7 +243,7 @@ pip install -i <你的镜像> <包名>
 ## 六、这台机器不是你一个人的
 
 ```bash
-python groundwork.py cluster survey --nodes gpu01 gpu02 gpu03
+python -m groundwork cluster survey --nodes gpu01 gpu02 gpu03
 ```
 
 - **绝不写死设备号。** 启动时挑最闲的卡。

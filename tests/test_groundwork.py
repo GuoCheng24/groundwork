@@ -13,12 +13,12 @@ import tempfile
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "tools"))
+sys.path.insert(0, ROOT)
 
-import cluster  # noqa: E402
-import lit  # noqa: E402
-import prereg  # noqa: E402
-from gate import detectable_effect, required_se, verdict  # noqa: E402
+from groundwork import cluster, ledger, reach  # noqa: E402
+from groundwork import lit  # noqa: E402
+from groundwork import prereg  # noqa: E402
+from groundwork.gate import detectable_effect, required_se, verdict  # noqa: E402
 
 # A throwaway repository created by a test is not anybody's work, so it gets a
 # neutral identity. Some environments install a global hook that enforces a
@@ -66,7 +66,7 @@ class Gate(unittest.TestCase):
 
     def test_the_cli_exit_code_carries_the_verdict(self):
         def run(*args):
-            return subprocess.run([sys.executable, os.path.join(ROOT, "groundwork.py"),
+            return subprocess.run([sys.executable, "-m", "groundwork",
                                    "gate", *args], capture_output=True, text=True).returncode
         self.assertEqual(run("--baseline", ".5", "--oracle", ".75", "--se", ".011"), 0)
         self.assertEqual(run("--baseline", ".8", "--oracle", ".81", "--se", ".01"), 1)
@@ -221,6 +221,81 @@ class Cluster(unittest.TestCase):
             self.assertEqual(cluster.cmd_plan(args), 0)
         finally:
             os.unlink(path)
+
+
+class Ledger(unittest.TestCase):
+    """The taxonomy is closed on purpose; a free-text cause is one nobody can count."""
+
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.cwd = os.getcwd()
+        os.chdir(self.dir)
+
+    def tearDown(self):
+        os.chdir(self.cwd)
+
+    @staticmethod
+    def _args(**kw):
+        base = dict(id="x", cause="ceiling-too-low", what="w", settled_by="s",
+                    cost=None, reopen_if=None, date=None)
+        base.update(kw)
+        return type("A", (), base)()
+
+    def test_an_unknown_cause_is_refused_and_the_taxonomy_is_printed(self):
+        self.assertEqual(ledger.cmd_kill(self._args(cause="something-new")), 2)
+
+    def test_a_known_cause_is_recorded_under_the_working_directory(self):
+        self.assertEqual(ledger.cmd_kill(self._args(id="a")), 0)
+        self.assertTrue(os.path.exists(os.path.join("archive", "killed.json")))
+
+    def test_the_same_direction_cannot_be_killed_twice(self):
+        self.assertEqual(ledger.cmd_kill(self._args(id="a")), 0)
+        self.assertEqual(ledger.cmd_kill(self._args(id="a")), 1)
+
+    def test_a_defect_needs_a_layer_that_exists(self):
+        args = type("A", (), dict(id="d", missed_by="nobody", what="w", why="y",
+                                  check=None, date=None))()
+        self.assertEqual(ledger.cmd_defect(args), 2)
+
+    def test_a_defect_without_a_check_is_recorded_as_not_converting(self):
+        args = type("A", (), dict(id="d", missed_by="mechanical", what="w", why="y",
+                                  check=None, date=None))()
+        self.assertEqual(ledger.cmd_defect(args), 0)
+        with open(os.path.join("archive", "ledger.json"), encoding="utf-8") as fh:
+            self.assertFalse(json.load(fh)["defects"][0]["converts"])
+
+    def test_the_shipped_taxonomy_is_found_from_anywhere(self):
+        self.assertTrue(os.path.exists(ledger.CAUSES), ledger.CAUSES)
+        self.assertGreaterEqual(len(ledger._causes()), 10)
+
+
+class Reach(unittest.TestCase):
+    """A body that is a bot wall must not be classified as content.
+
+    This is the tier that matters: the request succeeded, the status code is
+    fine, and anything checking only the status code will feed a challenge page
+    into a literature step as though it were a paper.
+    """
+
+    def test_a_challenge_body_is_not_open(self):
+        for marker in ("Just a moment...", "Checking your browser before",
+                       "Please enable JavaScript to continue"):
+            self.assertTrue(any(m in marker.lower() for m in reach.CHALLENGE_MARKERS),
+                            f"{marker!r} would be read as content")
+
+    def test_ordinary_content_is_not_a_challenge(self):
+        body = "<html><body><h1>On the electrodynamics of moving bodies</h1></body></html>"
+        self.assertFalse(any(m in body.lower() for m in reach.CHALLENGE_MARKERS))
+
+    def test_rate_limiting_is_not_the_same_as_unavailable(self):
+        import inspect
+        src = inspect.getsource(reach._fetch)
+        self.assertIn("429", src)
+        self.assertIn("not the same as unavailable", src)
+
+    def test_the_default_target_list_covers_the_indexes_the_pipeline_needs(self):
+        for host in ("api.openalex.org", "arxiv.org", "doi.org"):
+            self.assertIn(host, reach.DEFAULT_TARGETS)
 
 
 if __name__ == "__main__":
