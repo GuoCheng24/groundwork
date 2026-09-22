@@ -67,3 +67,8 @@ Every candidate that dies goes into `archive/` with its cause. Candidates die in
 batches: one programme killed 32 of 32 at this stage, another 16 of 16. That is
 the gate working, not the gate being too strict — but only if the verdicts are
 written down, or the same good taste proposes them again next quarter.
+
+## In this stage
+
+- [`occupancy.md`](occupancy.md) — is it already done, and can you tell - including the three traps of existence verification
+- [`venue-fit.md`](venue-fit.md) — capacity is a separate gate from novelty; contribution type predicts acceptance better than topic

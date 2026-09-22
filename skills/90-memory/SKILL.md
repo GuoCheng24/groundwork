@@ -55,3 +55,7 @@ Anything the repository already records: code structure, past fixes, commit
 history. Anything that only matters to the conversation it happened in. And
 anything private — cohort data, manuscripts under review, internal identifiers
 — which never enters a repository at all.
+
+## In this stage
+
+- [`postmortems.md`](postmortems.md) — the eight failure families that repeat

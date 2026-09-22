@@ -19,8 +19,11 @@ Everything here has been run. Every rule links to a public repository where it
 is enforced by CI, not to a paragraph of advice.
 
 ```bash
-git clone https://github.com/GuoCheng24/proofground
-python proofground/proofground.py gate --baseline 0.812 --oracle 0.838 --se 0.019
+git clone https://github.com/GuoCheng24/proofground && cd proofground
+python proofground.py gate    --baseline 0.812 --oracle 0.838 --se 0.019
+python proofground.py prereg  new prereg/PREREG_run1.md --title "run 1"
+python proofground.py cluster survey --nodes node16 node17 node18
+python proofground.py reach   --targets arxiv.org api.openalex.org doi.org
 ```
 
 Python 3.9+, standard library only. Works with Claude Code, Codex CLI, DeepSeek,
@@ -41,9 +44,14 @@ Kimi, or any agent that can read a Markdown instruction and run a shell command.
    └────────────────────── 90-memory: the archive of what died, and why ──────────┘
 ```
 
-Seven stages, not 189 skill files. Each stage decides whether you are
-allowed into the next one. A menu of skills asks you to know which one to call;
-a gate tells you.
+Seven stages, seventeen files. Each stage decides whether you are allowed into
+the next one: a menu asks you to know which skill to call, a gate tells you.
+
+Every file carries the failure that produced its rules, because the rules are
+not obvious and the failures are what make them stick — a scorer that moved 0.37
+points on a file that never changed, a preview renderer that lies in both
+directions, an occupancy search that invented its own competitor, a
+pre-registered "clean hardware test" that was not clean until a control existed.
 
 ---
 
@@ -211,18 +219,33 @@ reviewer that is genuinely a *different* model for the claim stage.
 
 ---
 
-## What this is not
+## What is here, and what is not
 
-It is not a promise that an agent will produce a publishable paper unattended.
-The gate exists because most directions should not be started, and a pipeline
-that never returns NO-GO is selling something.
+`proofground` is not a promise that an agent will produce a publishable paper
+unattended. The gate exists because most directions should not be started, and a
+pipeline that never returns NO-GO is selling something.
 
-If you want the generative side at maximum breadth — literature ingestion,
-ideation, patent and grant tracks, poster and talk generation —
-[ARIS](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep) has
-87 skill directories, 189 skill files in all, and a careful cross-model review
-gate, and it is good work. `proofground` covers the same pipeline with fewer, larger stages, and
-spends its first ten minutes trying to kill the project.
+It is also not, today, a drop-in replacement for the largest generative
+toolkits. Honestly, side by side with
+[ARIS](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep), which
+is careful work and worth using:
+
+| | ARIS | proofground |
+|---|---|---|
+| a stage that returns **NO-GO** before the work | — | **yes**, from four measurements |
+| an archive of **how directions die**, each with the test that would have caught it | failed ideas as anti-repetition memory | **ten causes**, with the cheap test and the cost |
+| pre-registration **version control can date** | — | **yes**, and it fails when the results are older |
+| **multi-node idle-GPU placement**, shard ownership that survives a restart | one configured server, vast.ai, Modal | **yes**, and it refuses to split one arm across two GPU models |
+| verification layers **blind to different defects**, each with a test asserting what it cannot catch | an LLM review gate with an un-forgeable reviewer-identity chain | **three layers**, no MCP required |
+| literature **ingestion backends** (arXiv, OpenAlex, Semantic Scholar, Crossref, web search) | **yes, several** | guidance and a reachability probe — **no ingestion backend** |
+| paper compilation, Overleaf sync, posters, slides, talks | **yes** | guidance only |
+| grant proposals, proof orchestration, self-optimisation | **yes** | **no** |
+| patents | five skills | one skill, written from a live prosecution |
+
+**If you already use ARIS, the useful move is not to switch.** Run
+`proofground gate` before its pipeline starts, and the `30-claim` layers before
+anything leaves. Those are the two places it has nothing, and they are the two
+places the expensive mistakes are.
 
 ## Licence
 

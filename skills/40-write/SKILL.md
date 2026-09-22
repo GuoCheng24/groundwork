@@ -52,3 +52,8 @@ Constructive: *we propose X, it solves Y, the number is Z.* The audit, the
 ablation and the negative result are supporting material and belong after it.
 This is a rule about ordering, not about hiding: a limitation that a reader
 would notice must be in the paper, stated by you first.
+
+## In this stage
+
+- [`build.md`](build.md) — one authoritative source, and a preview you must not trust
+- [`figures.md`](figures.md) — the primitives are not the bottleneck; collision is

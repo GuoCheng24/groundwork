@@ -52,6 +52,30 @@ jobs:
               print("\n".join(bad)); sys.exit(1)
           PY
 
+      # A file nobody links to is a file nobody reads. Every note in a stage
+      # directory has to be reachable from that stage's SKILL.md.
+      - name: No orphaned skill files
+        run: |
+          python - <<'PY'
+          import glob, os, re, sys
+          bad = []
+          for stage in sorted(glob.glob("skills/*/")):
+              main = os.path.join(stage, "SKILL.md")
+              if not os.path.exists(main):
+                  bad.append(f"{stage}: no SKILL.md"); continue
+              body = open(main, encoding="utf-8").read()
+              linked = set(re.findall(r"\]\(([^)]+\.md)\)", body))
+              for f in sorted(glob.glob(os.path.join(stage, "*.md"))):
+                  name = os.path.basename(f)
+                  if name == "SKILL.md":
+                      continue
+                  if name not in linked:
+                      bad.append(f"{f} is not linked from {main}")
+          print(f"{len(glob.glob('skills/*/*.md'))} skill files checked")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          PY
+
       - name: Every stage skill has frontmatter and a trigger list
         run: |
           python - <<'PY'

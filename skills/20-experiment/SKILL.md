@@ -78,3 +78,8 @@ official benchmark scorer, run ten times on one unchanged file, spanned 0.37
 points and disagreed with itself on two prompts of 541. Three runs had said it
 was stable. Any arm-to-arm difference smaller than that is not a finding about
 the arms.
+
+## In this stage
+
+- [`long-runs.md`](long-runs.md) — the loop has to survive the session that started it
+- [`hardware.md`](hardware.md) — the card is a variable, and it is worth 1.48 points

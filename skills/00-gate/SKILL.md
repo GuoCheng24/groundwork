@@ -71,3 +71,7 @@ It does not say the idea is novel, that the method will work, or that the result
 will be worth a paper. It says only that the ceiling, the baseline and the
 controls have not already answered the question. Everything it passes still has
 to survive `30-claim`.
+
+## In this stage
+
+- [`two-toolboxes.md`](two-toolboxes.md) — where originality actually comes from, and what to do when you only have one toolbox

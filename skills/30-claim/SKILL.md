@@ -64,3 +64,7 @@ worth one catch; the same finding as a check is worth every future one. Findings
 in the first row of the table above convert; findings in the second row mostly
 do **not**, and recording which is which is how you know the reviewer layer is
 not optional.
+
+## In this stage
+
+- [`statistics.md`](statistics.md) — the four places a result quietly stops being true

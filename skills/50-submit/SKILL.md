@@ -54,3 +54,7 @@ The talk is not the paper compressed. One claim, the evidence for it, the thing
 you would want to be asked. Every figure redrawn for the room it will be shown
 in — `doubleblind render --scale 0.3` is the unfurl case; a projected slide at
 the back of a lecture theatre is harsher than that, not gentler.
+
+## In this stage
+
+- [`patent.md`](patent.md) — the ordering constraints that cannot be undone
