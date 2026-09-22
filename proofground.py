@@ -13,15 +13,18 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "tools"))
 
-COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "reach"}
+COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "reach",
+            "lit": "lit", "ledger": "ledger"}
 
-USAGE = """usage: proofground {gate,prereg,cluster,reach} ...
+USAGE = """usage: proofground {gate,prereg,cluster,reach,lit,ledger} ...
 
   gate     refuse a direction whose ceiling, baseline or controls already answer it
   prereg   scaffold, seal and verify a pre-registration - including that it was
            committed before the results it governs
   cluster  survey idle GPUs across nodes, pick the ones that fit, plan shards
   reach    classify what this machine can actually fetch, and through which door
+  lit      literature grounding and occupancy search that can be checked
+  ledger   record what died and what got through, and roll it up
 
 `proofground <command> --help` for each."""
 

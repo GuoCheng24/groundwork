@@ -16,6 +16,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 
 import cluster  # noqa: E402
+import lit  # noqa: E402
 import prereg  # noqa: E402
 from gate import detectable_effect, required_se, verdict  # noqa: E402
 
@@ -134,6 +135,49 @@ class Prereg(unittest.TestCase):
         d = self._repo()
         p = self._make(d)
         self.assertEqual(self._verify(p), 1)
+
+
+class Literature(unittest.TestCase):
+    """A silent index must not read as an empty literature.
+
+    The primary index enforces a daily quota and answers 429 when it is spent.
+    The first version of this tool degraded to a preprint-only search and
+    printed the results as though the search were complete - which is the most
+    expensive way to be wrong at the occupancy gate, because "nobody has done
+    this" is exactly the answer a spent quota produces.
+    """
+
+    def setUp(self):
+        lit.BACKENDS.clear()
+
+    def test_occupancy_refuses_a_verdict_without_the_primary_index(self):
+        lit.BACKENDS.update({"openalex": False, "arxiv": True})
+        self.assertFalse(lit.primary_answered())
+        self.assertIn("NO ANSWER", lit.backend_report())
+
+    def test_the_primary_answering_is_what_allows_a_verdict(self):
+        lit.BACKENDS.update({"openalex": True, "arxiv": True})
+        self.assertTrue(lit.primary_answered())
+        self.assertNotIn("NO ANSWER", lit.backend_report())
+
+    def test_ranking_puts_the_on_topic_paper_first(self):
+        q = "bfloat16 batch invariance importance ratio"
+        on = {"title": "Batch invariance of bfloat16 importance ratios", "abstract": "", "year": 2026}
+        off = {"title": "Batch scheduling with minimum batch size", "abstract": "", "year": 2025}
+        self.assertGreater(lit._relevance(q, on), lit._relevance(q, off))
+
+    def test_the_current_year_is_resolved_at_run_time(self):
+        import datetime
+        self.assertEqual(lit.CUR_YEAR, datetime.date.today().year)
+
+    def test_a_weak_top_hit_is_refused_rather_than_returned(self):
+        real = lit.multi_search
+        try:
+            lit.multi_search = lambda q, n=8, since=None, recency=False: [
+                {"title": "An entirely unrelated doctoral thesis", "abstract": "", "year": 2011}]
+            self.assertIsNone(lit.best_match("bfloat16 batch invariance importance ratio"))
+        finally:
+            lit.multi_search = real
 
 
 class Cluster(unittest.TestCase):

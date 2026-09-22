@@ -1,35 +1,38 @@
 # proofground ⛰️🔬
 
+[![ci](https://github.com/GuoCheng24/proofground/actions/workflows/ci.yml/badge.svg)](https://github.com/GuoCheng24/proofground/actions/workflows/ci.yml)
+[![python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
+[![deps](https://img.shields.io/badge/dependencies-none-2e7d32)](#)
+[![licence](https://img.shields.io/badge/licence-MIT-green)](LICENSE)
+[![stars](https://img.shields.io/github/stars/GuoCheng24/proofground?style=flat&color=gold)](https://github.com/GuoCheng24/proofground/stargazers)
+
 **Your agent can hand you a paper by morning. The harder question is whether the
-project should have existed — and that one is answerable in about ten minutes,
-before the night is spent.**
+project should have existed — and that one is answerable in ten minutes, before
+the night is spent.**
 
-`proofground` is a full research pipeline for coding agents — direction, gate,
-experiment, claim, paper, submission, memory. It covers the same ground as the
-autonomous-research toolkits that write papers while you sleep, with two things
-those do not have:
-
-- **a gate at the front that refuses directions**, from four measurements taken
-  before the first real experiment;
-- **an archive of how research actually dies**, so a direction that was killed
-  stays killed instead of being re-proposed in four months by the same good
-  taste that proposed it the first time.
-
-Everything here has been run. Every rule links to a public repository where it
-is enforced by CI, not to a paragraph of advice.
+A full research pipeline for coding agents — direction, gate, experiment, claim,
+paper, submission, memory — with the stage every other toolkit is missing: **one
+that returns NO-GO.**
 
 ```bash
 git clone https://github.com/GuoCheng24/proofground && cd proofground
-python proofground.py gate    --baseline 0.812 --oracle 0.838 --se 0.019
-python proofground.py prereg  new prereg/PREREG_run1.md --title "run 1"
-python proofground.py cluster survey --nodes node16 node17 node18
-python proofground.py reach   --targets arxiv.org api.openalex.org doi.org
+python proofground.py gate --baseline 0.812 --oracle 0.830 --se 0.019      # NO-GO, in ten seconds
 ```
 
-Python 3.9+, standard library only. Works with Claude Code, Codex CLI, DeepSeek,
-Kimi, or any agent that can read a Markdown instruction and run a shell command.
+Python 3.9+, **no dependencies**, nothing to configure. Works with Claude Code,
+Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 
----
+| command | what it refuses |
+|---|---|
+| `proofground gate` | a direction whose ceiling, baseline, random arm or positive control already answers it |
+| `proofground lit` | an occupancy verdict when the index that would have found the competitor did not answer |
+| `proofground prereg` | a pre-registration that version control says is younger than its own results |
+| `proofground cluster` | a card whose free memory is somebody else's leftovers, and one arm split across two GPU models |
+| `proofground ledger` | a cause of death that is free text nobody can count |
+| `proofground reach` | a bot-challenge page being read as a paper |
+| [`doubleblind`](https://github.com/GuoCheng24/doubleblind) | a number that exists in no file, a brief that tells the reviewer what to conclude, a caption nobody can read |
+
+Every one of those refusals exists because the unrefused version shipped.
 
 ## The pipeline
 
@@ -117,6 +120,42 @@ stage; another 16 of 16. That is the gate working — but only if the verdicts a
 written down.
 
 ---
+
+## The occupancy gate: a silent index is not an empty literature
+
+```console
+$ proofground lit occupancy "bfloat16 batch invariance importance ratio" -n 6
+ 1. 2025  ...
+ ...
+# backends: arxiv: ok, openalex: NO ANSWER, semanticscholar: ok
+
+# ====================================================================
+#  NO VERDICT AVAILABLE. The primary index did not answer, so this is
+#  a preprint-only search. "Nothing occupies this" cannot be concluded
+#  from it - a spent quota and an empty literature look identical.
+# ====================================================================
+```
+
+That refusal is the whole point of the tool. The first version degraded silently
+to a preprint-only search and printed the results as though the search were
+complete — and the answer a spent quota produces is *"nobody has done this"*,
+which is the most expensive wrong answer available at this stage.
+
+`lit` also carries the three traps in checking that a paper exists at all:
+
+- an occupancy search **can invent its neighbours**, so every candidate that
+  matters is verified separately;
+- a verifier that fails on the network **reports a hallucination** — a batch of
+  failures at once is a network diagnosis, and `lit verify` returns a distinct
+  exit code for it rather than a verdict;
+- *"that identifier looks too recent to be real"* is **relative to today's
+  date**, and has produced false accusations against real papers. The current
+  year is resolved at run time, never written into the code.
+
+And `lit journal` reports a venue's citation metrics with the caveat attached,
+because one such figure quoted from memory once mis-set a venue choice by a
+factor of two — and the freely available proxy was itself off by a factor of
+three from the official number.
 
 ## The experiment stage: sealed first, then launched
 
@@ -237,7 +276,8 @@ is careful work and worth using:
 | pre-registration **version control can date** | — | **yes**, and it fails when the results are older |
 | **multi-node idle-GPU placement**, shard ownership that survives a restart | one configured server, vast.ai, Modal | **yes**, and it refuses to split one arm across two GPU models |
 | verification layers **blind to different defects**, each with a test asserting what it cannot catch | an LLM review gate with an un-forgeable reviewer-identity chain | **three layers**, no MCP required |
-| literature **ingestion backends** (arXiv, OpenAlex, Semantic Scholar, Crossref, web search) | **yes, several** | guidance and a reachability probe — **no ingestion backend** |
+| literature **ingestion** (OpenAlex, Crossref, arXiv, Semantic Scholar) | **yes, several skills** | **yes**, one tool — re-ranked, and it **refuses an occupancy verdict when the primary index is silent**, because a spent quota and an empty literature look identical |
+| a **record that compounds** — what died, what got through, what converted into a check | `meta-optimize` reads an event log | **yes**, `ledger`, with a closed taxonomy so the causes can be counted |
 | paper compilation, Overleaf sync, posters, slides, talks | **yes** | guidance only |
 | grant proposals, proof orchestration, self-optimisation | **yes** | **no** |
 | patents | five skills | one skill, written from a live prosecution |
