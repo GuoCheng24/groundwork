@@ -63,3 +63,5 @@ the back of a lecture theatre is harsher than that, not gentler.
 - [`rebuttal.md`](rebuttal.md) — answer the review that was written
 - [`resubmit.md`](resubmit.md) — a rejected paper is not a template change
 - [`talks.md`](talks.md) — talks, slides and posters, and why you must render them
+- [`portals.md`](portals.md) — the submission-form fields that are writing tasks, and the one that picks your reviewers
+- [`grants.md`](grants.md) — proposals: reviewers fund feasibility, not ideas

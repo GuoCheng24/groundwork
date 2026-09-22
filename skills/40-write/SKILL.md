@@ -63,3 +63,5 @@ would notice must be in the paper, stated by you first.
 - [`diagrams.md`](diagrams.md) — the overview figure is buildable; layout is the hard part
 - [`theory.md`](theory.md) — attacking a stated open problem across days
 - [`revision.md`](revision.md) — auditing a manuscript, including somebody else's
+- [`latex.md`](latex.md) — the failures that compile cleanly
+- [`docx-from-latex.md`](docx-from-latex.md) — producing a Word copy, where whole tables disappear without a trace

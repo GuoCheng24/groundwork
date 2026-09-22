@@ -60,7 +60,7 @@ Every one of those refusals exists because the unrefused version shipped.
    └────────────────────── 90-memory: the archive of what died, and why ──────────┘
 ```
 
-Seven stages, forty-three files. Each stage decides whether you are allowed into
+Seven stages, forty-seven files. Each stage decides whether you are allowed into
 the next one: a menu asks you to know which skill to call, a gate tells you.
 
 Every file carries the failure that produced its rules, because the rules are
@@ -324,11 +324,13 @@ is careful work and worth using:
 | verification layers **blind to different defects**, each with a test asserting what it cannot catch | an LLM review gate with an un-forgeable reviewer-identity chain | **three layers**, no MCP required |
 | literature **ingestion** (OpenAlex, Crossref, arXiv, Semantic Scholar) | **yes, several skills** | **yes**, one tool — re-ranked, and it **refuses an occupancy verdict when the primary index is silent**, because a spent quota and an empty literature look identical |
 | a **record that compounds** — what died, what got through, what converted into a check | `meta-optimize` reads an event log | **yes**, `ledger`, with a closed taxonomy so the causes can be counted |
-| paper compilation and reference style | **yes** | **yes**, as a recipe with the three silent variables that break it |
-| Overleaf sync | **yes** | no |
+| paper compilation and reference style | **yes** | **yes**, and two files deeper: the failures that *compile cleanly* — a centred over-wide table that never warns, a font declaration that never reaches the preamble, a bibliography hyphen that is not a hyphen |
+| **producing the Word copy** — where a starred table vanishes without a trace, and why extracting the XML text cannot see it | — | **yes** |
+| Overleaf **sync** specifically | **yes** | no — the editor's API is not covered; the LaTeX and Word production path is, in much more depth |
+| **submission portals** — the field that picks your reviewers, eligibility rules, what anonymity actually leaks | — | **yes** |
 | slides, posters, talks | **yes** | **yes**, with the rendering discipline — a deck was 17 pages in one renderer and 11 in another |
 | theory track | `proof-orchestrator`, `proof-writer` | **yes**, one file: attack a *stated* open problem, and the three ways a result turns out to be known |
-| grant proposals | **yes** | no |
+| grant proposals | **yes** | **yes** — the gate applied before the proposal, "why you" as a checkable question, and the preliminary result that was designed to be reportable either way |
 | **handing a manuscript to a human collaborator** — tracked-change formatting regressions, orphaned equation objects, reference-manager fields, metadata that leaks through the explanation document | — | **yes**, from a manuscript delivered round after round and found unclean each time |
 | **caption audit** — panel letters, a stated direction that is backwards, a colour encoding that contradicts the discussion | — | **yes** |
 
