@@ -58,3 +58,4 @@ the back of a lecture theatre is harsher than that, not gentler.
 ## In this stage
 
 - [`patent.md`](patent.md) — the ordering constraints that cannot be undone
+- [`delivery.md`](delivery.md) — handing a manuscript to a human who will open it in Word

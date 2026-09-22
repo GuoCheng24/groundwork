@@ -57,3 +57,4 @@ would notice must be in the paper, stated by you first.
 
 - [`build.md`](build.md) — one authoritative source, and a preview you must not trust
 - [`figures.md`](figures.md) — the primitives are not the bottleneck; collision is
+- [`captions.md`](captions.md) — the audit nobody runs, and the eight things one pass found

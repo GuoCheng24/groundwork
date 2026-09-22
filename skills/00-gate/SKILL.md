@@ -75,3 +75,5 @@ to survive `30-claim`.
 ## In this stage
 
 - [`two-toolboxes.md`](two-toolboxes.md) — where originality actually comes from, and what to do when you only have one toolbox
+- [`ceiling-first.md`](ceiling-first.md) — the measurement that was worth more than the project it came from
+- [`breakthrough.md`](breakthrough.md) — why the serial deep-dive never produces the breakthrough

@@ -47,7 +47,7 @@ Every one of those refusals exists because the unrefused version shipped.
    └────────────────────── 90-memory: the archive of what died, and why ──────────┘
 ```
 
-Seven stages, seventeen files. Each stage decides whether you are allowed into
+Seven stages, twenty-two files. Each stage decides whether you are allowed into
 the next one: a menu asks you to know which skill to call, a gate tells you.
 
 Every file carries the failure that produced its rules, because the rules are
@@ -95,6 +95,26 @@ prints the share of the headroom a method must capture to be detectable at
 all — a number worth knowing before the work rather than after.
 
 ---
+
+### The two sentences that make this a gate rather than advice
+
+One project measured its oracle ceiling in its **tenth** session. The ceiling was
+closed — there was nothing for any method to win. Measured in session one, every
+conclusion of that project was available in a day, and the other nine sessions
+need never have happened.
+
+A later project did measure the ceiling on day one: 0.5836 against a baseline of
+0.5305, an apparent 2.7× of headroom, gate passed. The baseline it compared
+against was **its own, untuned**. The right comparison was three numbers read
+straight from the same region, which scored **0.6307** — the oracle ceiling lost
+to the trivial baseline, and the project should have died that morning. It went
+on to pass six further adversarial checks over two weeks, and **not one of them
+asked whether the control had been tuned**. Given the same budget, the baseline
+scored 0.6148 and the proposed method 0.6124: a gain of **−0.0024**.
+
+So the rule has a second half, and it is the half that matters: *the baseline
+gets the same tuning budget as the method.* A baseline nobody tried to make win
+is a strawman with error bars. See [`skills/00-gate/ceiling-first.md`](skills/00-gate/ceiling-first.md).
 
 ## The archive: ten ways a direction dies
 
@@ -278,7 +298,9 @@ is careful work and worth using:
 | verification layers **blind to different defects**, each with a test asserting what it cannot catch | an LLM review gate with an un-forgeable reviewer-identity chain | **three layers**, no MCP required |
 | literature **ingestion** (OpenAlex, Crossref, arXiv, Semantic Scholar) | **yes, several skills** | **yes**, one tool — re-ranked, and it **refuses an occupancy verdict when the primary index is silent**, because a spent quota and an empty literature look identical |
 | a **record that compounds** — what died, what got through, what converted into a check | `meta-optimize` reads an event log | **yes**, `ledger`, with a closed taxonomy so the causes can be counted |
-| paper compilation, Overleaf sync, posters, slides, talks | **yes** | guidance only |
+| paper compilation, Overleaf sync, posters, slides | **yes** | guidance only |
+| **handing a manuscript to a human collaborator** — tracked-change formatting regressions, orphaned equation objects, reference-manager fields, metadata that leaks through the explanation document | — | **yes**, from a manuscript delivered round after round and found unclean each time |
+| **caption audit** — panel letters, a stated direction that is backwards, a colour encoding that contradicts the discussion | — | **yes** |
 | grant proposals, proof orchestration, self-optimisation | **yes** | **no** |
 | patents | five skills | one skill, written from a live prosecution |
 

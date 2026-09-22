@@ -72,3 +72,4 @@ written down, or the same good taste proposes them again next quarter.
 
 - [`occupancy.md`](occupancy.md) — is it already done, and can you tell - including the three traps of existence verification
 - [`venue-fit.md`](venue-fit.md) — capacity is a separate gate from novelty; contribution type predicts acceptance better than topic
+- [`originality.md`](originality.md) — designing the gates, and what a wrong gate produces instead of an error
