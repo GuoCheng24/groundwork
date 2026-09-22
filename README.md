@@ -47,7 +47,7 @@ Every one of those refusals exists because the unrefused version shipped.
    └────────────────────── 90-memory: the archive of what died, and why ──────────┘
 ```
 
-Seven stages, twenty-two files. Each stage decides whether you are allowed into
+Seven stages, forty-two files. Each stage decides whether you are allowed into
 the next one: a menu asks you to know which skill to call, a gate tells you.
 
 Every file carries the failure that produced its rules, because the rules are
@@ -57,6 +57,19 @@ directions, an occupancy search that invented its own competitor, a
 pre-registered "clean hardware test" that was not clean until a control existed.
 
 ---
+
+
+### What is in each stage
+
+| stage | what it decides | notes, each written from a failure |
+|---|---|---|
+| [`00-gate`](skills/00-gate/) | Gate — the four numbers that decide | [`breakthrough`](skills/00-gate/breakthrough.md) · [`ceiling-first`](skills/00-gate/ceiling-first.md) · [`metric-validity`](skills/00-gate/metric-validity.md) · [`positive-control`](skills/00-gate/positive-control.md) · [`two-toolboxes`](skills/00-gate/two-toolboxes.md) |
+| [`10-direction`](skills/10-direction/) | Direction — candidates, not ideas | [`kill-argument`](skills/10-direction/kill-argument.md) · [`lit-review`](skills/10-direction/lit-review.md) · [`occupancy`](skills/10-direction/occupancy.md) · [`originality`](skills/10-direction/originality.md) · [`venue-fit`](skills/10-direction/venue-fit.md) |
+| [`20-experiment`](skills/20-experiment/) | Experiment — sealed first, then launched | [`ablations`](skills/20-experiment/ablations.md) · [`data-hygiene`](skills/20-experiment/data-hygiene.md) · [`hardware`](skills/20-experiment/hardware.md) · [`implementation`](skills/20-experiment/implementation.md) · [`long-runs`](skills/20-experiment/long-runs.md) · [`shared-machine`](skills/20-experiment/shared-machine.md) |
+| [`30-claim`](skills/30-claim/) | Claim — three layers, blind to different things | [`citations`](skills/30-claim/citations.md) · [`integrity`](skills/30-claim/integrity.md) · [`review-loop`](skills/30-claim/review-loop.md) · [`statistics`](skills/30-claim/statistics.md) |
+| [`40-write`](skills/40-write/) | Write — from claims, not from results | [`build`](skills/40-write/build.md) · [`captions`](skills/40-write/captions.md) · [`claims`](skills/40-write/claims.md) · [`diagrams`](skills/40-write/diagrams.md) · [`figures`](skills/40-write/figures.md) · [`structure`](skills/40-write/structure.md) · [`theory`](skills/40-write/theory.md) |
+| [`50-submit`](skills/50-submit/) | Submit — and everything after | [`compliance`](skills/50-submit/compliance.md) · [`delivery`](skills/50-submit/delivery.md) · [`patent`](skills/50-submit/patent.md) · [`rebuttal`](skills/50-submit/rebuttal.md) · [`resubmit`](skills/50-submit/resubmit.md) · [`talks`](skills/50-submit/talks.md) |
+| [`90-memory`](skills/90-memory/) | Memory — the archive is the asset | [`postmortems`](skills/90-memory/postmortems.md) · [`wiki`](skills/90-memory/wiki.md) |
 
 ## The gate: four numbers, ten minutes, before anything
 
@@ -298,10 +311,14 @@ is careful work and worth using:
 | verification layers **blind to different defects**, each with a test asserting what it cannot catch | an LLM review gate with an un-forgeable reviewer-identity chain | **three layers**, no MCP required |
 | literature **ingestion** (OpenAlex, Crossref, arXiv, Semantic Scholar) | **yes, several skills** | **yes**, one tool — re-ranked, and it **refuses an occupancy verdict when the primary index is silent**, because a spent quota and an empty literature look identical |
 | a **record that compounds** — what died, what got through, what converted into a check | `meta-optimize` reads an event log | **yes**, `ledger`, with a closed taxonomy so the causes can be counted |
-| paper compilation, Overleaf sync, posters, slides | **yes** | guidance only |
+| paper compilation and reference style | **yes** | **yes**, as a recipe with the three silent variables that break it |
+| Overleaf sync | **yes** | no |
+| slides, posters, talks | **yes** | **yes**, with the rendering discipline — a deck was 17 pages in one renderer and 11 in another |
+| theory track | `proof-orchestrator`, `proof-writer` | **yes**, one file: attack a *stated* open problem, and the three ways a result turns out to be known |
+| grant proposals | **yes** | no |
 | **handing a manuscript to a human collaborator** — tracked-change formatting regressions, orphaned equation objects, reference-manager fields, metadata that leaks through the explanation document | — | **yes**, from a manuscript delivered round after round and found unclean each time |
 | **caption audit** — panel letters, a stated direction that is backwards, a colour encoding that contradicts the discussion | — | **yes** |
-| grant proposals, proof orchestration, self-optimisation | **yes** | **no** |
+
 | patents | five skills | one skill, written from a live prosecution |
 
 **If you already use ARIS, the useful move is not to switch.** Run

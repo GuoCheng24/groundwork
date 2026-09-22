@@ -59,3 +59,4 @@ anything private — cohort data, manuscripts under review, internal identifiers
 ## In this stage
 
 - [`postmortems.md`](postmortems.md) — the eight failure families that repeat
+- [`wiki.md`](wiki.md) — persistent memory that stays worth loading

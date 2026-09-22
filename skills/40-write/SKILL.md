@@ -58,3 +58,7 @@ would notice must be in the paper, stated by you first.
 - [`build.md`](build.md) — one authoritative source, and a preview you must not trust
 - [`figures.md`](figures.md) — the primitives are not the bottleneck; collision is
 - [`captions.md`](captions.md) — the audit nobody runs, and the eight things one pass found
+- [`claims.md`](claims.md) — the unit the paper is actually made of
+- [`structure.md`](structure.md) — write the paper the venue actually prints
+- [`diagrams.md`](diagrams.md) — the overview figure is buildable; layout is the hard part
+- [`theory.md`](theory.md) — attacking a stated open problem across days

@@ -83,3 +83,7 @@ the arms.
 
 - [`long-runs.md`](long-runs.md) — the loop has to survive the session that started it
 - [`hardware.md`](hardware.md) — the card is a variable, and it is worth 1.48 points
+- [`shared-machine.md`](shared-machine.md) — sharing a cluster with people who are not you
+- [`data-hygiene.md`](data-hygiene.md) — the preprocessing that silently happens twice
+- [`ablations.md`](ablations.md) — the arm that is missing is usually the informative one
+- [`implementation.md`](implementation.md) — making the thing you are testing actually be the thing

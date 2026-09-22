@@ -77,3 +77,5 @@ to survive `30-claim`.
 - [`two-toolboxes.md`](two-toolboxes.md) — where originality actually comes from, and what to do when you only have one toolbox
 - [`ceiling-first.md`](ceiling-first.md) — the measurement that was worth more than the project it came from
 - [`breakthrough.md`](breakthrough.md) — why the serial deep-dive never produces the breakthrough
+- [`positive-control.md`](positive-control.md) — run it before the experiment, not after the null
+- [`metric-validity.md`](metric-validity.md) — can the metric carry the sentence you intend to write

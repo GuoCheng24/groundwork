@@ -68,3 +68,6 @@ not optional.
 ## In this stage
 
 - [`statistics.md`](statistics.md) — the four places a result quietly stops being true
+- [`citations.md`](citations.md) — the reference that resolves to nothing
+- [`review-loop.md`](review-loop.md) — the two ways an adversarial loop degenerates
+- [`integrity.md`](integrity.md) — the checks that catch what looks like a good result

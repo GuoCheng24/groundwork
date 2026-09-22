@@ -59,3 +59,7 @@ the back of a lecture theatre is harsher than that, not gentler.
 
 - [`patent.md`](patent.md) — the ordering constraints that cannot be undone
 - [`delivery.md`](delivery.md) — handing a manuscript to a human who will open it in Word
+- [`compliance.md`](compliance.md) — the venue's hard specs, as a file that fails
+- [`rebuttal.md`](rebuttal.md) — answer the review that was written
+- [`resubmit.md`](resubmit.md) — a rejected paper is not a template change
+- [`talks.md`](talks.md) — talks, slides and posters, and why you must render them
