@@ -19,8 +19,11 @@ sys.path.insert(0, ROOT)
 
 from groundwork import attach, cluster, ledger, noise, reach, scaffold, stats  # noqa: E402
 from groundwork import lit  # noqa: E402
+from groundwork import check  # noqa: E402
+from groundwork import probe  # noqa: E402
 from groundwork import watch  # noqa: E402
 from groundwork import prereg  # noqa: E402
+from groundwork import gate as gate_mod  # noqa: E402
 from groundwork.gate import detectable_effect, required_se, verdict  # noqa: E402
 
 # A throwaway repository created by a test is not anybody's work, so it gets a
@@ -402,6 +405,258 @@ class Attach(unittest.TestCase):
         self.assertEqual(sorted(os.listdir(os.path.join(d, ".claude", "skills"))), first)
         self.assertTrue(all(os.path.islink(os.path.join(d, ".claude", "skills", n))
                             for n in first), "stages must be linked, not copied")
+
+
+class GateRecord(unittest.TestCase):
+    def test_the_verdict_goes_into_the_gate_section_not_the_end_of_the_file(self):
+        d = tempfile.mkdtemp()
+        p = os.path.join(d, "PROJECT.md")
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write("# p\n\n## 1. The gate\n\n_(paste it here)_\n\n## 2. Later\n\nkeep me\n")
+        go, lines, facts = verdict(0.50, 0.75, 0.011, None, None, None, 2.0)
+        gate_mod.record(p, lines, go, facts)
+        with open(p, encoding="utf-8") as fh:
+            text = fh.read()
+        head = text.index("## 1. The gate")
+        nxt = text.index("## 2. Later")
+        self.assertIn("Verdict: GO", text[head:nxt], "the verdict landed outside the gate section")
+        self.assertIn("keep me", text, "a later section was destroyed")
+        self.assertNotIn("_(paste it here)_", text, "the template was left next to the verdict")
+
+    def test_a_no_go_records_what_blocked_it_and_where_it_goes(self):
+        d = tempfile.mkdtemp()
+        p = os.path.join(d, "PROJECT.md")
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write("# p\n\n## The gate\n\n_(here)_\n")
+        go, lines, facts = verdict(0.812, 0.830, 0.019, None, None, None, 2.0)
+        self.assertFalse(go)
+        gate_mod.record(p, lines, go, facts)
+        with open(p, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("NO-GO", text)
+        self.assertIn("blocking:", text)
+        self.assertIn("ledger kill", text)
+
+    def test_a_document_with_no_gate_section_is_not_silently_rewritten(self):
+        d = tempfile.mkdtemp()
+        p = os.path.join(d, "PROJECT.md")
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write("# p\n\n## Notes\n\nx\n")
+        before = open(p, encoding="utf-8").read()
+        msg = gate_mod.record(p, ["a"], True, {"blocking": []})
+        self.assertIn("no section", msg)
+        self.assertEqual(open(p, encoding="utf-8").read(), before)
+
+
+
+class Check(unittest.TestCase):
+    """The sweep, and the three ways a sweep lies: a vacuous pass, a false
+    accusation, and an exemption that quietly disarms the check."""
+
+    def _proj(self):
+        d = tempfile.mkdtemp()
+        for sub in ("prereg", "results", "archive"):
+            os.makedirs(os.path.join(d, sub))
+        return d
+
+    def _seal(self, path):
+        import hashlib
+        h = hashlib.sha256(open(path, "rb").read()).hexdigest()
+        with open(os.path.splitext(path)[0] + ".sha256", "w", encoding="utf-8") as fh:
+            fh.write(f"{h}  {os.path.basename(path)}\n")
+
+    def test_an_empty_project_is_not_all_green(self):
+        rows = check.run(self._proj())
+        self.assertFalse(any(r["verdict"] == check.OK for r in rows),
+                         "a project with nothing in it must not report passes")
+        self.assertTrue(all(r["verdict"] in (check.NA, check.FAIL) for r in rows))
+
+    def test_na_is_reported_as_loudly_as_a_pass(self):
+        out = check.report(check.run(self._proj()), ".")
+        self.assertIn("not applicable", out)
+        self.assertIn("`n/a` is not a pass", out)
+
+    def test_results_without_a_preregistration_fail(self):
+        d = self._proj()
+        with open(os.path.join(d, "results", "metrics_run1.json"), "w", encoding="utf-8") as fh:
+            json.dump({"acc": 0.5}, fh)
+        row = next(r for r in check.run(d) if r["check"] == "prereg")
+        self.assertEqual(row["verdict"], check.FAIL)
+
+    def test_a_document_cannot_seal_itself(self):
+        """A sha256 inside a document is a digest of something else."""
+        d = self._proj()
+        p = os.path.join(d, "prereg", "PREREG_a.md")
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write("# plan\n\nThe dataset sha256 is " + "0" * 64 + "\n")
+        self.assertIsNone(check._seal_for(p, open(p, encoding="utf-8").read()),
+                          "an inline digest was accepted as a self-seal")
+
+    def test_a_seal_quoted_by_a_later_document_counts(self):
+        import hashlib
+        d = self._proj()
+        p = os.path.join(d, "prereg", "PREREG_a.md")
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write("# plan a\n\n## What changes\n\nthe budget\n")
+        h = hashlib.sha256(open(p, "rb").read()).hexdigest()
+        with open(os.path.join(d, "prereg", "PREREG_b.md"), "w", encoding="utf-8") as fh:
+            fh.write(f"# amendment\n\nThis amends `PREREG_a.md`, sha256 `{h}`.\n")
+        self.assertIn("PREREG_b.md", check._seal_for(p, open(p, encoding="utf-8").read()))
+
+    def test_a_stale_quoted_seal_does_not_count(self):
+        d = self._proj()
+        p = os.path.join(d, "prereg", "PREREG_a.md")
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write("# plan a\n")
+        with open(os.path.join(d, "prereg", "PREREG_b.md"), "w", encoding="utf-8") as fh:
+            fh.write("This amends `PREREG_a.md`, sha256 `" + "a" * 64 + "`.\n")
+        self.assertIsNone(check._seal_for(p, open(p, encoding="utf-8").read()),
+                          "a quoted digest that does not match was accepted")
+
+    def test_a_plan_written_to_another_template_is_not_accused_of_being_empty(self):
+        d = self._proj()
+        p = os.path.join(d, "prereg", "PREREG_x.md")
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write("# plan\n\n## Fixed settings\n\ngreedy, seed 0\n\n"
+                     "## The two arms\n\n4096 and 8192\n")
+        self._seal(p)
+        row = next(r for r in check.run(d) if r["check"] == "prereg")
+        self.assertEqual(row["verdict"], check.NA)
+        self.assertNotIn("empty", row["detail"])
+
+    def test_a_preregistration_is_only_compared_with_results_it_names(self):
+        self.assertEqual(check._tag("prereg/PREREG_run3_addendum_3d.md"), "run3")
+        self.assertEqual(check._tag("PREREG_budget.md"), "budget")
+
+    def test_a_waiver_must_carry_a_reason(self):
+        d = self._proj()
+        with open(os.path.join(d, "results", "m.json"), "w", encoding="utf-8") as fh:
+            json.dump({"acc": 1}, fh)
+        with open(os.path.join(d, "archive", "waivers.json"), "w", encoding="utf-8") as fh:
+            json.dump({"noise": "", "prereg": "measured bit-exact instead"}, fh)
+        rows = {r["check"]: r for r in check.run(d)}
+        self.assertEqual(rows["noise"]["verdict"], check.FAIL,
+                         "an empty reason disarmed the check")
+        self.assertEqual(rows["prereg"]["verdict"], check.WAIVED)
+
+    def test_a_waived_row_still_prints_its_reason_every_time(self):
+        d = self._proj()
+        with open(os.path.join(d, "results", "m.json"), "w", encoding="utf-8") as fh:
+            json.dump({"acc": 1}, fh)
+        with open(os.path.join(d, "archive", "waivers.json"), "w", encoding="utf-8") as fh:
+            json.dump({"prereg": "a demonstration, not a test against a threshold"}, fh)
+        out = check.report(check.run(d), d)
+        self.assertIn("a demonstration, not a test against a threshold", out)
+        self.assertIn("waived", out)
+
+    def test_a_waiver_cannot_turn_a_pass_or_an_na_into_something_else(self):
+        d = self._proj()
+        with open(os.path.join(d, "archive", "waivers.json"), "w", encoding="utf-8") as fh:
+            json.dump({"gate": "not applicable, honest", "private": "trust me"}, fh)
+        rows = {r["check"]: r for r in check.run(d)}
+        self.assertEqual(rows["gate"]["verdict"], check.NA, "a waiver rewrote an n/a")
+
+    def test_a_private_path_in_a_tracked_file_is_caught(self):
+        # Composed rather than written out: a fixture for a scanner must not be
+        # a hit for that scanner in its own repository, or the check fires on
+        # its own test and the only way out is an exemption - and an exemption
+        # written for one file is how a repository stops checking itself.
+        bait = "/" + "public/home/" + "someuser" + "/project"
+        d = self._proj()
+        with open(os.path.join(d, "notes.md"), "w", encoding="utf-8") as fh:
+            fh.write(f"run it from {bait}\n")
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        self.assertEqual(row["verdict"], check.FAIL)
+        self.assertIn("notes.md", row["detail"])
+
+    def test_a_check_that_raises_is_a_failure_not_a_pass(self):
+        broken = [("boom", "does it explode", lambda root: 1 / 0)]
+        saved = check.CHECKS
+        try:
+            check.CHECKS = broken
+            row = check.run(self._proj())[0]
+        finally:
+            check.CHECKS = saved
+        self.assertEqual(row["verdict"], check.FAIL)
+        self.assertIn("the check itself raised", row["detail"])
+
+
+
+class Probe(unittest.TestCase):
+    """What the machine can do, and - harder - what the report is allowed to claim."""
+
+    def test_a_module_name_matches_a_segment_not_a_substring(self):
+        self.assertTrue(probe._segment_match("compiler/gcc/11.3.0", "gcc"))
+        self.assertTrue(probe._segment_match("apps/gromacs/2025.1-4090", "gromacs"))
+        # the noise case: a substring match buries the real hit under false ones
+        self.assertFalse(probe._segment_match("apps/amber/24-gcc-openmpi", "gcc"))
+        self.assertFalse(probe._segment_match("mathlib/fftw/3.3.9", "ff"))
+
+    def test_an_executable_below_path_depth_is_found(self):
+        d = tempfile.mkdtemp()
+        deep = os.path.join(d, "share", "group", "tools", "lo", "opt", "program")
+        os.makedirs(deep)
+        exe = os.path.join(deep, "soffice")
+        with open(exe, "w", encoding="utf-8") as fh:
+            fh.write("#!/bin/sh\n")
+        os.chmod(exe, 0o755)
+        found, _roots, trunc = probe.find_off_path(["soffice"], [d], budget=30)
+        self.assertFalse(trunc)
+        self.assertIn("soffice", found, "an install below PATH depth was missed")
+        self.assertEqual(found["soffice"][0], exe)
+
+    def test_a_pruned_directory_is_not_searched(self):
+        d = tempfile.mkdtemp()
+        junk = os.path.join(d, "x", "site-packages", "bin")
+        os.makedirs(junk)
+        exe = os.path.join(junk, "ninja")
+        with open(exe, "w", encoding="utf-8") as fh:
+            fh.write("#!/bin/sh\n")
+        os.chmod(exe, 0o755)
+        found, _r, _t = probe.find_off_path(["ninja"], [d], budget=30)
+        self.assertEqual(found, {})
+
+    def test_a_search_that_ran_out_of_time_is_not_an_absence(self):
+        d = tempfile.mkdtemp()
+        found, _r, truncated = probe.find_off_path(["anything"], [d], budget=0)
+        self.assertTrue(truncated, "a timed-out crawl must be marked, not reported as clean")
+        self.assertEqual(found, {})
+
+    def test_the_report_says_where_it_looked_whenever_it_says_not_found(self):
+        d = {"host": "h", "gpus": None, "memory": {"total_gb": None, "shm": None,
+             "cpus": 4, "loadavg": None}, "disk": [], "modules": None,
+             "tools": {"on_path": [], "off_path": {}, "absent": ["soffice"],
+                       "searched": ["/opt"], "truncated": False, "uncrawled": []},
+             "isolation": {"unprivileged_userns": False, "kvm": False,
+                           "cgroup_v2_delegated": False}}
+        out = probe.report(d)
+        self.assertIn("not found", out)
+        self.assertIn("/opt", out, "a negative that does not say where it looked is not a measurement")
+        self.assertIn("statement about PATH", out)
+
+    def test_a_truncated_report_offers_the_catalogue_instead_of_a_verdict(self):
+        d = {"host": "h", "gpus": None, "memory": {"total_gb": None, "shm": None,
+             "cpus": 4, "loadavg": None}, "disk": [], "modules": None,
+             "tools": {"on_path": [], "off_path": {}, "absent": ["soffice"],
+                       "searched": ["/opt"], "truncated": True,
+                       "uncrawled": [{"path": "/shared", "size_gb": 4096}]}}
+        d["isolation"] = {"unprivileged_userns": True, "kvm": False,
+                          "cgroup_v2_delegated": False}
+        out = probe.report(d)
+        self.assertIn("RAN OUT OF TIME", out)
+        self.assertIn("module avail", out)
+        self.assertIn("/shared", out)
+        self.assertIn("4 TB", out)
+
+    def test_an_uncrawled_mount_is_listed_once_and_only_if_unsearched(self):
+        rows = probe.uncrawled_mounts(["/"], min_gb=1)
+        self.assertEqual(rows, [], "everything is under / and / was searched")
+
+    def test_a_tool_asked_for_twice_is_reported_once(self):
+        t = probe.tools(extra=["git", "git"], roots=["/nonexistent-xyz"], budget=5)
+        names = [x["name"] for x in t["on_path"]] + t["absent"]
+        self.assertEqual(len(names), len(set(names)))
+
 
 
 class Watch(unittest.TestCase):

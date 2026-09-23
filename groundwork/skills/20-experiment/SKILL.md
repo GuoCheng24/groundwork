@@ -39,6 +39,22 @@ pre-registration committed after its results is a write-up.
 
 ## 2. Find the capacity that is actually free
 
+Start with the machine you are on, because what it can do is usually
+underestimated:
+
+```bash
+groundwork probe            # GPUs, /dev/shm, what is installed off PATH, isolation
+```
+
+`which X` answers for `PATH`, not for the machine. LibreOffice was declared
+unavailable here for weeks on that evidence while it sat eight directories deep
+under a shared mount; `ninja` was missing from `PATH` while an inference stack's
+JIT backend needed it. On a cluster, `module avail` is the real catalogue. And
+"no root, so no containers" was false: unprivileged user namespaces, `bwrap`
+and `fuse-overlayfs` were all available to an ordinary account.
+
+Then look outward:
+
 ```bash
 groundwork cluster survey --nodes gpu01 gpu02 gpu03 gpu04
 groundwork cluster plan --nodes gpu01 gpu03 --need-gb 20 --shards 4 \

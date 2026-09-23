@@ -95,10 +95,31 @@ def _git(args, cwd):
     return p.stdout.strip() if p.returncode == 0 else None
 
 
-def committed_at(path):
-    """Unix time of the commit that last touched `path`, or None if not in git."""
+def committed_at(path, first=True):
+    """Unix time `path` entered version control (`first`), or last changed.
+
+    Which one you ask for decides whether this test works at all. The question
+    a pre-registration has to answer is *when did it enter the record* - and
+    that is the FIRST commit. Asking for the last one makes any later edit to
+    the document - a redaction, a typo, a broken link - move it forward past
+    its own results, and the tool then calls a correctly pre-registered study a
+    write-up. That happened here, to a real pre-registration, and it was the
+    tool that was wrong.
+
+    `first=False` gives the last-touched time, which is the right question for
+    "was the plan modified after the results were known".
+    """
     d = os.path.dirname(os.path.abspath(path)) or "."
-    out = _git(["log", "-1", "--format=%ct", "--", os.path.basename(path)], d)
+    base = os.path.basename(path)
+    if first:
+        out = _git(["log", "--diff-filter=A", "--format=%ct", "--", base], d)
+        if out:
+            return int(out.splitlines()[-1])
+        # no add recorded (a filtered or grafted history): fall back to the
+        # oldest commit that touches it, and say nothing more confident
+        out = _git(["log", "--format=%ct", "--", base], d)
+        return int(out.splitlines()[-1]) if out else None
+    out = _git(["log", "-1", "--format=%ct", "--", base], d)
     return int(out) if out and out.isdigit() else None
 
 
@@ -173,6 +194,7 @@ def cmd_verify(a):
                      if not any("section" in p for p in problems) else f"{len(have)} sections")
 
     pre_t = committed_at(a.path)
+    pre_last = committed_at(a.path, first=False)
     if pre_t is None:
         problems.append(f"{a.path} is not committed - a pre-registration that exists only in a "
                         "working tree can be edited with no trace")
@@ -190,6 +212,11 @@ def cmd_verify(a):
                 f"write-up.")
         elif pre_t is not None:
             notes.append(f"{res} {how} {(stamp - pre_t) / 60:.0f} min after the pre-registration")
+            if pre_last is not None and pre_last > stamp:
+                notes.append(
+                    f"{a.path} was edited {(pre_last - stamp) / 60:.0f} min AFTER "
+                    f"{res} - the order is still right, and the seal above is what says "
+                    "the plan itself did not change")
 
     for n in notes:
         print(f"  ok   {n}")

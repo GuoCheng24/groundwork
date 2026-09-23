@@ -82,6 +82,51 @@ jobs:
           fi
           grep -q "TROUBLE IN THE LOG" /tmp/o.txt
 
+      # A sweep that reports a pass because there was nothing to check has told
+      # you the opposite of the truth, so the empty case is the one CI pins.
+      - name: check reports n/a on an empty project, and does not fail it
+        run: |
+          mkdir -p /tmp/cproj && cd /tmp/cproj
+          python -m groundwork init --name ci
+          python -m groundwork check | tee /tmp/c.txt
+          grep -q "not applicable" /tmp/c.txt
+          grep -q "is not a pass" /tmp/c.txt
+          if grep -qE "^  ok  " /tmp/c.txt; then
+            echo "::error::an empty project reported a pass"; exit 1
+          fi
+
+      - name: check fails a project with results and no pre-registration
+        run: |
+          cd /tmp/cproj && mkdir -p results
+          echo '{"acc": 0.5}' > results/metrics_run1.json
+          if python -m groundwork check > /tmp/c2.txt; then
+            echo "::error::results with no pre-registration passed"; cat /tmp/c2.txt; exit 1
+          fi
+          grep -q "FAIL  prereg" /tmp/c2.txt
+
+      # An exemption that disarms a check without saying why is how a repository
+      # stops checking itself. An entry with no reason must waive nothing.
+      - name: a waiver with no reason waives nothing
+        run: |
+          cd /tmp/cproj && mkdir -p archive
+          echo '{"prereg": ""}' > archive/waivers.json
+          if python -m groundwork check > /tmp/c3.txt; then
+            echo "::error::an empty reason disarmed the check"; exit 1
+          fi
+          # record a real gate so the sweep can come out clean, rather than
+          # teaching that everything gets waived
+          python -m groundwork gate --baseline 0.50 --oracle 0.75 --se 0.011 --record
+          printf '{"prereg": "a demonstration, not a test against a threshold",\n "noise": "the comparison is bit-exact, not scored"}\n' > archive/waivers.json
+          python -m groundwork check | tee /tmp/c4.txt
+          grep -q "a demonstration, not a test against a threshold" /tmp/c4.txt
+          grep -q "2 waived" /tmp/c4.txt
+          grep -q "ok    gate" /tmp/c4.txt
+
+      - name: probe says where it looked when it says not found
+        run: |
+          python -m groundwork probe --root /nonexistent-root --search-seconds 5 | tee /tmp/p.txt
+          grep -q "statement about PATH" /tmp/p.txt
+
       - name: The exact tests reproduce published figures
         run: python -m groundwork stats selftest
 
@@ -105,6 +150,11 @@ jobs:
 
       - name: install lists every stage
         run: python -m groundwork install --list | grep -c "^  [0-9]" | grep -q 7
+
+      # The sweep is run over this repository on every push. A tool that its own
+      # project does not pass is a tool nobody else should be asked to run.
+      - name: groundwork check passes on groundwork
+        run: python -m groundwork check
 
       - name: The archive is well-formed and every cause names a gate
         run: |

@@ -38,9 +38,11 @@ Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 | command | what it does, or refuses |
 |---|---|
 | `groundwork init` | starts a project whose first section is the gate, **left empty on purpose** |
+| `groundwork check` | a sweep that reports a pass because there was nothing to check, and an exemption that quietly disarms the check next to it |
 | `groundwork gate` | a direction whose ceiling, baseline, random arm or positive control already answers it |
 | `groundwork lit` | an occupancy verdict when the index that would have found the competitor did not answer |
 | `groundwork prereg` | a pre-registration that version control says is younger than its own results |
+| `groundwork probe` | `which` answering for `PATH` and being read as an answer about the machine, and a filesystem crawl that did not finish being read as an absence |
 | `groundwork cluster` | a card whose free memory is somebody else's leftovers, and one arm split across two GPU models |
 | `groundwork watch` | a run that was never alive, an empty log read as silence rather than buffering, and a watch that dies with the session that set it up |
 | `groundwork ledger` | a cause of death that is free text nobody can count |
@@ -63,6 +65,8 @@ Every one of those refusals exists because the unrefused version shipped.
                               across idle       defects        audited    talk
                               GPUs
    └────────────────────── 90-memory: the archive of what died, and why ──────────┘
+
+ groundwork check ── runs every gate above over a project, in one command
 ```
 
 Seven stages, 49 files. Each stage decides whether you are allowed into
@@ -258,6 +262,40 @@ decoding, the same batch size and the same scorer, on two different GPU models,
 1.48 points from changing nothing but the card. The same arm repeated on a
 second card of the *same* model reproduced 541 of 541 generations byte for byte.
 
+### Before either: what can this machine actually do
+
+```console
+$ groundwork probe
+  GPU        6 card(s), 0 idle
+  /dev/shm   126 GB, 0.3 GB used - this is RAM, and it is charged to you
+  on PATH    git ssh rsync nvidia-smi gcc pandoc tectonic gh jq
+  modules    69 in `module avail` - a catalogue that is deliberately not on PATH
+  INSTALLED BUT NOT ON PATH - `which` says no and the machine says yes:
+             ninja:   .../envs/af3/bin/ninja
+             soffice: .../tools/lo76/opt/libreoffice7.6/program/soffice
+  isolation  unprivileged user namespaces: yes; bwrap fuse-overlayfs podman
+             /dev/kvm no, cgroup v2 delegation no
+             so: file-system and process isolation without root, but no VM.
+```
+
+Both of those were real. `soffice` was declared unavailable for weeks on the
+strength of `which soffice` returning nothing, while LibreOffice sat eight
+directories deep under a shared mount; documents were checked with an
+approximate renderer that under-reported overflowing text. `ninja` was missing
+from `PATH` when an inference stack's JIT backend shelled out to it, and the
+run was worked around instead of fixed. **A negative from `which` is a
+statement about `PATH`.**
+
+So is a negative from a filesystem crawl, and `probe` says which: it names the
+roots it searched and the depth, lists the large mounts it did **not** search,
+and if the crawl hit its time budget it says the results are unfinished
+searches rather than absences. On a cluster the fast door is the module system,
+which is where `probe` looks first.
+
+The third block is the one that reopens work. "No root, so no containers" was
+written down here as a constraint and was simply false: unprivileged user
+namespaces, `bwrap` and `fuse-overlayfs` were all available.
+
 ### Then launch it so that it outlives the session
 
 ```console
@@ -286,6 +324,53 @@ file is read by whoever comes next; an intention is not.
 The tool's own first version had the bug it exists to catch: `os.kill(pid, 0)`
 succeeds for a process that has exited and **not been reaped**, so a job that
 died one second in was reported as alive. Both directions are now in CI.
+
+---
+
+## One command that runs all of them
+
+```console
+$ groundwork check
+  n/a   gate          no PROJECT.md, so no recorded gate
+  ok    prereg        2 sealed pre-registration(s), every required section filled
+  ok    prereg-order  2 entered the record before the results they govern
+  FAIL  noise         results are being compared with no measured noise floor
+                      -> groundwork noise --n 10 --command '<your scorer>'
+  waiv  raw-data      the generations are the artefact here; they are 3 MB and versioned
+  ok    private       61 tracked file(s) scanned, nothing private found
+
+  3 ok, 1 failed, 1 not applicable, 1 waived
+```
+
+Three decisions make this more than a checklist.
+
+**`n/a` is printed as loudly as `FAIL`, and it is not a pass.** A sweep over a
+project with no pre-registration must not show a green tick: a check that
+passed because there was *nothing to check* has told you the opposite of the
+truth. Most sweeps of this kind are mostly `n/a` on a young project, and that
+is the reading.
+
+**A waiver names its check and carries a reason, and the reason is reprinted
+every time.** A flat exemption list is how a repository disarms itself — an
+entry written for one document silently exempted a deliberately broken second
+one here, and the CI step whose job was to fail started passing. A waiver in
+`archive/waivers.json` with an empty reason does not waive anything.
+
+**It refuses to accuse.** A pre-registration written to another template is
+reported as *not judged by name*, not as incomplete — deciding whether prose
+answers a question is not something a name match can do, and a sweep that
+guesses generates false accusations against documents that do answer it. The
+checks that stay are the ones that can be decided mechanically: is there a
+seal; did version control see the plan first; is the noise floor on disk; is a
+home path about to be pushed.
+
+Two of those were found by running the sweep against this author's own
+repositories. `prereg verify` had been asking when a pre-registration was
+*last* committed, so redacting a machine name from a sealed plan moved it
+forward past its own results and the tool called a correctly pre-registered
+study a write-up. And a `sha256` appearing inside a document was being taken as
+its seal — impossible, since a file cannot contain its own digest; the digest
+in that document belonged to the plan it amended.
 
 ---
 
@@ -355,6 +440,9 @@ is careful work and worth using:
 | an archive of **how directions die**, each with the test that would have caught it | failed ideas as anti-repetition memory | **ten causes**, with the cheap test and the cost |
 | pre-registration **version control can date** | — | **yes**, and it fails when the results are older |
 | **multi-node idle-GPU placement**, shard ownership that survives a restart | one configured server, vast.ai, Modal | **yes**, and it refuses to split one arm across two GPU models |
+| **launching a long run and being sure it started** | `run-experiment`, `monitor-experiment`, an experiment queue | **yes**, and the check is the point: ninety seconds before believing it, the log head read back, an empty head called buffering rather than silence, and a flag file that outlives the session so the watch is not an intention |
+| **finding out what the machine can actually do** | — | **yes** — including what is installed but not on `PATH`, the module catalogue, whether isolation without root is available, and which large mounts it did *not* search |
+| **running every gate at once, over a project** | `meta-optimize` over an event log | **yes**, `check` — and it reports `n/a` as loudly as `FAIL`, because a sweep that passes for want of anything to check has told you the opposite of the truth |
 | verification layers **blind to different defects**, each with a test asserting what it cannot catch | an LLM review gate with an un-forgeable reviewer-identity chain | **three layers**, no MCP required |
 | literature **ingestion** (OpenAlex, Crossref, arXiv, Semantic Scholar) | **yes, several skills** | **yes**, one tool — re-ranked, and it **refuses an occupancy verdict when the primary index is silent**, because a spent quota and an empty literature look identical |
 | a **record that compounds** — what died, what got through, what converted into a check | `meta-optimize` reads an event log | **yes**, `ledger`, with a closed taxonomy so the causes can be counted |
