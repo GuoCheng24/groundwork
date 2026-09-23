@@ -54,6 +54,12 @@ PRIVATE = [
      "an email address"),
     (r"\b(?:ghp|gho|ghs|github_pat)_[A-Za-z0-9_]{20,}\b", "a GitHub token"),
     (r"\bpypi-[A-Za-z0-9_-]{16,}\b", "a PyPI token"),
+    # RFC1918 only, with lookarounds. A plain four-number pattern flags
+    # `nvidia-cublas-cu12==12.8.4.1` in every requirements freeze, and a check
+    # that cries wolf on a version pin is a check that gets turned off - found
+    # by running an early version of this over five repositories, where the one
+    # and only hit was a package version.
+    (r"(?<![\d.])(?:10\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)|172\.(?:1[6-9]|2\d|3[01])\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)|192\.168\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d))(?![\d.])", "an internal (RFC1918) address"),
 ]
 # What counts as private is partly project-specific: a cluster's node names, an
 # internal ticket prefix, a collaborator's initials. A project declares its own

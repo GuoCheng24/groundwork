@@ -453,6 +453,18 @@ class GateRecord(unittest.TestCase):
 
 
 
+def _addr(*octets):
+    """An address assembled from its octets.
+
+    Written out, these fixtures make the repository fail its own scan - the
+    pattern they exist to test is a built-in. Joining them keeps the literal
+    out of the source, which is the same move as `_bait` and for the same
+    reason: an exemption written for one file is how a repository stops
+    checking itself.
+    """
+    return ".".join(str(o) for o in octets)
+
+
 def _bait():
     """A path that the private scan must catch, assembled so that this source
     file is not itself a hit.
@@ -654,6 +666,31 @@ class Check(unittest.TestCase):
         row = next(r for r in check.run(d) if r["check"] == "private")
         self.assertEqual(row["verdict"], check.FAIL,
                          "an untracked file about to be committed was not scanned")
+
+    def test_the_address_pattern_does_not_fire_on_a_version_pin(self):
+        """A check that cries wolf on every requirements freeze gets turned off.
+
+        Found by running an early four-number pattern over five repositories:
+        the one and only hit in any of them was `nvidia-cublas-cu12==12.8.4.1`.
+        """
+        rx = next(p for p, w in check.PRIVATE if "RFC1918" in w)
+        for s_ in (f"ssh {_addr(10, 0, 0, 5)}",
+                   f"gateway {_addr(192, 168, 1, 1)}",
+                   f"at {_addr(172, 20, 3, 44)}",
+                   f"http://{_addr(192, 168, 0, 7)}:8080/x",
+                   f"({_addr(10, 1, 2, 3)})",
+                   _addr(10, 255, 255, 255)):
+            self.assertRegex(s_, rx, f"missed a real internal address in {s_!r}")
+        for s_ in (f"nvidia-cublas-cu12=={_addr(12, 8, 4, 1)}",
+                   f"version {_addr(10, 2, 3, 4, 5)}",
+                   _addr(1, 10, 0, 1),
+                   _addr(192, 169, 1, 1),
+                   _addr(172, 32, 0, 1),
+                   _addr(10, 0, 0, 256),
+                   f"cuda {_addr(12, 8, 90)}",
+                   f"torch {_addr(2, 13, 0)}",
+                   f"v{_addr(10, 0, 0, 1, 2)}"):
+            self.assertNotRegex(s_, rx, f"cried wolf on {s_!r}")
 
     def test_a_check_that_raises_is_a_failure_not_a_pass(self):
         broken = [("boom", "does it explode", lambda root: 1 / 0)]
