@@ -1,61 +1,55 @@
 """The 1200x630 card GitHub shows when the link is shared.
 
-Read from archive/causes-of-death.json, so the chart cannot drift from the file
-it summarises - and the shape it makes is the argument: of the ten ways a
-direction dies, eight are catchable before the first real experiment.
+The composition is the positioning: a full pipeline, and the first stage is the
+one that refuses. Counts come from archive/causes-of-death.json and from the
+skill tree, so the card cannot drift from what the repository contains.
 
 Built through cardkit, which refuses to write a card that fails its own
 legibility, contrast and collision audit at the ~360 px a link unfurl gives it.
+Per-stage labels are impossible at that floor - a ten-character word needs more
+width than a seventh of the canvas - so the strip carries the shape and one
+label carries the argument.
 """
 import collections
+import glob
 import json
 import pathlib
 import sys
 
-from matplotlib.patches import Rectangle
+from matplotlib.patches import FancyBboxPatch
 
 sys.path.insert(0, str(pathlib.Path.home() / "bin"))
-from cardkit import INK, SANS, card  # noqa: E402
+from cardkit import INK, MUTE, SANS, card  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 with open(ROOT / "archive" / "causes-of-death.json", encoding="utf-8") as fh:
     CAUSES = json.load(fh)["causes"]
 
-STAGE = {
-    "00-gate": "before you start",
-    "10-direction": "before you start",
-    "20-experiment": "at the experiment",
-    "30-claim": "at the write-up",
-}
-missing = sorted({c["gate"].split("/")[0] for c in CAUSES} - set(STAGE))
-if missing:
-    raise SystemExit(f"causes name stages with no card label: {missing}")
+EARLY_STAGES = {"00-gate", "10-direction"}
+N_CAUSES = len(CAUSES)
+N_EARLY = sum(1 for c in CAUSES if c["gate"].split("/")[0] in EARLY_STAGES)
+N_STAGES = len(sorted(glob.glob(str(ROOT / "skills" / "*/"))))
+N_NOTES = len(glob.glob(str(ROOT / "skills" / "*" / "*.md")))
 
-COUNTS = collections.Counter(STAGE[c["gate"].split("/")[0]] for c in CAUSES)
-ORDER = ["before you start", "at the experiment", "at the write-up"]
-ROWS = [(k, COUNTS[k]) for k in ORDER if COUNTS[k]]
-TOTAL = sum(n for _k, n in ROWS)
-
-ACCENT = "#7a4b1f"
-EARLY = "#1f6f6b"
+ACCENT = "#1f6f6b"
+WARN = "#b4562a"
 
 
 def chart(ax, accent):
-    top, gap, end = 3.10, 0.90, 10.95
-    labels = [ax.text(0.78, top - i * gap, name, fontsize=34, color=INK,
-                      family=SANS, va="center")
-              for i, (name, _n) in enumerate(ROWS)]
-    ax.figure.canvas.draw()
-    r = ax.figure.canvas.get_renderer()
-    widest = max(t.get_window_extent(r).x1 for t in labels) / ax.figure.dpi
-    x0 = widest + 0.30
-    unit = (end - x0) / max(n for _k, n in ROWS)
-    for i, (name, n) in enumerate(ROWS):
-        y = top - i * gap
-        colour = EARLY if name == "before you start" else accent
-        ax.add_patch(Rectangle((x0, y - 0.22), n * unit, 0.44, fc=colour, ec="none"))
-        ax.text(x0 + n * unit + 0.18, y, str(n), fontsize=34, fontweight="bold",
-                color=colour, family=SANS, va="center")
+    # the pipeline strip: one block per stage, the first one refusing
+    x0, x1, y0, h, gap = 0.78, 11.22, 2.78, 0.74, 0.11
+    w = (x1 - x0 - gap * (N_STAGES - 1)) / N_STAGES
+    for i in range(N_STAGES):
+        x = x0 + i * (w + gap)
+        ax.add_patch(FancyBboxPatch((x, y0), w, h, boxstyle="round,pad=0.015,rounding_size=0.09",
+                                    fc=WARN if i == 0 else accent, ec="none", zorder=3))
+
+    ax.text(x0, 2.16, "NO-GO", fontsize=42, fontweight="bold", color=WARN,
+            family=SANS, va="center")
+    ax.text(x0 + 2.55, 2.16, "the stage other pipelines skip",
+            fontsize=34, color=INK, family=SANS, va="center")
+    ax.text(x0, 1.30, f"{N_STAGES} stages, {N_NOTES} notes, 6 tools, no dependencies",
+            fontsize=34, color=MUTE, family=SANS, va="center")
 
 
 if __name__ == "__main__":
@@ -64,7 +58,7 @@ if __name__ == "__main__":
     card(out=str(out), accent=ACCENT, badge="gw",
          kicker="GROUNDWORK",
          headline="Most directions should not be started",
-         evidence=f"{TOTAL} ways a direction dies, and where each is caught",
+         evidence=f"{N_CAUSES} ways a direction dies, {N_EARLY} before you start",
          chart=chart,
          footer="github.com/GuoCheng24/groundwork",
          headline_size=44)

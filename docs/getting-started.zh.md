@@ -61,15 +61,15 @@ claude
 Host mycluster
     HostName <你本来就在用的地址>
     User <你的用户名>
-    RemoteForward 17899 127.0.0.1:7890      # <-- 关键的就是这一行
+    RemoteForward 18080 127.0.0.1:1080      # <-- 关键的就是这一行
     ExitOnForwardFailure yes
     ServerAliveInterval 20
     ServerAliveCountMax 3
     TCPKeepAlive yes
 ```
 
-`RemoteForward 17899 127.0.0.1:7890` 的意思是：**集群发到它自己 17899 端口的东西，
-从我笔记本的 7890 端口出去**。后面那个地址指向你笔记本上真正能出网的东西（本地代理
+`RemoteForward 18080 127.0.0.1:1080` 的意思是：**集群发到它自己 18080 端口的东西，
+从我笔记本的 1080 端口出去**。后面那个地址指向你笔记本上真正能出网的东西（本地代理
 客户端、`127.0.0.1:1080`，随便什么你已经在用的）。前面那个端口随便挑一个没人用的，
 它只属于你。
 
@@ -82,8 +82,8 @@ Host mycluster
 
 ```bash
 # 隧道真的活着才设代理
-if timeout 1 bash -c ': < /dev/tcp/127.0.0.1/17899' 2>/dev/null; then
-    export http_proxy=http://127.0.0.1:17899
+if timeout 1 bash -c ': < /dev/tcp/127.0.0.1/18080' 2>/dev/null; then
+    export http_proxy=http://127.0.0.1:18080
     export https_proxy=$http_proxy
     export no_proxy=localhost,127.0.0.1
 else
@@ -113,8 +113,8 @@ no_proxy="" NO_PROXY="" gh api repos/<owner>/<repo>
 混合模式的代理通常在**同一个端口**上同时讲 HTTP 和 SOCKS：
 
 ```bash
-curl -x http://127.0.0.1:17899       -L https://example.org      # 一般够用
-curl -x socks5h://127.0.0.1:17899    -L https://example.org      # 兜底
+curl -x http://127.0.0.1:18080       -L https://example.org      # 一般够用
+curl -x socks5h://127.0.0.1:18080    -L https://example.org      # 兜底
 ```
 
 **域名解析不了的时候用 `socks5h`**。那个 `h` 表示 **DNS 交给远端做**，正好解决
@@ -123,9 +123,9 @@ curl -x socks5h://127.0.0.1:17899    -L https://example.org      # 兜底
 
 ```bash
 # python（需要 PySocks）
-proxies = {"http": "socks5h://127.0.0.1:17899", "https": "socks5h://127.0.0.1:17899"}
+proxies = {"http": "socks5h://127.0.0.1:18080", "https": "socks5h://127.0.0.1:18080"}
 # git，顺便绕开 no_proxy 的排除
-no_proxy="" git -c http.proxy=socks5h://127.0.0.1:17899 clone <url>
+no_proxy="" git -c http.proxy=socks5h://127.0.0.1:18080 clone <url>
 ```
 
 只认 HTTP 代理的工具（好几个下载器都是）必须用 `http://` 那种写法，而且目标域名

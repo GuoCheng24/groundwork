@@ -69,15 +69,15 @@ same SSH command you already use:
 Host mycluster
     HostName <the address you already use>
     User <your username>
-    RemoteForward 17899 127.0.0.1:7890      # <-- the line that matters
+    RemoteForward 18080 127.0.0.1:1080      # <-- the line that matters
     ExitOnForwardFailure yes
     ServerAliveInterval 20
     ServerAliveCountMax 3
     TCPKeepAlive yes
 ```
 
-`RemoteForward 17899 127.0.0.1:7890` means: *anything the cluster sends to its
-own port 17899 comes out of my laptop's port 7890.* Point the second number at
+`RemoteForward 18080 127.0.0.1:1080` means: *anything the cluster sends to its
+own port 18080 comes out of my laptop's port 1080.* Point the second number at
 whatever gives your laptop internet — a local proxy client, or `127.0.0.1:1080`,
 or whatever you already use. Pick any free port for the first number; it is
 yours alone.
@@ -92,8 +92,8 @@ On the **cluster**, in `~/.bashrc`:
 
 ```bash
 # only set the proxy if the tunnel is actually up
-if timeout 1 bash -c ': < /dev/tcp/127.0.0.1/17899' 2>/dev/null; then
-    export http_proxy=http://127.0.0.1:17899
+if timeout 1 bash -c ': < /dev/tcp/127.0.0.1/18080' 2>/dev/null; then
+    export http_proxy=http://127.0.0.1:18080
     export https_proxy=$http_proxy
     export no_proxy=localhost,127.0.0.1
 else
@@ -124,8 +124,8 @@ Check your own with `echo $no_proxy` before believing any diagnosis.
 A mixed-mode proxy usually speaks **both** HTTP and SOCKS on the same port:
 
 ```bash
-curl -x http://127.0.0.1:17899       -L https://example.org      # usually fine
-curl -x socks5h://127.0.0.1:17899    -L https://example.org      # the fallback
+curl -x http://127.0.0.1:18080       -L https://example.org      # usually fine
+curl -x socks5h://127.0.0.1:18080    -L https://example.org      # the fallback
 ```
 
 Use `socks5h` when a hostname **fails to resolve**. The `h` means the *remote*
@@ -135,9 +135,9 @@ completely unreachable are simply unresolvable locally.
 
 ```bash
 # python, needs PySocks
-proxies = {"http": "socks5h://127.0.0.1:17899", "https": "socks5h://127.0.0.1:17899"}
+proxies = {"http": "socks5h://127.0.0.1:18080", "https": "socks5h://127.0.0.1:18080"}
 # git, bypassing a no_proxy exclusion as well
-no_proxy="" git -c http.proxy=socks5h://127.0.0.1:17899 clone <url>
+no_proxy="" git -c http.proxy=socks5h://127.0.0.1:18080 clone <url>
 ```
 
 Tools that only understand HTTP proxies — several downloaders among them — must
