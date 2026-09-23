@@ -453,6 +453,17 @@ class GateRecord(unittest.TestCase):
 
 
 
+def _bait():
+    """A path that the private scan must catch, assembled so that this source
+    file is not itself a hit.
+
+    Written out, the literal makes the repository fail its own scan, and the
+    only way out is an exemption - which is how a repository stops checking
+    itself. Joining the segments keeps the separator out of the source.
+    """
+    return "/".join(["", "public", "home", "someuser", "project"])
+
+
 class Check(unittest.TestCase):
     """The sweep, and the three ways a sweep lies: a vacuous pass, a false
     accusation, and an exemption that quietly disarms the check."""
@@ -561,17 +572,88 @@ class Check(unittest.TestCase):
         self.assertEqual(rows["gate"]["verdict"], check.NA, "a waiver rewrote an n/a")
 
     def test_a_private_path_in_a_tracked_file_is_caught(self):
-        # Composed rather than written out: a fixture for a scanner must not be
-        # a hit for that scanner in its own repository, or the check fires on
-        # its own test and the only way out is an exemption - and an exemption
-        # written for one file is how a repository stops checking itself.
-        bait = "/" + "public/home/" + "someuser" + "/project"
+        bait = _bait()
         d = self._proj()
         with open(os.path.join(d, "notes.md"), "w", encoding="utf-8") as fh:
             fh.write(f"run it from {bait}\n")
         row = next(r for r in check.run(d) if r["check"] == "private")
         self.assertEqual(row["verdict"], check.FAIL)
         self.assertIn("notes.md", row["detail"])
+
+    def test_a_project_can_declare_what_is_private_to_it(self):
+        d = self._proj()
+        with open(os.path.join(d, "archive", "private-patterns.json"), "w",
+                  encoding="utf-8") as fh:
+            json.dump({"patterns": [{"regex": r"\bnode[0-9]{2}\b",
+                                     "what": "a compute node name"}]}, fh)
+        with open(os.path.join(d, "notes.md"), "w", encoding="utf-8") as fh:
+            fh.write("we ran it on " + "node" + "17\n")
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        self.assertEqual(row["verdict"], check.FAIL)
+        self.assertIn("compute node name", row["detail"])
+
+    def test_the_scan_says_how_many_patterns_it_applied(self):
+        d = self._proj()
+        with open(os.path.join(d, "notes.md"), "w", encoding="utf-8") as fh:
+            fh.write("nothing to see\n")
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        self.assertEqual(row["verdict"], check.OK)
+        self.assertIn("pattern(s)", row["detail"],
+                      "a clean scan must say what it scanned against")
+        self.assertIn("none declared", row["detail"])
+
+    def test_the_pattern_file_does_not_match_its_own_rules(self):
+        """A scanner that flags its own configuration teaches you to turn it off."""
+        d = self._proj()
+        with open(os.path.join(d, "archive", "private-patterns.json"), "w",
+                  encoding="utf-8") as fh:
+            json.dump({"patterns": [{"regex": "/" + "public/share/[a-z]+/",
+                                     "what": "another account's directory"}]}, fh)
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        self.assertEqual(row["verdict"], check.OK, row["detail"])
+
+    def test_a_literal_secret_in_the_pattern_file_is_still_caught(self):
+        """Only the `regex` values are exempt, and only from themselves."""
+        d = self._proj()
+        with open(os.path.join(d, "archive", "private-patterns.json"), "w",
+                  encoding="utf-8") as fh:
+            json.dump({"patterns": [{"regex": r"\bnodeXX\b", "what": "a node name",
+                                     "why": "it was " + "node" + "17 originally"}]}, fh)
+        with open(os.path.join(d, "archive", "private-patterns.json"), encoding="utf-8") as fh:
+            pass
+        d2 = check.project_patterns(d)[0]
+        self.assertEqual(len(d2), 1)
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        # the `why` field still carries the literal, and the built-in patterns
+        # do not cover node names, so declare one and it must fire
+        with open(os.path.join(d, "archive", "private-patterns.json"), "w",
+                  encoding="utf-8") as fh:
+            json.dump({"patterns": [{"regex": r"\bnode[0-9]{2}\b", "what": "a node name",
+                                     "why": "it was " + "node" + "17 originally"}]}, fh)
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        self.assertEqual(row["verdict"], check.FAIL,
+                         "a literal written into a non-regex field escaped the scan")
+
+    def test_an_unreadable_pattern_file_is_a_failure_not_a_silent_narrowing(self):
+        d = self._proj()
+        with open(os.path.join(d, "archive", "private-patterns.json"), "w",
+                  encoding="utf-8") as fh:
+            fh.write("{not json")
+        with open(os.path.join(d, "notes.md"), "w", encoding="utf-8") as fh:
+            fh.write("clean\n")
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        self.assertEqual(row["verdict"], check.FAIL)
+        self.assertIn("could not be read", row["detail"])
+
+    def test_a_file_about_to_be_added_is_scanned(self):
+        """Scanning only tracked files passes right up to the `git add`."""
+        d = self._proj()
+        subprocess.run(["git", "init", "-q"], cwd=d, check=False)
+        with open(os.path.join(d, "untracked.md"), "w", encoding="utf-8") as fh:
+            fh.write(f"run it from {_bait()}\n")
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        self.assertEqual(row["verdict"], check.FAIL,
+                         "an untracked file about to be committed was not scanned")
 
     def test_a_check_that_raises_is_a_failure_not_a_pass(self):
         broken = [("boom", "does it explode", lambda root: 1 / 0)]

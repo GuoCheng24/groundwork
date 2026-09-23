@@ -55,6 +55,20 @@ PRIVATE = [
     (r"\b(?:ghp|gho|ghs|github_pat)_[A-Za-z0-9_]{20,}\b", "a GitHub token"),
     (r"\bpypi-[A-Za-z0-9_-]{16,}\b", "a PyPI token"),
 ]
+# What counts as private is partly project-specific: a cluster's node names, an
+# internal ticket prefix, a collaborator's initials. A project declares its own
+# in archive/private-patterns.json, and `check` reports how many patterns it
+# applied - so a file that is missing or empty reads as a narrower scan rather
+# than as a clean one.
+#
+# The patterns file is scanned like every other file, deliberately - writing the
+# secret itself in there instead of a regex is the obvious mistake, and a scan
+# that skipped its own configuration would be the one place it could hide. What
+# IS removed before scanning is the `regex` values themselves: a pattern written
+# to match another account's directory contains that directory's prefix by
+# construction, and a scanner that flags its own rules teaches you to turn it
+# off.
+PATTERNS_FILE = os.path.join("archive", "private-patterns.json")
 SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv", ".mypy_cache"}
 TEXT_EXT = {".md", ".py", ".sh", ".txt", ".json", ".yml", ".yaml", ".toml", ".cfg", ".tex"}
 
@@ -68,10 +82,21 @@ def _git(args, cwd):
 
 
 def _tracked(root):
+    """Files git would carry: tracked, plus untracked-and-not-ignored.
+
+    Scanning only tracked files passes right up to the moment you `git add`,
+    which is the moment the scan exists for. Ignored files stay out - that is
+    what .gitignore is for, and a scan that shouted about a 30 GB generations
+    file would be turned off.
+    """
     out = _git(["ls-files"], root)
     if out is None:
         return None
-    return [f for f in out.splitlines() if f]
+    files = [f for f in out.splitlines() if f]
+    new = _git(["ls-files", "--others", "--exclude-standard"], root)
+    if new:
+        files += [f for f in new.splitlines() if f]
+    return files
 
 
 def _walk(root):
@@ -348,12 +373,50 @@ def check_raw_gitignored(root):
     return OK, f"{len(raw)} raw file(s), none of the large ones tracked", ""
 
 
+def _without_rules(text):
+    """The patterns file with its own `regex` values blanked out."""
+    try:
+        d = json.loads(text)
+    except ValueError:
+        return text
+    for row in d.get("patterns", []):
+        row.pop("regex", None)
+    return json.dumps(d, indent=1)
+
+
+def project_patterns(root):
+    """Extra patterns this project declares. Returns (patterns, problems)."""
+    f = os.path.join(root, PATTERNS_FILE)
+    if not os.path.exists(f):
+        return [], []
+    try:
+        with open(f, encoding="utf-8") as fh:
+            d = json.load(fh)
+    except (OSError, ValueError) as exc:
+        return [], [f"{PATTERNS_FILE} could not be read ({exc}); no project patterns applied"]
+    out, bad = [], []
+    for row in d.get("patterns", []):
+        rx, what = row.get("regex"), row.get("what")
+        if not rx or not what:
+            bad.append(f"{PATTERNS_FILE}: an entry with no regex or no description")
+            continue
+        try:
+            re.compile(rx)
+        except re.error as exc:
+            bad.append(f"{PATTERNS_FILE}: {rx!r} is not a regex ({exc})")
+            continue
+        out.append((rx, what))
+    return out, bad
+
+
 def check_private(root):
     tracked = _tracked(root)
     in_git = tracked is not None
     files = [os.path.join(root, f) for f in tracked] if in_git else \
         [f for f in _walk(root) if os.path.splitext(f)[1] in TEXT_EXT]
-    hits = []
+    extra, pattern_problems = project_patterns(root)
+    patterns = PRIVATE + extra
+    hits = list(pattern_problems)
     for f in files:
         if os.path.splitext(f)[1] not in TEXT_EXT or not os.path.exists(f):
             continue
@@ -362,19 +425,32 @@ def check_private(root):
                 text = fh.read(400_000)
         except OSError:
             continue
-        for pat, what in PRIVATE:
+        if os.path.abspath(f) == os.path.abspath(os.path.join(root, PATTERNS_FILE)):
+            text = _without_rules(text)
+        found = []
+        for pat, what in patterns:
             m = re.search(pat, text)
             if m:
                 line = text[:m.start()].count("\n") + 1
-                hits.append(f"{os.path.relpath(f, root)}:{line} {what}")
-                break
-    what = "tracked file(s)" if in_git else "file(s) in the working tree (not a git repository)"
+                found.append(f"{os.path.relpath(f, root)}:{line} {what}")
+        # all of them, not the first: a file that leaks a node name and an
+        # internal address has two problems, and fixing the one that happened
+        # to sort first leaves the report looking the same next run
+        hits += found
+    what = "file(s) git would carry" if in_git else "file(s) in the working tree (not a git repository)"
+    how = (f"{len(patterns)} pattern(s): {len(PRIVATE)} built in"
+           + (f" + {len(extra)} declared in {PATTERNS_FILE}" if extra
+              else f", none declared in {PATTERNS_FILE}"))
     if not files:
         return NA, f"no {what} to scan", ""
     if hits:
-        return FAIL, f"{len(hits)} file(s): " + "; ".join(hits[:3]), \
+        more = f" (+{len(hits) - 3} more)" if len(hits) > 3 else ""
+        return FAIL, f"{len(hits)} finding(s): " + "; ".join(hits[:3]) + more, \
             "redact before pushing; git history keeps what a later commit removes"
-    return OK, f"{len(files)} {what} scanned, nothing private found", ""
+    return OK, f"{len(files)} {what} scanned against {how}; nothing found", \
+        ("" if extra else
+         "what counts as private is partly project-specific - a node name, a "
+         f"ticket prefix, initials. Declare them in {PATTERNS_FILE}")
 
 
 def check_skills(root):

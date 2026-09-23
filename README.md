@@ -393,6 +393,15 @@ entry written for one document silently exempted a deliberately broken second
 one here, and the CI step whose job was to fail started passing. A waiver in
 `archive/waivers.json` with an empty reason does not waive anything.
 
+**It scans what git would carry, not what git already carries**, and it says
+what it scanned against. A scan restricted to tracked files passes right up to
+the moment you `git add`, which is the moment it exists for; ignored files stay
+out, because a scan that shouted about a 30 GB generations file would be turned
+off. What counts as private is partly project-specific — a cluster's node
+names, an internal ticket prefix — so a project declares its own patterns in
+`archive/private-patterns.json`, and every clean result names how many patterns
+it applied rather than just saying nothing was found.
+
 **It refuses to accuse.** A pre-registration written to another template is
 reported as *not judged by name*, not as incomplete — deciding whether prose
 answers a question is not something a name match can do, and a sweep that

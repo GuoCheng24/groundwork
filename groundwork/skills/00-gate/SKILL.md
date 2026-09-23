@@ -99,6 +99,12 @@ A gate that genuinely does not apply is waived in `archive/waivers.json`, with
 a reason, and the reason is reprinted on every run. An exemption with no reason
 waives nothing: a flat allow-list is how a repository disarms its own checks.
 
+The private-material scan covers what git *would* carry, untracked-and-not-
+ignored files included, because the moment before `git add` is the moment it
+is for. Declare what is private to this project — node names, a ticket prefix,
+initials — in `archive/private-patterns.json`, as regexes rather than literals;
+that file is scanned like any other, with only its own `regex` values exempt.
+
 ## In this stage
 
 - [`two-toolboxes.md`](two-toolboxes.md) — where originality actually comes from, and what to do when you only have one toolbox
