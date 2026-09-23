@@ -1,0 +1,72 @@
+{
+ "schema": "groundwork-external-facts/1",
+ "note": "Numbers this README quotes that live in a different repository. They are recorded here with where they come from so the sentence and the source can be compared without a network, and so CI stays hermetic. Each entry names the document that quotes it, so a fact cannot be left behind when a page is rewritten. tests/test_readme_numbers.py checks that document against this file always, and re-derives every entry from the source repository whenever that repository is checked out beside this one - which is where drift is caught. Two entries here were already stale when this file was written: the ledger had grown from 20 findings to 21 and the human-eye count from 9 to 10.",
+ "facts": [
+  {
+   "id": "scorer_spread_points",
+   "value": 0.37,
+   "rendered": "0.37",
+   "what": "points the official IFEval scorer spans across 10 scorings of one unchanged file",
+   "repo": "ifeval-reproduction",
+   "path": "results/scorer_noise.json",
+   "derive": "round(metrics.prompt_level_strict_acc.spread_points, 2)",
+   "as_of": "97f01d572f668291b9d8214655037898f38029b1",
+   "used_in": "README.md"
+  },
+  {
+   "id": "scorer_n_scorings",
+   "value": 10,
+   "rendered": "ten runs",
+   "what": "scorings of the same unchanged file",
+   "repo": "ifeval-reproduction",
+   "path": "results/scorer_noise.json",
+   "derive": "n_scorings",
+   "as_of": "97f01d572f668291b9d8214655037898f38029b1",
+   "used_in": "README.md"
+  },
+  {
+   "id": "hardware_points",
+   "value": 1.48,
+   "rendered": "1.48",
+   "what": "points between two GPU models, same weights, same seed, greedy, same batch size",
+   "repo": "ifeval-reproduction",
+   "path": "results/metrics_run3.json",
+   "derive": "abs(round(HARDWARE.metrics.prompt_level_strict_acc.points, 2))",
+   "as_of": "97f01d572f668291b9d8214655037898f38029b1",
+   "used_in": "README.md"
+  },
+  {
+   "id": "byte_identical",
+   "value": 541,
+   "rendered": "541 of 541",
+   "what": "generations reproduced byte for byte on a second card of the same model",
+   "repo": "ifeval-reproduction",
+   "path": "results/metrics_run3.json",
+   "derive": "DETERMINISM.byte_identical_responses",
+   "as_of": "97f01d572f668291b9d8214655037898f38029b1",
+   "used_in": "README.md"
+  },
+  {
+   "id": "ledger_findings",
+   "value": 21,
+   "rendered": "21 real defects",
+   "what": "defects recorded in the doubleblind ledger",
+   "repo": "doubleblind",
+   "path": "ledger/findings.json",
+   "derive": "len(findings)",
+   "as_of": "dc43b96f45e57e0a17e95c9218e7205eb880399b",
+   "used_in": "README.md"
+  },
+  {
+   "id": "ledger_human_eye",
+   "value": 10,
+   "rendered": "10 were caught by a person",
+   "what": "of those, the ones a person caught by looking at the rendered artifact",
+   "repo": "doubleblind",
+   "path": "ledger/findings.json",
+   "derive": "count(findings where caught_by == 'human eye')",
+   "as_of": "dc43b96f45e57e0a17e95c9218e7205eb880399b",
+   "used_in": "README.md"
+  }
+ ]
+}
