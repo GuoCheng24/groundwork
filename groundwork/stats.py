@@ -18,31 +18,54 @@ from __future__ import annotations
 
 import argparse
 import sys
-from math import comb
+from math import comb, exp, fsum, lgamma, log, log1p
 
 Z80, Z95 = 0.8416, 1.9600
+
+
+def _log_pmf(i, n, p):
+    """log of the binomial pmf, via lgamma.
+
+    Not `comb(n, i) * p**i * (1-p)**(n-i)`: `comb` is an exact integer, and at
+    n = 2638 multiplying it by a float raises OverflowError. That version
+    shipped and was only found by running the tool on a full benchmark - every
+    earlier use had n of 541 or less.
+    """
+    if p <= 0.0:
+        return 0.0 if i == 0 else -float("inf")
+    if p >= 1.0:
+        return 0.0 if i == n else -float("inf")
+    return (lgamma(n + 1) - lgamma(i + 1) - lgamma(n - i + 1)
+            + i * log(p) + (n - i) * log1p(-p))
+
+
+def binom_cdf(p, k, n):
+    """P(X <= k) for X ~ Binomial(n, p), summed from the shorter tail."""
+    if k < 0:
+        return 0.0
+    if k >= n:
+        return 1.0
+    if k <= n // 2:
+        return min(1.0, fsum(exp(_log_pmf(i, n, p)) for i in range(0, k + 1)))
+    return max(0.0, 1.0 - fsum(exp(_log_pmf(i, n, p)) for i in range(k + 1, n + 1)))
 
 
 def clopper_pearson(k, n, alpha=0.05):
     """Exact binomial interval. Not the normal approximation, which is wrong at the ends."""
     if n == 0:
         return (float("nan"), float("nan"))
-
-    def cdf(p, k, n):
-        return sum(comb(n, i) * p ** i * (1 - p) ** (n - i) for i in range(0, k + 1))
-
     lo = hi = 0.0
     if k > 0:
         a, b = 0.0, 1.0
-        for _ in range(200):
+        for _ in range(100):          # 2^-100; double precision runs out long before
             m = (a + b) / 2
-            a, b = (m, b) if 1 - cdf(m, k - 1, n) < alpha / 2 else (a, m)
+            a, b = (m, b) if 1 - binom_cdf(m, k - 1, n) < alpha / 2 else (a, m)
         lo = (a + b) / 2
     if k < n:
         a, b = 0.0, 1.0
-        for _ in range(200):
+        for _ in range(100):
             m = (a + b) / 2
-            a, b = (m, b) if cdf(m, k, n) > alpha / 2 else (a, m)
+            a, b = (m, b) if binom_cdf(m, k, n) > alpha / 2 else (a, m)
         hi = (a + b) / 2
     else:
         hi = 1.0
@@ -55,7 +78,10 @@ def mcnemar_exact(b, c):
     if n == 0:
         return 1.0
     k = min(b, c)
-    return min(1.0, 2 * sum(comb(n, i) for i in range(0, k + 1)) / 2 ** n)
+    # in log space for the same reason as the interval: sum(comb(...)) / 2**n
+    # is an exact-integer division that overflows to a float at a few thousand
+    # discordant pairs
+    return min(1.0, 2 * binom_cdf(0.5, k, n))
 
 
 def detectable_effect(se, power_z=Z80, alpha_z=Z95):
@@ -88,8 +114,23 @@ def cmd_ci(a):
     print(f"  {a.k}/{a.n} = {100 * a.k / a.n:.2f}%   "
           f"{100 * (1 - a.alpha):.0f}% CI [{100 * lo:.2f}, {100 * hi:.2f}]")
     if a.against is not None:
+        # The interval is printed in percent, and the number a user has to hand
+        # is as often a fraction. Guessing the unit produces a confident wrong
+        # verdict - this printed "the interval EXCLUDES 0.8682" about an
+        # interval of [85.93, 88.51], which contains 86.82. So it refuses
+        # instead, and shows both readings.
+        if 0.0 < a.against <= 1.0:
+            as_pct = a.against * 100
+            print(f"\n  --against {a.against} is ambiguous: the interval above is in PERCENT,")
+            print(f"  so {a.against} reads as {a.against}% and is almost certainly meant as "
+                  f"{as_pct:g}%.")
+            print(f"    as {a.against:g}%   the interval {'contains' if lo * 100 <= a.against <= hi * 100 else 'excludes'} it")
+            print(f"    as {as_pct:g}%   the interval {'contains' if lo * 100 <= as_pct <= hi * 100 else 'excludes'} it")
+            print(f"  Say which: `--against {as_pct:g}` for the second.")
+            return 2
         inside = lo * 100 <= a.against <= hi * 100
-        print(f"  the interval {'contains' if inside else 'EXCLUDES'} {a.against}")
+        print(f"  the interval [{100 * lo:.2f}, {100 * hi:.2f}]% "
+              f"{'contains' if inside else 'EXCLUDES'} {a.against}%")
         print("\n  A verdict that rests on an interval boundary is a verdict that a second"
               "\n  arm can flip without being distinguishable from the first. If you are"
               "\n  about to publish one, run the second arm.")
@@ -170,7 +211,10 @@ def main(argv=None):
     c.add_argument("k", type=int)
     c.add_argument("n", type=int)
     c.add_argument("--alpha", type=float, default=0.05)
-    c.add_argument("--against", type=float, help="a number to compare the interval with")
+    c.add_argument("--against", type=float, metavar="PERCENT",
+                   help="a number to compare the interval with, IN PERCENT "
+                        "(86.82, not 0.8682); a value in (0, 1] is refused as "
+                        "ambiguous rather than guessed at")
     c.set_defaults(func=cmd_ci)
     m = sub.add_parser("mcnemar", help="exact paired test from the discordant counts")
     m.add_argument("b", type=int)

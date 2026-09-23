@@ -795,6 +795,50 @@ class PostTrainingClaims(unittest.TestCase):
 
 
 
+class StatsAtScale(unittest.TestCase):
+    """Both of these shipped and were found by running the tool on a full
+    benchmark. Every earlier use had n of 541 or less."""
+
+    def test_the_interval_survives_a_full_benchmark(self):
+        from groundwork import stats
+        lo, hi = stats.clopper_pearson(2302, 2638)      # raised OverflowError
+        self.assertAlmostEqual(lo, 0.859305, places=5)  # checked against scipy
+        self.assertAlmostEqual(hi, 0.885124, places=5)
+
+    def test_the_interval_survives_a_hundred_thousand_trials(self):
+        from groundwork import stats
+        lo, hi = stats.clopper_pearson(87_000, 100_000)
+        self.assertLess(lo, 0.87)
+        self.assertGreater(hi, 0.87)
+        self.assertLess(hi - lo, 0.01, "the interval should tighten with n")
+
+    def test_the_paired_test_survives_thousands_of_discordant_pairs(self):
+        from groundwork import stats
+        p = stats.mcnemar_exact(1200, 1300)             # int/int overflowed
+        self.assertGreater(p, 0.0)
+        self.assertLess(p, 0.1)
+        self.assertAlmostEqual(stats.mcnemar_exact(4, 7), 0.549, places=3)
+
+    def test_a_target_given_as_a_fraction_is_refused_not_guessed(self):
+        """It printed "the interval EXCLUDES 0.8682" about [85.93, 88.51]."""
+        from groundwork import stats
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = stats.main(["ci", "2302", "2638", "--against", "0.8682"])
+        self.assertEqual(rc, 2)
+        self.assertIn("ambiguous", out.getvalue())
+        self.assertIn("86.82", out.getvalue())
+        self.assertNotIn("EXCLUDES", out.getvalue())
+
+    def test_a_target_in_percent_is_answered_with_its_units(self):
+        from groundwork import stats
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            stats.main(["ci", "2302", "2638", "--against", "86.82"])
+        self.assertIn("contains 86.82%", out.getvalue())
+
+
+
 class Night(unittest.TestCase):
     """The property that matters is what did NOT run."""
 
