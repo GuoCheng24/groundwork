@@ -216,12 +216,12 @@ one stage at a time.
 
 | stage | ask for | the tool |
 |---|---|---|
-| deciding what to work on | the ceiling, the tuned baseline, a random arm, a positive control | [`groundwork gate`](../skills/00-gate/) |
-| the literature | who already occupies this claim, and can you tell | [`groundwork lit`](../skills/10-direction/) |
-| the experiment | a sealed pre-registration, then a launch across idle GPUs | [`groundwork prereg`](../skills/20-experiment/), `cluster` |
+| deciding what to work on | the ceiling, the tuned baseline, a random arm, a positive control | [`groundwork gate`](../groundwork/groundwork/skills/00-gate/) |
+| the literature | who already occupies this claim, and can you tell | [`groundwork lit`](../groundwork/skills/10-direction/) |
+| the experiment | a sealed pre-registration, then a launch across idle GPUs | [`groundwork prereg`](../groundwork/skills/20-experiment/), `cluster` |
 | the claims | three layers that are blind to different defects | [`doubleblind`](https://github.com/GuoCheng24/doubleblind) |
-| the paper | claims first, figures audited, tables generated | [`40-write`](../skills/40-write/) |
-| submission | hard specs as a file that fails; the rebuttal | [`50-submit`](../skills/50-submit/) |
+| the paper | claims first, figures audited, tables generated | [`40-write`](../groundwork/skills/40-write/) |
+| submission | hard specs as a file that fails; the rebuttal | [`50-submit`](../groundwork/skills/50-submit/) |
 
 The single highest-value habit: **ask it to do the cheap thing that could end
 the project, first.** An agent will happily spend your week building something
@@ -267,7 +267,7 @@ public package index are safe.
 
 **The environment is a silent variable.** Record the versions that produced a
 result, from the runtime rather than from memory — see
-[`../skills/20-experiment/hardware.md`](../skills/20-experiment/hardware.md),
+[`../skills/20-experiment/hardware.md`](../groundwork/skills/20-experiment/hardware.md),
 where the same weights and the same seed on two different GPUs scored 1.48
 points apart.
 
@@ -295,7 +295,7 @@ python -m groundwork cluster survey --nodes gpu01 gpu02 gpu03
 ## Where to go next
 
 - [`../README.md`](../README.md) — what this repository is for.
-- [`../skills/00-gate/SKILL.md`](../skills/00-gate/SKILL.md) — the four numbers
+- [`../groundwork/skills/00-gate/SKILL.md`](../groundwork/groundwork/skills/00-gate/SKILL.md) — the four numbers
   that decide whether a direction is worth a week. Read this one before you
   start anything.
 - [`../archive/causes-of-death.json`](../archive/causes-of-death.json) — ten ways

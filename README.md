@@ -80,13 +80,13 @@ pre-registered "clean hardware test" that was not clean until a control existed.
 
 | stage | what it decides | notes, each written from a failure |
 |---|---|---|
-| [`00-gate`](skills/00-gate/) | Gate — the four numbers that decide | [`breakthrough`](skills/00-gate/breakthrough.md) · [`ceiling-first`](skills/00-gate/ceiling-first.md) · [`metric-validity`](skills/00-gate/metric-validity.md) · [`positive-control`](skills/00-gate/positive-control.md) · [`two-toolboxes`](skills/00-gate/two-toolboxes.md) |
-| [`10-direction`](skills/10-direction/) | Direction — candidates, not ideas | [`kill-argument`](skills/10-direction/kill-argument.md) · [`lit-review`](skills/10-direction/lit-review.md) · [`occupancy`](skills/10-direction/occupancy.md) · [`originality`](skills/10-direction/originality.md) · [`venue-fit`](skills/10-direction/venue-fit.md) |
-| [`20-experiment`](skills/20-experiment/) | Experiment — sealed first, then launched | [`ablations`](skills/20-experiment/ablations.md) · [`data-hygiene`](skills/20-experiment/data-hygiene.md) · [`hardware`](skills/20-experiment/hardware.md) · [`implementation`](skills/20-experiment/implementation.md) · [`long-runs`](skills/20-experiment/long-runs.md) · [`shared-machine`](skills/20-experiment/shared-machine.md) |
-| [`30-claim`](skills/30-claim/) | Claim — three layers, blind to different things | [`citations`](skills/30-claim/citations.md) · [`integrity`](skills/30-claim/integrity.md) · [`review-loop`](skills/30-claim/review-loop.md) · [`statistics`](skills/30-claim/statistics.md) |
-| [`40-write`](skills/40-write/) | Write — from claims, not from results | [`build`](skills/40-write/build.md) · [`captions`](skills/40-write/captions.md) · [`claims`](skills/40-write/claims.md) · [`diagrams`](skills/40-write/diagrams.md) · [`figures`](skills/40-write/figures.md) · [`structure`](skills/40-write/structure.md) · [`theory`](skills/40-write/theory.md) |
-| [`50-submit`](skills/50-submit/) | Submit — and everything after | [`compliance`](skills/50-submit/compliance.md) · [`delivery`](skills/50-submit/delivery.md) · [`patent`](skills/50-submit/patent.md) · [`rebuttal`](skills/50-submit/rebuttal.md) · [`resubmit`](skills/50-submit/resubmit.md) · [`talks`](skills/50-submit/talks.md) |
-| [`90-memory`](skills/90-memory/) | Memory — the archive is the asset | [`postmortems`](skills/90-memory/postmortems.md) · [`wiki`](skills/90-memory/wiki.md) |
+| [`00-gate`](groundwork/groundwork/skills/00-gate/) | Gate — the four numbers that decide | [`breakthrough`](groundwork/groundwork/skills/00-gate/breakthrough.md) · [`ceiling-first`](groundwork/groundwork/skills/00-gate/ceiling-first.md) · [`metric-validity`](groundwork/groundwork/skills/00-gate/metric-validity.md) · [`positive-control`](groundwork/groundwork/skills/00-gate/positive-control.md) · [`two-toolboxes`](groundwork/groundwork/skills/00-gate/two-toolboxes.md) |
+| [`10-direction`](groundwork/skills/10-direction/) | Direction — candidates, not ideas | [`kill-argument`](groundwork/skills/10-direction/kill-argument.md) · [`lit-review`](groundwork/skills/10-direction/lit-review.md) · [`occupancy`](groundwork/skills/10-direction/occupancy.md) · [`originality`](groundwork/skills/10-direction/originality.md) · [`venue-fit`](groundwork/skills/10-direction/venue-fit.md) |
+| [`20-experiment`](groundwork/skills/20-experiment/) | Experiment — sealed first, then launched | [`ablations`](groundwork/skills/20-experiment/ablations.md) · [`data-hygiene`](groundwork/skills/20-experiment/data-hygiene.md) · [`hardware`](groundwork/skills/20-experiment/hardware.md) · [`implementation`](groundwork/skills/20-experiment/implementation.md) · [`long-runs`](groundwork/skills/20-experiment/long-runs.md) · [`shared-machine`](groundwork/skills/20-experiment/shared-machine.md) |
+| [`30-claim`](groundwork/skills/30-claim/) | Claim — three layers, blind to different things | [`citations`](groundwork/skills/30-claim/citations.md) · [`integrity`](groundwork/skills/30-claim/integrity.md) · [`review-loop`](groundwork/skills/30-claim/review-loop.md) · [`statistics`](groundwork/skills/30-claim/statistics.md) |
+| [`40-write`](groundwork/skills/40-write/) | Write — from claims, not from results | [`build`](groundwork/skills/40-write/build.md) · [`captions`](groundwork/skills/40-write/captions.md) · [`claims`](groundwork/skills/40-write/claims.md) · [`diagrams`](groundwork/skills/40-write/diagrams.md) · [`figures`](groundwork/skills/40-write/figures.md) · [`structure`](groundwork/skills/40-write/structure.md) · [`theory`](groundwork/skills/40-write/theory.md) |
+| [`50-submit`](groundwork/skills/50-submit/) | Submit — and everything after | [`compliance`](groundwork/skills/50-submit/compliance.md) · [`delivery`](groundwork/skills/50-submit/delivery.md) · [`patent`](groundwork/skills/50-submit/patent.md) · [`rebuttal`](groundwork/skills/50-submit/rebuttal.md) · [`resubmit`](groundwork/skills/50-submit/resubmit.md) · [`talks`](groundwork/skills/50-submit/talks.md) |
+| [`90-memory`](groundwork/skills/90-memory/) | Memory — the archive is the asset | [`postmortems`](groundwork/skills/90-memory/postmortems.md) · [`wiki`](groundwork/skills/90-memory/wiki.md) |
 
 ## The gate: four numbers, ten minutes, before anything
 
@@ -144,7 +144,7 @@ tuned**. Given the same budget, the final gain over that baseline was
 
 So the rule has a second half, and it is the half that matters: *the baseline
 gets the same tuning budget as the method.* A baseline nobody tried to make win
-is a strawman with error bars. See [`skills/00-gate/ceiling-first.md`](skills/00-gate/ceiling-first.md).
+is a strawman with error bars. See [`groundwork/skills/00-gate/ceiling-first.md`](groundwork/groundwork/skills/00-gate/ceiling-first.md).
 
 ## The archive: ten ways a direction dies
 
@@ -294,12 +294,12 @@ Not a bibliography — repositories where these rules run in CI on every push.
 
 ## Using it with your agent
 
-The stages are plain Markdown under [`skills/`](skills/) — no framework, no MCP
+The stages are plain Markdown under [`skills/`](groundwork/skills/) — no framework, no MCP
 server, no second subscription.
 
 - **Claude Code** — `ln -s .../groundwork/skills/* .claude/skills/`, then ask
   for a stage by name.
-- **Codex CLI** — `codex exec < skills/00-gate/SKILL.md` for a fresh session.
+- **Codex CLI** — `codex exec < groundwork/skills/00-gate/SKILL.md` for a fresh session.
 - **DeepSeek / Kimi / any OpenAI-compatible endpoint** — the skill file is the
   system prompt; the tools are shell commands.
 

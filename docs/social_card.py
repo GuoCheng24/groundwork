@@ -28,8 +28,8 @@ with open(ROOT / "archive" / "causes-of-death.json", encoding="utf-8") as fh:
 EARLY_STAGES = {"00-gate", "10-direction"}
 N_CAUSES = len(CAUSES)
 N_EARLY = sum(1 for c in CAUSES if c["gate"].split("/")[0] in EARLY_STAGES)
-N_STAGES = len(sorted(glob.glob(str(ROOT / "skills" / "*/"))))
-N_NOTES = len(glob.glob(str(ROOT / "skills" / "*" / "*.md")))
+N_STAGES = len(sorted(glob.glob(str(ROOT / "groundwork" / "skills" / "*/"))))
+N_NOTES = len(glob.glob(str(ROOT / "groundwork" / "skills" / "*" / "*.md")))
 N_TOOLS = len([f for f in glob.glob(str(ROOT / "groundwork" / "*.py"))
                if pathlib.Path(f).name not in ("__init__.py", "__main__.py", "cli.py")])
 

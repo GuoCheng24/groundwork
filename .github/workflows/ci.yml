@@ -34,6 +34,13 @@ jobs:
           mkdir -p /tmp/elsewhere && cd /tmp/elsewhere
           /tmp/fresh/bin/groundwork | head -3
           /tmp/fresh/bin/groundwork gate --baseline 0.50 --oracle 0.75 --se 0.011
+          # the stages must be inside the wheel: a stranger who cloned, installed
+          # and ran this from a project directory could not find them when they
+          # lived at the repository root, and this is the one command whose whole
+          # job is to attach the pipeline to an agent
+          /tmp/fresh/bin/groundwork install --list | grep -q 00-gate
+          /tmp/fresh/bin/groundwork install
+          test -L .claude/skills/groundwork-00-gate
           /tmp/fresh/bin/groundwork ledger kill --id ci --cause ceiling-too-low \
               --what "a check that the taxonomy ships with the package" \
               --settled-by "this step"
@@ -88,7 +95,7 @@ jobs:
                   if not c.get(k):
                       bad.append(f"{c['id']}: empty {k}")
               stage = c["gate"].split("/")[0]
-              if not os.path.isdir(os.path.join("skills", stage)):
+              if not os.path.isdir(os.path.join("groundwork", "skills", stage)):
                   bad.append(f"{c['id']}: gate {c['gate']} names no stage under skills/")
           print(f"{len(causes)} causes checked")
           if bad:
@@ -102,7 +109,7 @@ jobs:
           python - <<'PY'
           import glob, os, re, sys
           bad = []
-          for stage in sorted(glob.glob("skills/*/")):
+          for stage in sorted(glob.glob("groundwork/skills/*/")):
               main = os.path.join(stage, "SKILL.md")
               if not os.path.exists(main):
                   bad.append(f"{stage}: no SKILL.md"); continue
@@ -114,7 +121,7 @@ jobs:
                       continue
                   if name not in linked:
                       bad.append(f"{f} is not linked from {main}")
-          print(f"{len(glob.glob('skills/*/*.md'))} skill files checked")
+          print(f"{len(glob.glob('groundwork/groundwork/skills/*/*.md'))} skill files checked")
           if bad:
               print("\n".join(bad)); sys.exit(1)
           PY
@@ -124,7 +131,7 @@ jobs:
           python - <<'PY'
           import glob, sys
           bad = []
-          files = sorted(glob.glob("skills/*/SKILL.md"))
+          files = sorted(glob.glob("groundwork/skills/*/SKILL.md"))
           for f in files:
               s = open(f, encoding="utf-8").read()
               if not s.startswith("---\n"):

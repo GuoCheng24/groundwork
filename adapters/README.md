@@ -1,6 +1,6 @@
 # Adapters — the same stages, whichever agent you use
 
-The stages under [`skills/`](../skills/) are plain Markdown and the tools are
+The stages under [`skills/`](../groundwork/skills/) are plain Markdown and the tools are
 shell commands, so there is nothing to install into an agent. What differs is
 how you hand a stage to it, and — for the claim stage — how you get a reviewer
 that is genuinely a *different* model.
@@ -29,7 +29,7 @@ Agent(subagent_type='general-purpose',
 ## Codex CLI
 
 ```bash
-codex exec --skip-git-repo-check < skills/00-gate/SKILL.md
+codex exec --skip-git-repo-check < groundwork/skills/00-gate/SKILL.md
 codex exec --skip-git-repo-check < packet.md        # the claim stage's reviewer
 ```
 

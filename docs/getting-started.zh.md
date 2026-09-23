@@ -192,12 +192,12 @@ claude            # 或者 codex
 
 | 阶段 | 让它做什么 | 工具 |
 |---|---|---|
-| 决定做不做 | 天花板、**调过参的**平凡基线、随机臂、正对照 | [`groundwork gate`](../skills/00-gate/) |
-| 查文献 | 谁已经占了这个 claim，以及**你能不能判断** | [`groundwork lit`](../skills/10-direction/) |
-| 做实验 | 先封印预注册，再摊到空闲 GPU 上跑 | [`prereg`](../skills/20-experiment/) · `cluster` |
+| 决定做不做 | 天花板、**调过参的**平凡基线、随机臂、正对照 | [`groundwork gate`](../groundwork/groundwork/skills/00-gate/) |
+| 查文献 | 谁已经占了这个 claim，以及**你能不能判断** | [`groundwork lit`](../groundwork/skills/10-direction/) |
+| 做实验 | 先封印预注册，再摊到空闲 GPU 上跑 | [`prereg`](../groundwork/skills/20-experiment/) · `cluster` |
 | 定结论 | 三层互相看不见对方盲区的核查 | [`doubleblind`](https://github.com/GuoCheng24/doubleblind) |
-| 写论文 | 先 claim 再散文，图要审，表要生成 | [`40-write`](../skills/40-write/) |
-| 投稿 | 硬规格写成会失败的脚本；rebuttal | [`50-submit`](../skills/50-submit/) |
+| 写论文 | 先 claim 再散文，图要审，表要生成 | [`40-write`](../groundwork/skills/40-write/) |
+| 投稿 | 硬规格写成会失败的脚本；rebuttal | [`50-submit`](../groundwork/skills/50-submit/) |
 
 最值钱的一个习惯：**先让它做那件"可能直接终结这个课题"的便宜事。** agent 会非常
 乐意花你一周去建一个**天花板在第一天就是关着的**东西——不是它不小心，而是**没有
@@ -235,7 +235,7 @@ pip install -i <你的镜像> <包名>
 社区频道和公共包索引是安全的。
 
 **环境是个静默变量。** 产生结果的版本号要**从运行时读出来记下**，别凭记忆——见
-[`../skills/20-experiment/hardware.md`](../skills/20-experiment/hardware.md)：
+[`../skills/20-experiment/hardware.md`](../groundwork/skills/20-experiment/hardware.md)：
 同样的权重、同样的随机种子、贪心解码，**换一张显卡差了 1.48 个点**。
 
 ---
@@ -258,7 +258,7 @@ python -m groundwork cluster survey --nodes gpu01 gpu02 gpu03
 ## 接下来读什么
 
 - [`../README.md`](../README.md) —— 这个仓库是干什么的。
-- [`../skills/00-gate/SKILL.md`](../skills/00-gate/SKILL.md) —— 决定一个方向值不值
+- [`../groundwork/skills/00-gate/SKILL.md`](../groundwork/groundwork/skills/00-gate/SKILL.md) —— 决定一个方向值不值
   一周的那四个数。**动手之前先读这个。**
 - [`../archive/causes-of-death.json`](../archive/causes-of-death.json) —— 一个研究
   方向死掉的十种方式，以及各自那个能更早终结它的廉价检验。

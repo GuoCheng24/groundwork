@@ -32,4 +32,4 @@ groundwork = "groundwork.cli:main"
 packages = ["groundwork"]
 
 [tool.setuptools.package-data]
-groundwork = ["causes-of-death.json"]
+groundwork = ["causes-of-death.json", "skills/*/*.md"]

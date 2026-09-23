@@ -1,0 +1,96 @@
+{
+  "schema": "groundwork-archive/1",
+  "note": "How research directions actually die. Each entry is a way a project ended, the cheap test that would have ended it sooner, and where in the pipeline that test belongs. Drawn from directions that were pursued and abandoned in one research programme; the instances are stated as patterns rather than as project details, because the pattern is the part that transfers.",
+  "causes": [
+    {
+      "id": "ceiling-too-low",
+      "name": "The ceiling was never high enough",
+      "what_happened": "The method worked. It could not have mattered: an oracle with perfect access to the thing the method estimates gained 1.6 to 1.8 points over the trivial baseline, so the whole space available to any method was inside the noise.",
+      "cheap_test": "Before the first real experiment, measure the oracle ceiling and the strongest trivial baseline on the same split. Headroom is ceiling minus baseline.",
+      "gate": "00-gate/headroom",
+      "rule": "Below 2x headroom over the noise floor, do not start.",
+      "cost_when_missed": "weeks"
+    },
+    {
+      "id": "baseline-absorbs-it",
+      "name": "A thick trivial baseline absorbed the entire signal",
+      "what_happened": "A structured encoding reproduced across cohorts and looked like a finding. A dense local baseline with no structure at all reached the same number, so the structure was carrying nothing of its own.",
+      "cheap_test": "Tune the trivial baseline as hard as the proposed method, in the same pipeline, by the same person, before comparing.",
+      "gate": "00-gate/strongest-baseline",
+      "rule": "The baseline must be given the same regularisation search and the same budget. A baseline nobody tried to make win is not a baseline.",
+      "cost_when_missed": "weeks"
+    },
+    {
+      "id": "positive-control-collapsed",
+      "name": "The positive control collapsed",
+      "what_happened": "The main analysis returned a clean null. So did the positive control - the case where the effect is known to exist and must be recovered - which meant the null measured the pipeline, not the world.",
+      "cheap_test": "Run the positive control first. It is cheaper than the experiment and it tells you whether a null would mean anything.",
+      "gate": "00-gate/positive-control",
+      "rule": "A null result without a working positive control is not a result.",
+      "cost_when_missed": "the whole study"
+    },
+    {
+      "id": "reduces-to-known",
+      "name": "It reduced to a problem that is already solved",
+      "what_happened": "A failure mode that looked new turned out to be exactly a known balance condition under a change of variables; a statistical-computational gap collapsed back onto sparse PCA.",
+      "cheap_test": "Write the proposed quantity in the simplest equivalent form you can and search for that form, not for your framing of it.",
+      "gate": "10-direction/reduction-check",
+      "rule": "Before claiming a new phenomenon, try to reduce it to an old one and fail.",
+      "cost_when_missed": "weeks"
+    },
+    {
+      "id": "already-occupied",
+      "name": "Somebody published it, sometimes decades ago",
+      "what_happened": "A qualitative mechanism was occupied by a 2017 paper and its closed form by a 2003 one. A core idea was pre-announced in a section of a paper that had been cited but not read past the abstract.",
+      "cheap_test": "Occupancy search before the first experiment, on the mechanism rather than the application, including work old enough that nobody cites it any more.",
+      "gate": "10-direction/occupancy",
+      "rule": "Abstract-level search hits about 4% of what is already there. Fetch full text for the candidates that matter.",
+      "cost_when_missed": "days to weeks"
+    },
+    {
+      "id": "randomised-control-wins",
+      "name": "A random policy beat every learned one",
+      "what_happened": "Every learned repair strategy was compared against each other and looked ordered and sensible. Random assignment beat all of them.",
+      "cheap_test": "Add a shuffled or randomly assigned arm to the first comparison, not the last.",
+      "gate": "00-gate/random-arm",
+      "rule": "Every comparison of learned policies carries a random policy in the same table.",
+      "cost_when_missed": "weeks"
+    },
+    {
+      "id": "external-validation-collapsed",
+      "name": "It held internally and vanished externally",
+      "what_happened": "An interaction effect was strong in the development cohort and absent in the external one.",
+      "cheap_test": "Hold out the external cohort before looking at anything, and decide in advance what result would end the project.",
+      "gate": "20-experiment/preregister",
+      "rule": "The stopping rule is written before the data is seen, and it names the outcome that ends the project.",
+      "cost_when_missed": "months"
+    },
+    {
+      "id": "own-supplement",
+      "name": "The finding was already in our own supplementary material",
+      "what_happened": "A per-subgroup breakdown proposed as a new paper turned out to be a table in the supplement of a paper the same group had already published.",
+      "cheap_test": "Search your own prior output before your competitors'.",
+      "gate": "10-direction/occupancy",
+      "rule": "Self-occupancy is occupancy.",
+      "cost_when_missed": "days"
+    },
+    {
+      "id": "leakage-flattered-it",
+      "name": "The number was produced by leakage",
+      "what_happened": "A perfect discrimination figure came from selecting features on the full dataset before splitting it. Redone correctly, the effect went to chance.",
+      "cheap_test": "Move every selection, normalisation and threshold inside the cross-validation fold and re-run before believing anything above the field's usual ceiling.",
+      "gate": "30-claim/leakage",
+      "rule": "A result far better than the field's best is a leakage report until proven otherwise.",
+      "cost_when_missed": "a submission"
+    },
+    {
+      "id": "ceiling-is-a-smaller-venue",
+      "name": "It worked, and its ceiling was a smaller venue",
+      "what_happened": "A cheap certificate method genuinely worked; both routes to a flagship claim collapsed back onto things already known, leaving a solid but mid-tier paper.",
+      "cheap_test": "State the strongest sentence the result could support before running it, and ask which venue publishes that sentence.",
+      "gate": "10-direction/venue-fit",
+      "rule": "Decide the target venue from the strongest supportable claim, not from ambition. Re-decide when the claim changes.",
+      "cost_when_missed": "a rejection cycle"
+    }
+  ]
+}
