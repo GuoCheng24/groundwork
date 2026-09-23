@@ -67,13 +67,15 @@ PRIVATE = [
 # applied - so a file that is missing or empty reads as a narrower scan rather
 # than as a clean one.
 #
-# The patterns file is scanned like every other file, deliberately - writing the
-# secret itself in there instead of a regex is the obvious mistake, and a scan
-# that skipped its own configuration would be the one place it could hide. What
-# IS removed before scanning is the `regex` values themselves: a pattern written
-# to match another account's directory contains that directory's prefix by
-# construction, and a scanner that flags its own rules teaches you to turn it
-# off.
+# The patterns file is scanned like every other file, INCLUDING its own rules.
+# The tempting exemption - skip the `regex` values, since a pattern matching
+# another account's directory contains that prefix by construction - was tried
+# and was wrong: the file is committed, so a literal private prefix written
+# there IS the leak, and a separate pre-commit scan refused a commit that this
+# one had passed. Two guards disagreeing is a defect in whichever is laxer.
+#
+# Write each rule so the literal never appears: `/[p]ublic/[s]hare/[a-z]+/`
+# matches exactly the same text and spells none of it.
 PATTERNS_FILE = os.path.join("archive", "private-patterns.json")
 SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv", ".mypy_cache"}
 TEXT_EXT = {".md", ".py", ".sh", ".txt", ".json", ".yml", ".yaml", ".toml", ".cfg", ".tex"}
@@ -379,17 +381,6 @@ def check_raw_gitignored(root):
     return OK, f"{len(raw)} raw file(s), none of the large ones tracked", ""
 
 
-def _without_rules(text):
-    """The patterns file with its own `regex` values blanked out."""
-    try:
-        d = json.loads(text)
-    except ValueError:
-        return text
-    for row in d.get("patterns", []):
-        row.pop("regex", None)
-    return json.dumps(d, indent=1)
-
-
 def project_patterns(root):
     """Extra patterns this project declares. Returns (patterns, problems)."""
     f = os.path.join(root, PATTERNS_FILE)
@@ -431,8 +422,6 @@ def check_private(root):
                 text = fh.read(400_000)
         except OSError:
             continue
-        if os.path.abspath(f) == os.path.abspath(os.path.join(root, PATTERNS_FILE)):
-            text = _without_rules(text)
         found = []
         for pat, what in patterns:
             m = re.search(pat, text)

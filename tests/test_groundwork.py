@@ -614,12 +614,29 @@ class Check(unittest.TestCase):
                       "a clean scan must say what it scanned against")
         self.assertIn("none declared", row["detail"])
 
-    def test_the_pattern_file_does_not_match_its_own_rules(self):
-        """A scanner that flags its own configuration teaches you to turn it off."""
+    def test_a_rule_written_with_a_literal_prefix_is_itself_a_leak(self):
+        """The exemption that seemed obvious, and was wrong.
+
+        Skipping the `regex` values when scanning the patterns file lets a
+        literal private prefix sit in a committed file. A separate pre-commit
+        scan refused a commit this one had passed, and two guards disagreeing
+        is a defect in whichever is laxer.
+        """
+        d = self._proj()
+        literal = "/" + "/".join(["public", "share", "[a-z]+"]) + "/"
+        with open(os.path.join(d, "archive", "private-patterns.json"), "w",
+                  encoding="utf-8") as fh:
+            json.dump({"patterns": [{"regex": literal,
+                                     "what": "another account's directory"}]}, fh)
+        row = next(r for r in check.run(d) if r["check"] == "private")
+        self.assertEqual(row["verdict"], check.FAIL,
+                         "a literal private prefix in a committed rule was exempted")
+
+    def test_a_rule_written_with_character_classes_is_clean(self):
         d = self._proj()
         with open(os.path.join(d, "archive", "private-patterns.json"), "w",
                   encoding="utf-8") as fh:
-            json.dump({"patterns": [{"regex": "/" + "public/share/[a-z]+/",
+            json.dump({"patterns": [{"regex": r"/[p]ublic/[s]hare/[a-z]+/",
                                      "what": "another account's directory"}]}, fh)
         row = next(r for r in check.run(d) if r["check"] == "private")
         self.assertEqual(row["verdict"], check.OK, row["detail"])
