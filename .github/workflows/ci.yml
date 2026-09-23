@@ -64,10 +64,15 @@ jobs:
       - name: watch calls a job that died at once dead, not alive
         run: |
           mkdir -p /tmp/wproj && cd /tmp/wproj
+          # NOT `| tee`: a pipeline's status is the LAST command's, so piping
+          # through tee reports tee's success and hides the exit code being
+          # tested. This step failed that way on its first run.
           if python -m groundwork watch start --name dead --alive-after 3 --force \
-               -- python -c "raise SystemExit('weights not found')" | tee /tmp/w.txt; then
+               -- python -c "raise SystemExit('weights not found')" > /tmp/w.txt 2>&1; then
+            cat /tmp/w.txt
             echo "::error::a job that died before the check was reported as started"; exit 1
           fi
+          cat /tmp/w.txt
           grep -q "ALREADY GONE" /tmp/w.txt
           grep -q "weights not found" /tmp/w.txt
           test -f archive/runs/dead.DONE
@@ -77,9 +82,11 @@ jobs:
           cd /tmp/wproj
           python -m groundwork watch start --name oom --alive-after 2 --force \
             -- python -u -c "print('step 1'); raise MemoryError('CUDA out of memory')" || true
-          if python -m groundwork watch status --name oom | tee /tmp/o.txt; then
+          if python -m groundwork watch status --name oom > /tmp/o.txt 2>&1; then
+            cat /tmp/o.txt
             echo "::error::an OOM in the log was reported as a clean end"; exit 1
           fi
+          cat /tmp/o.txt
           grep -q "TROUBLE IN THE LOG" /tmp/o.txt
 
       # A sweep that reports a pass because there was nothing to check has told
@@ -88,12 +95,17 @@ jobs:
         run: |
           mkdir -p /tmp/cproj && cd /tmp/cproj
           python -m groundwork init --name ci
-          python -m groundwork check | tee /tmp/c.txt
+          python -m groundwork check > /tmp/c.txt; cat /tmp/c.txt
           grep -q "not applicable" /tmp/c.txt
           grep -q "is not a pass" /tmp/c.txt
-          if grep -qE "^  ok  " /tmp/c.txt; then
-            echo "::error::an empty project reported a pass"; exit 1
+          # The private scan legitimately passes on an empty project - it
+          # really did scan and find nothing. The gates must not: there is
+          # nothing for them to have looked at.
+          if grep -qE "^  ok +(gate|prereg|prereg-order|noise|ledger|runs) " /tmp/c.txt; then
+            echo "::error::a gate reported a pass with nothing to check"; exit 1
           fi
+          grep -qE "^  n/a +gate " /tmp/c.txt
+          grep -qE "^  n/a +prereg " /tmp/c.txt
 
       - name: check fails a project with results and no pre-registration
         run: |
@@ -117,14 +129,15 @@ jobs:
           # teaching that everything gets waived
           python -m groundwork gate --baseline 0.50 --oracle 0.75 --se 0.011 --record
           printf '{"prereg": "a demonstration, not a test against a threshold",\n "noise": "the comparison is bit-exact, not scored"}\n' > archive/waivers.json
-          python -m groundwork check | tee /tmp/c4.txt
+          python -m groundwork check > /tmp/c4.txt; cat /tmp/c4.txt
           grep -q "a demonstration, not a test against a threshold" /tmp/c4.txt
           grep -q "2 waived" /tmp/c4.txt
           grep -q "ok    gate" /tmp/c4.txt
 
       - name: probe says where it looked when it says not found
         run: |
-          python -m groundwork probe --root /nonexistent-root --search-seconds 5 | tee /tmp/p.txt
+          python -m groundwork probe --root /nonexistent-root --search-seconds 5 > /tmp/p.txt
+          cat /tmp/p.txt
           grep -q "statement about PATH" /tmp/p.txt
 
       - name: The exact tests reproduce published figures
@@ -132,7 +145,8 @@ jobs:
 
       - name: A scorer that never moves is reported as not moving
         run: |
-          python -m groundwork noise --n 3 --command 'python -c "print(\"acc 0.75\")"' | tee /tmp/n.txt
+          python -m groundwork noise --n 3 --command 'python -c "print(\"acc 0.75\")"' > /tmp/n.txt
+          cat /tmp/n.txt
           grep -q "Nothing moved" /tmp/n.txt
 
       - name: A scoring command that fails is not a measurement
