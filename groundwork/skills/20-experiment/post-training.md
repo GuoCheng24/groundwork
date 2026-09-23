@@ -84,8 +84,34 @@ lognormal with sigma 8, binary and 90%-sparse rewards at `G` from 2 to 64: the
 bound is never exceeded and is attained every time.
 
 If your advantages look explosive, the cause is elsewhere — the ratio above,
-the clip, the KL term, or a group of size 1 where the standard deviation is
-zero and you are dividing by an epsilon.
+the clip, or the KL term.
+
+## The case the bound does not cover: a group where every reward is equal
+
+All correct, or all wrong. On an easy prompt or an impossible one this is the
+common case, and it should contribute **nothing**: the variance is zero, so the
+normalisation is `0/0` and what happens next is decided by arithmetic rather
+than by the algorithm.
+
+Eight rollouts that all scored `0.7`, summed in a loop the way a reduction
+does: the mean lands one ulp high, the variance comes out **1.2e-32** instead
+of zero, and the advantage is the full **1.0**, with a sign chosen by rounding.
+A group that carries no information emits a unit-scale gradient.
+
+Two things make it hard to catch:
+
+- **it depends on the reward value.** Eight copies of `0.7` and of `0.1` do it;
+  `0.3`, `0.65` and `1/3` do not. So it appears on some prompts and not others,
+  which reads like a property of the data;
+- **it depends on your runtime.** CPython 3.12 gave `sum` compensated
+  summation, so the identical code returns exactly `0.0` there and `1.0` on
+  3.9. This was found by a test that passed on one and failed on the other.
+
+The fix is an epsilon in the **denominator** — `(r - mean) / (std + eps)`,
+which takes the same case to 1e-11 — and not a test for `std == 0`, which is
+the branch that never fires. Better still, **drop groups whose rewards are all
+equal before the normalisation**: that is what the epsilon is approximating,
+and it says so in the code.
 
 ## What to check, in order
 

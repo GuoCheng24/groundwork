@@ -624,10 +624,48 @@ class PostTrainingClaims(unittest.TestCase):
                 self.assertLessEqual(self._zmax(r), bound + 1e-9,
                                      f"a heavy tail exceeded the bound at G={G}")
 
-    def test_a_group_whose_rewards_are_all_equal_has_no_advantage_at_all(self):
-        """The failure mode the bound does not cover: zero variance, and an
-        epsilon in the denominator deciding the update."""
-        self.assertEqual(self._zmax([0.7] * 8), 0.0)
+    @staticmethod
+    def _zmax_naive(rewards):
+        """The same thing with a plain accumulation loop, which is what a
+        framework's reduction does."""
+        G = len(rewards)
+        acc = 0.0
+        for x in rewards:
+            acc += x
+        m = acc / G
+        var = sum((x - m) ** 2 for x in rewards) / G
+        if var == 0:
+            return 0.0
+        return max(abs(x - m) for x in rewards) / math.sqrt(var)
+
+    def test_a_group_of_equal_rewards_can_emit_a_unit_advantage_from_rounding(self):
+        """The case the bound does not protect you from, and it is common.
+
+        A group where every rollout got the same reward - all correct, or all
+        wrong - should contribute nothing. Its variance is zero, so the
+        normalisation is 0/0, and what your framework does there is decided by
+        arithmetic rather than by the algorithm.
+
+        Eight copies of 0.7, accumulated in a loop: the mean lands one ulp
+        high, the variance is 1.2e-32 instead of 0, and the advantage comes out
+        at the full 1.0 with a sign chosen by rounding. Whether it happens
+        depends on the reward value AND on the Python version - 3.12 gave
+        `sum` compensated summation, so the same code returns exactly 0 there
+        and 1.0 on 3.9. This test failed in CI on 3.9 and passed on 3.13.
+        """
+        self.assertEqual(self._zmax_naive([0.3] * 8), 0.0)      # no error, by luck
+        self.assertEqual(self._zmax_naive([0.7] * 8), 1.0,
+                         "the trap this documents has stopped reproducing; "
+                         "check the note still says something true")
+        # and the mitigation: an epsilon in the denominator, not a zero test
+        G = 8
+        acc = 0.0
+        for x in [0.7] * G:
+            acc += x
+        m = acc / G
+        var = sum((x - m) ** 2 for x in [0.7] * G) / G
+        adv = max(abs(x - m) for x in [0.7] * G) / (math.sqrt(var) + 1e-6)
+        self.assertLess(adv, 1e-9, "an epsilon in the denominator must kill it")
 
     def test_the_note_states_the_bound_it_is_guarded_against(self):
         p = os.path.join(ROOT, "groundwork", "skills", "20-experiment", "post-training.md")
