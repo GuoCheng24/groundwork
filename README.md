@@ -451,6 +451,20 @@ arms of a benchmark reproduction, gate chain and all.
 And when every step passes, the report says so in the only way that is true:
 *the commands succeeded, which is not the same as the result being right.*
 
+To be told rather than to remember, `--notify` takes a shell command:
+
+```bash
+groundwork night run plan.txt --notify 'curl -sf -X POST "$WEBHOOK" -d "$GROUNDWORK_SUMMARY"'
+```
+
+No messaging vendor is built in — a webhook is a `curl`, a message is a
+`mail`, a desktop bell is a `notify-send`, and a tool that ships one
+integration ships a token to store and a vendor to follow. The command is
+handed the verdict in its environment, **and its exit code is reported**: a
+notification that fails silently is worse than none, because you are then
+waiting for a message that is not coming, and the file that would have told you
+is the one you have stopped checking.
+
 ---
 
 ## The claim stage: three layers, blind to different things
@@ -531,6 +545,7 @@ is careful work and worth using:
 | Overleaf **sync** specifically | **yes** | no — the editor's API is not covered; the LaTeX and Word production path is, in much more depth |
 | **renting GPUs** — vast.ai, Modal, a serverless backend | **yes** | no, and deliberately: this has never been run here, and a file written from a vendor's documentation would be the one file in this repository not backed by something that happened. `cluster` assumes you can ssh to a GPU; if you cannot, ARIS covers that and this does not |
 | **installable as a plugin** | yes | **yes**, and from one source: the Claude Code and Codex manifests point at the *same* seven stage files, so there is no mirror to fall behind |
+| **being told when it ends** | `feishu-notify` | `night --notify` takes any shell command — a webhook is a `curl` — and **reports the notification's own exit code**, because a message that failed silently leaves you waiting for one that is not coming |
 | **submission portals** — the field that picks your reviewers, eligibility rules, what anonymity actually leaks | — | **yes** |
 | slides, posters, talks | **yes** | **yes**, two files: the talk, and the production discipline — a deck was 17 pages in one renderer and 11 in another, and the converter is usually installed but not where a plain lookup finds it |
 | theory track | `proof-orchestrator`, `proof-writer` | **yes**, one file: attack a *stated* open problem, and the three ways a result turns out to be known |

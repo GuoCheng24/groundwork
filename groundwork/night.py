@@ -25,6 +25,15 @@ A plan is a text file, one step per line:
     groundwork night run plan.txt
     groundwork night report                # what happened, and what to decide
 
+    groundwork night run plan.txt --notify \\
+        'curl -sf -X POST "$WEBHOOK" -d "$GROUNDWORK_SUMMARY"'
+
+No messaging vendor is built in: a webhook is a `curl`, and a tool that ships
+one integration ships a token to store. The command gets the verdict in its
+environment, and its exit code is reported - a notification that failed
+silently is worse than none, because you are then waiting for a message that
+is not coming.
+
 What you read in the morning is `archive/night/<run>/REPORT.md`: what ran, how
 long each step took, where it stopped, and the lines from the log that say why.
 A night that ends at a gate is the night working.
@@ -89,6 +98,36 @@ def _why(lines):
     return hits[-8:] or lines[-6:]
 
 
+def notify(command, env, where):
+    """Run the user's notification command, and say if it failed.
+
+    No vendor is built in. A webhook is a `curl`, a message is a `mail`, a
+    desktop bell is a `notify-send` - all of them are one shell command, and a
+    tool that ships one integration ships a token to store and a vendor to
+    follow. What it does instead is hand the command five environment
+    variables and report its exit code, because **a notification that failed
+    silently is worse than none**: you are now waiting for a message that is
+    never coming, and the flag file that would have told you is the thing you
+    stopped checking.
+
+    The flag file and the report remain the durable record. This is the
+    convenience on top of them, not a replacement.
+    """
+    e = dict(os.environ)
+    e.update(env)
+    try:
+        rc = subprocess.call(command, shell=True, env=e)
+    except OSError as exc:
+        print(f"  notification could not run: {exc}", file=sys.stderr)
+        return 1
+    if rc != 0:
+        print(f"  NOTIFICATION FAILED (exit {rc}). Nothing was sent, so the only\n"
+              f"  record of this night is {where} - go and read it.", file=sys.stderr)
+    else:
+        print(f"  notified: {command.split()[0]}")
+    return rc
+
+
 def cmd_run(a):
     try:
         steps = parse(a.plan)
@@ -150,6 +189,14 @@ def cmd_run(a):
         json.dump(record, fh, indent=1)
     report = write_report(out, record)
     print(f"\n{report}")
+    if a.notify:
+        summary = (f"night {run}: STOPPED at [{stopped}]" if stopped
+                   else f"night {run}: all {len(steps) - start_at} step(s) passed")
+        notify(a.notify, {"GROUNDWORK_RUN": run,
+                          "GROUNDWORK_STATUS": "stopped" if stopped else "ok",
+                          "GROUNDWORK_STEP": stopped or "",
+                          "GROUNDWORK_REPORT": os.path.abspath(report),
+                          "GROUNDWORK_SUMMARY": summary}, report)
     if stopped:
         print(f"\nThe night stopped at [{stopped}]. That is the tool working: the step\n"
               "exited non-zero and nothing downstream ran on top of it.")
@@ -225,6 +272,12 @@ def main(argv=None):
     r.add_argument("--from", dest="start_from", metavar="STEP",
                    help="resume from this step, after fixing what stopped it")
     r.add_argument("--dry-run", action="store_true")
+    r.add_argument("--notify", metavar="CMD",
+                   help="shell command to run when the night ends. It is given "
+                        "GROUNDWORK_RUN, GROUNDWORK_STATUS (ok|stopped), "
+                        "GROUNDWORK_STEP, GROUNDWORK_REPORT and GROUNDWORK_SUMMARY, "
+                        "and its exit code is reported - a notification that fails "
+                        "silently is worse than none")
     r.set_defaults(func=cmd_run)
     p = sub.add_parser("report", help="read the morning report")
     p.add_argument("--name")

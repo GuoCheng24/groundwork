@@ -757,6 +757,26 @@ class Night(unittest.TestCase):
         plan = self._plan("# a night\n\n[a] one\n   # indented comment\n[b] two\n")
         self.assertEqual([n for n, _c in night.parse(plan)], ["a", "b"])
 
+    def test_a_notification_that_failed_says_so(self):
+        """A notification that fails silently is worse than none: you then wait
+        for a message that is not coming, and stop checking the file that
+        would have told you."""
+        plan = self._plan(f'[a] {sys.executable} -c "pass"\n')
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            rc, out = self._run(["run", plan, "--name", "n5", "--notify", "exit 7"])
+        self.assertEqual(rc, 0, "a failed notification must not fail the night")
+        self.assertIn("NOTIFICATION FAILED", err.getvalue())
+        self.assertIn("REPORT.md", err.getvalue(), "it must say where to look instead")
+
+    def test_the_notification_is_given_the_verdict(self):
+        plan = self._plan(f'[gate] {sys.executable} -c "raise SystemExit(1)"\n')
+        seen = os.path.join(self.d, "sent.txt")
+        self._run(["run", plan, "--name", "n6", "--notify",
+                   f'printf "%s|%s" "$GROUNDWORK_STATUS" "$GROUNDWORK_STEP" > {seen}'])
+        with open(seen, encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), "stopped|gate")
+
     def test_a_plan_with_no_steps_is_refused(self):
         plan = self._plan("# only comments\n")
         with self.assertRaises(ValueError):
