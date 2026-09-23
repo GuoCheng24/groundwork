@@ -53,7 +53,9 @@ read the state letter in `/proc/<pid>/stat` and treat `Z` as dead.
   shards restarted at different points then take the same item while a third is
   taken by nobody — silently, because each shard file looks complete alone;
 - when merging shards, fail on an id whose copies disagree, naming the field.
-  That is a real problem, not a tidying job.
+  That is a real problem, not a tidying job — `groundwork shard merge` does it,
+  and also reports a total short of what was expected, which is the only trace
+  a shard that died leaves behind.
 
 ## Clocks
 

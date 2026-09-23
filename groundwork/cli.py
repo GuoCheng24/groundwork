@@ -15,9 +15,10 @@ COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "
             "lit": "lit", "ledger": "ledger",
             "stats": "stats", "noise": "noise",
             "init": "scaffold", "install": "attach",
-            "watch": "watch", "probe": "probe", "check": "check"}
+            "watch": "watch", "probe": "probe", "check": "check",
+            "shard": "shard"}
 
-USAGE = """usage: groundwork {init,install,check,gate,lit,prereg,probe,cluster,watch,stats,noise,ledger,reach} ...
+USAGE = """usage: groundwork {init,install,check,gate,lit,prereg,probe,cluster,shard,watch,stats,noise,ledger,reach} ...
 
   check    run every gate over a project at once; `n/a` is reported, not passed
   gate     refuse a direction whose ceiling, baseline or controls already answer it
@@ -25,6 +26,7 @@ USAGE = """usage: groundwork {init,install,check,gate,lit,prereg,probe,cluster,w
            committed before the results it governs
   probe    what this machine can actually do, including what is installed off PATH
   cluster  survey idle GPUs across nodes, pick the ones that fit, plan shards
+  shard    own items so a restart loses none, and merge without hiding a clash
   reach    classify what this machine can actually fetch, and through which door
   lit      literature grounding and occupancy search that can be checked
   ledger   record what died and what got through, and roll it up

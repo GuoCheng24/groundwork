@@ -80,6 +80,15 @@ Three habits, each learnt by losing a night:
   two shards restarted at different points then take the same item while a third
   is taken by nobody — silently, because every shard file looks complete alone.
 
+```bash
+groundwork shard plan --items 2638 --shards 5      # sizes, and that line in place
+groundwork shard merge 'out_s*.jsonl' --expect 2638
+```
+
+`merge` exits non-zero on two different answers for one id — naming the fields
+that differ — and on a total short of what was expected, which is what a shard
+that died leaves behind.
+
 ## 4. Launch it so that it outlives this session
 
 ```bash

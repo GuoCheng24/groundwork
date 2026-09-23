@@ -140,6 +140,26 @@ jobs:
           cat /tmp/p.txt
           grep -q "statement about PATH" /tmp/p.txt
 
+      # The failure this exists for is silent: a shard that died leaves a hole
+      # no shard file reports, and a disagreement gets deduped away. Both must
+      # exit non-zero.
+      - name: shard merge refuses a hole and a disagreement
+        run: |
+          mkdir -p /tmp/sproj && cd /tmp/sproj
+          printf '{"id":"q1","ans":"A"}\n' > a.jsonl
+          printf '{"id":"q2","ans":"B"}\n' > b.jsonl
+          python -m groundwork shard merge a.jsonl b.jsonl --expect 2 -o merged.jsonl
+          test "$(wc -l < merged.jsonl)" = "2"
+          if python -m groundwork shard merge a.jsonl b.jsonl --expect 3 > /tmp/s1.txt 2>&1; then
+            cat /tmp/s1.txt; echo "::error::a missing item was merged silently"; exit 1
+          fi
+          grep -q "SHORT BY 1" /tmp/s1.txt
+          printf '{"id":"q1","ans":"DIFFERENT"}\n' > c.jsonl
+          if python -m groundwork shard merge a.jsonl c.jsonl > /tmp/s2.txt 2>&1; then
+            cat /tmp/s2.txt; echo "::error::two answers for one id were deduped"; exit 1
+          fi
+          grep -q "DIFFERENT CONTENT" /tmp/s2.txt
+
       - name: The exact tests reproduce published figures
         run: python -m groundwork stats selftest
 

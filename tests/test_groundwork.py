@@ -21,6 +21,7 @@ from groundwork import attach, cluster, ledger, noise, reach, scaffold, stats  #
 from groundwork import lit  # noqa: E402
 from groundwork import check  # noqa: E402
 from groundwork import probe  # noqa: E402
+from groundwork import shard  # noqa: E402
 from groundwork import watch  # noqa: E402
 from groundwork import prereg  # noqa: E402
 from groundwork import gate as gate_mod  # noqa: E402
@@ -656,6 +657,118 @@ class Probe(unittest.TestCase):
         t = probe.tools(extra=["git", "git"], roots=["/nonexistent-xyz"], budget=5)
         names = [x["name"] for x in t["on_path"]] + t["absent"]
         self.assertEqual(len(names), len(set(names)))
+
+
+
+class Shard(unittest.TestCase):
+    """Ownership, and the restart that silently loses items."""
+
+    def test_ownership_is_a_partition_of_the_full_list(self):
+        items = list(range(2638))
+        parts = [shard.owned(items, i, 5) for i in range(5)]
+        flat = [x for p in parts for x in p]
+        self.assertEqual(sorted(flat), items)
+        self.assertEqual(len(flat), len(set(flat)), "an item is owned twice")
+
+    def test_slicing_after_the_done_filter_loses_and_duplicates_items(self):
+        """The bug this tool exists for, demonstrated rather than asserted.
+
+        Two shards restart at different points. Slicing the REMAINING items
+        makes ownership depend on progress; slicing the full list does not.
+        """
+        items = list(range(20))
+        done = {0: set(range(0, 8)), 1: set(range(0, 3))}   # shard 0 got further
+
+        wrong = {}
+        for i in (0, 1):
+            remaining = [x for x in items if x not in done[i]]
+            wrong[i] = set(remaining[i::2])
+        overlap = wrong[0] & wrong[1]
+        covered = wrong[0] | wrong[1] | done[0] | done[1]
+        self.assertTrue(overlap, "the wrong order should produce items owned twice")
+        self.assertTrue(set(items) - covered, "the wrong order should orphan items")
+
+        right = {i: set(shard.owned(items, i, 2)) for i in (0, 1)}
+        self.assertEqual(right[0] & right[1], set(), "correct order overlapped")
+        self.assertEqual(right[0] | right[1], set(items), "correct order orphaned an item")
+
+    def test_a_shard_index_out_of_range_is_refused(self):
+        with self.assertRaises(ValueError):
+            shard.owned([1, 2, 3], 5, 5)
+        with self.assertRaises(ValueError):
+            shard.owned([1, 2, 3], -1, 3)
+
+    def test_merge_refuses_two_answers_for_one_item(self):
+        d = tempfile.mkdtemp()
+        a = os.path.join(d, "a.jsonl")
+        b = os.path.join(d, "b.jsonl")
+        with open(a, "w", encoding="utf-8") as fh:
+            fh.write('{"id":"q1","ans":"A"}\n')
+        with open(b, "w", encoding="utf-8") as fh:
+            fh.write('{"id":"q1","ans":"B"}\n')
+        rows, clashes, _ = shard.merge([a, b])
+        self.assertEqual(len(clashes), 1)
+        self.assertEqual(clashes[0][3], ["ans"], "the clash must name the field")
+        self.assertEqual(shard.main(["merge", a, b]), 1)
+
+    def test_an_identical_duplicate_is_not_a_clash(self):
+        """Shard files are often pre-seeded with what an earlier run produced,
+        so the same id legitimately appears twice. Only disagreement is a
+        problem."""
+        d = tempfile.mkdtemp()
+        a, b = (os.path.join(d, n) for n in ("a.jsonl", "b.jsonl"))
+        for p in (a, b):
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write('{"id":"q1","ans":"A"}\n')
+        rows, clashes, _ = shard.merge([a, b])
+        self.assertEqual(clashes, [])
+        self.assertEqual(len(rows), 1)
+
+    def test_a_hole_is_reported_because_no_shard_file_shows_it(self):
+        d = tempfile.mkdtemp()
+        a = os.path.join(d, "a.jsonl")
+        with open(a, "w", encoding="utf-8") as fh:
+            fh.write('{"id":"q1"}\n{"id":"q2"}\n')
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = shard.main(["merge", a, "--expect", "5"])
+        self.assertEqual(rc, 1)
+        self.assertIn("SHORT BY 3", out.getvalue())
+
+    def test_more_items_than_expected_is_also_refused(self):
+        d = tempfile.mkdtemp()
+        a = os.path.join(d, "a.jsonl")
+        with open(a, "w", encoding="utf-8") as fh:
+            fh.write('{"id":"q1"}\n{"id":"q2"}\n')
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = shard.main(["merge", a, "--expect", "1"])
+        self.assertEqual(rc, 1)
+        self.assertIn("MORE THAN EXPECTED", out.getvalue())
+
+    def test_own_skips_what_is_done_without_changing_what_is_owned(self):
+        d = tempfile.mkdtemp()
+        allf = os.path.join(d, "all.jsonl")
+        with open(allf, "w", encoding="utf-8") as fh:
+            for i in range(20):
+                fh.write(json.dumps({"id": f"q{i}"}) + "\n")
+        donef = os.path.join(d, "done.jsonl")
+        with open(donef, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"id": "q3"}) + "\n")     # q3 is shard 3 of 5's
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            shard.main(["own", "--items", allf, "--shard", "3/5", "--done", donef])
+        self.assertIn("owns 4 of 20", out.getvalue())
+        self.assertIn("1 already done", out.getvalue())
+        self.assertIn("3 to do", out.getvalue())
+
+    def test_plan_states_the_rule_that_has_to_be_in_the_harness(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            shard.main(["plan", "--items", "100", "--shards", "4"])
+        text = out.getvalue()
+        self.assertIn("BEFORE the already-done filter", text)
+        self.assertIn("[25, 25, 25, 25]", text)
 
 
 

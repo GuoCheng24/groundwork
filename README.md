@@ -44,6 +44,7 @@ Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 | `groundwork prereg` | a pre-registration that version control says is younger than its own results |
 | `groundwork probe` | `which` answering for `PATH` and being read as an answer about the machine, and a filesystem crawl that did not finish being read as an absence |
 | `groundwork cluster` | a card whose free memory is somebody else's leftovers, and one arm split across two GPU models |
+| `groundwork shard` | work split so that a restart takes an item twice or not at all, and a merge that quietly keeps one of two different answers for the same item |
 | `groundwork watch` | a run that was never alive, an empty log read as silence rather than buffering, and a watch that dies with the session that set it up |
 | `groundwork ledger` | a cause of death that is free text nobody can count |
 | `groundwork stats` | the exact interval, the exact paired test, the smallest effect the split can resolve, and BH against BY — so nobody re-implements them |
@@ -295,6 +296,30 @@ which is where `probe` looks first.
 The third block is the one that reopens work. "No root, so no containers" was
 written down here as a constraint and was simply false: unprivileged user
 namespaces, `bwrap` and `fuse-overlayfs` were all available.
+
+### Split it so a restart loses nothing
+
+```console
+$ groundwork shard merge 'out_s*.jsonl' --expect 2638
+  out_s0.jsonl: 528 rows
+  ...
+1595 distinct id(s)
+
+SHORT BY 1043: expected 2638. A shard that died leaves a hole that no file
+reports, because every shard file is complete on its own.
+```
+
+The rule is one line, and it is the whole tool: **slice the item list before
+filtering out what is already done.** Slice afterwards and ownership depends on
+how far each shard happened to get — restart two shards at different points and
+they take the same item while a third is taken by nobody. Nothing errors, and
+every shard file is internally consistent. `shard plan` prints that line in the
+shape your harness needs it, and a test demonstrates the wrong order producing
+both the overlap and the orphan rather than asserting that it would.
+
+`merge` refuses two different answers for one id, naming the fields that
+differ. That is not a duplicate to be deduped: two runs produced different
+answers, and which one survives depends on the order the files were listed in.
 
 ### Then launch it so that it outlives the session
 
