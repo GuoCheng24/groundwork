@@ -18,6 +18,17 @@ one was detectable before the first real experiment.
 **Nothing below asks what the proposed method is.** A gate that knows what you
 are hoping for is not a gate.
 
+## Start the project empty
+
+```bash
+groundwork init --name "the direction, in a sentence"
+```
+
+It writes a project document whose **first section is these four measurements,
+left blank**. An empty gate section is the signal that work has not started, and
+a project document whose first page is a plan rather than a measurement is how a
+closed ceiling goes unnoticed until session ten.
+
 ## The four measurements
 
 Run these on the same split, in the same pipeline, before anything else.

@@ -13,9 +13,12 @@ Any difference between two arms smaller than that spread is not a finding about
 the arms. Before comparing anything:
 
 ```bash
-# score the same output N times; report the spread per metric
-python scorer_noise.py --responses generations.jsonl --n 10
+groundwork noise --n 10 --command 'python score.py --in generations.jsonl'
 ```
+
+The command is expected to print `name value` lines; `noise` reports the spread
+per metric and says which ones moved. Ten is the default because **three runs of
+one real scorer said it was stable and ten said it was not**.
 
 If the scorer involves a language detector, a tokeniser with a global random
 state, or a model call, assume it moves until measured.
@@ -26,9 +29,17 @@ BH controls FDR under independence and under positive regression dependence.
 Under **correlated two-sided** tests — which is exactly what a few hundred
 correlated features and two-sided comparisons give you — that guarantee does not
 hold. Use **BY**, **e-BH**, or **knockoffs** when you need the guarantee, and
-say which.
+say which. `groundwork stats fdr` prints both and refuses to let the difference
+go unnoticed.
 
 ## 3. Exact tests at small n, and report the counts
+
+```bash
+groundwork stats ci 69 80 --against 94.8     # exact interval, and the verdict it supports
+groundwork stats mcnemar 4 7                 # exact paired test from the counts
+groundwork stats mde --se 0.019              # what this split can resolve
+groundwork stats fdr pvalues.txt             # BH and BY side by side
+```
 
 At small n, report the discordant counts, not only a p-value: *b = 2, c = 2,
 exact two-sided p = 1.000* tells a reader what happened; "n.s." does not. Use

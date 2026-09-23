@@ -15,7 +15,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from groundwork import cluster, ledger, reach  # noqa: E402
+from groundwork import attach, cluster, ledger, noise, reach, scaffold, stats  # noqa: E402
 from groundwork import lit  # noqa: E402
 from groundwork import prereg  # noqa: E402
 from groundwork.gate import detectable_effect, required_se, verdict  # noqa: E402
@@ -296,6 +296,109 @@ class Reach(unittest.TestCase):
     def test_the_default_target_list_covers_the_indexes_the_pipeline_needs(self):
         for host in ("api.openalex.org", "arxiv.org", "doi.org"):
             self.assertIn(host, reach.DEFAULT_TARGETS)
+
+
+class Stats(unittest.TestCase):
+    """Checked against figures an independent implementation published."""
+
+    def test_selftest_passes(self):
+        self.assertEqual(stats._selftest(), 0)
+
+    def test_the_interval_is_exact_not_normal(self):
+        # at the end of the range the normal approximation goes outside [0, 1]
+        lo, hi = stats.clopper_pearson(80, 80)
+        self.assertEqual(hi, 1.0)
+        self.assertGreater(lo, 0.95)
+
+    def test_by_is_never_more_liberal_than_bh(self):
+        ps = [0.0001, 0.006, 0.02, 0.04, 0.2, 0.9]
+        self.assertTrue(stats.benjamini_yekutieli(ps) <= stats.benjamini_hochberg(ps))
+
+    def test_mcnemar_with_no_discordant_pairs_is_one(self):
+        self.assertEqual(stats.mcnemar_exact(0, 0), 1.0)
+
+    def test_the_two_arms_of_the_real_comparison_reproduce(self):
+        """The numbers this repository quotes elsewhere, recomputed here."""
+        self.assertEqual(tuple(round(v * 100, 2) for v in stats.clopper_pearson(69, 80)),
+                         (76.73, 92.93))
+        self.assertEqual(tuple(round(v * 100, 2) for v in stats.clopper_pearson(72, 80)),
+                         (81.24, 95.58))
+        self.assertAlmostEqual(stats.mcnemar_exact(4, 7), 0.5488, places=4)
+
+
+class Noise(unittest.TestCase):
+    def test_name_value_lines_are_parsed(self):
+        self.assertEqual(noise.parse("accuracy 0.75\nn 541"), {"accuracy": 0.75, "n": 541.0})
+
+    def test_a_flat_json_object_is_parsed(self):
+        self.assertEqual(noise.parse('{"acc": 0.5, "name": "x", "ok": true}'), {"acc": 0.5})
+
+    def test_prose_is_ignored_rather_than_guessed_at(self):
+        self.assertEqual(noise.parse("scoring 541 prompts, please wait"), {})
+
+    def test_a_scorer_that_moves_is_reported_and_one_that_does_not_is_not(self):
+        import io
+        from contextlib import redirect_stdout
+
+        def run(cmd):
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = noise.main(["--n", "4", "--command", cmd])
+            return rc, buf.getvalue()
+
+        rc, out = run(f'{sys.executable} -c "print(\'acc 0.75\')"')
+        self.assertEqual(rc, 0)
+        self.assertIn("Nothing moved", out)
+
+        rc, out = run(f'{sys.executable} -c "import random;'
+                      f' print(f\'acc {{random.choice([0.75, 0.76])}}\')"')
+        self.assertEqual(rc, 0)
+
+    def test_a_command_that_fails_is_not_a_measurement(self):
+        rc = noise.main(["--n", "2", "--command", f'{sys.executable} -c "import sys;sys.exit(3)"'])
+        self.assertEqual(rc, 2)
+
+
+class Scaffold(unittest.TestCase):
+    def test_the_gate_section_comes_first_and_is_empty(self):
+        d = tempfile.mkdtemp()
+        self.assertEqual(scaffold.main(["--dir", d, "--name", "t"]), 0)
+        body = open(os.path.join(d, "PROJECT.md"), encoding="utf-8").read()
+        first = [ln for ln in body.splitlines() if ln.startswith("## ")][0]
+        self.assertIn("gate", first.lower(),
+                      "the first section of a project document must be the gate")
+        self.assertIn("|  |  |", body.replace(" | | |", " |  |  |"),
+                      "the gate table must ship empty")
+
+    def test_it_refuses_to_overwrite_without_force(self):
+        d = tempfile.mkdtemp()
+        self.assertEqual(scaffold.main(["--dir", d]), 0)
+        self.assertEqual(scaffold.main(["--dir", d]), 1)
+        self.assertEqual(scaffold.main(["--dir", d, "--force"]), 0)
+
+    def test_raw_generations_are_gitignored_but_scored_tables_are_not(self):
+        d = tempfile.mkdtemp()
+        scaffold.main(["--dir", d])
+        gi = open(os.path.join(d, ".gitignore"), encoding="utf-8").read()
+        self.assertIn("generations*.jsonl", gi)
+        self.assertNotIn("per_prompt", gi)
+
+
+class Attach(unittest.TestCase):
+    def test_every_stage_is_discoverable_with_a_title(self):
+        found = attach.stages()
+        self.assertGreaterEqual(len(found), 7)
+        for name, title, _d, _notes in found:
+            self.assertTrue(title, f"{name} has no title line")
+
+    def test_linking_is_idempotent(self):
+        d = tempfile.mkdtemp()
+        self.assertEqual(attach.main(["--dir", d]), 0)
+        first = sorted(os.listdir(os.path.join(d, ".claude", "skills")))
+        self.assertEqual(attach.main(["--dir", d]), 0)
+        self.assertEqual(sorted(os.listdir(os.path.join(d, ".claude", "skills"))), first)
+        self.assertTrue(all(os.path.islink(os.path.join(d, ".claude", "skills", n))
+                            for n in first), "stages must be linked, not copied")
 
 
 if __name__ == "__main__":

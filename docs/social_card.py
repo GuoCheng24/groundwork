@@ -30,6 +30,8 @@ N_CAUSES = len(CAUSES)
 N_EARLY = sum(1 for c in CAUSES if c["gate"].split("/")[0] in EARLY_STAGES)
 N_STAGES = len(sorted(glob.glob(str(ROOT / "skills" / "*/"))))
 N_NOTES = len(glob.glob(str(ROOT / "skills" / "*" / "*.md")))
+N_TOOLS = len([f for f in glob.glob(str(ROOT / "groundwork" / "*.py"))
+               if pathlib.Path(f).name not in ("__init__.py", "__main__.py", "cli.py")])
 
 ACCENT = "#1f6f6b"
 WARN = "#b4562a"
@@ -48,7 +50,7 @@ def chart(ax, accent):
             family=SANS, va="center")
     ax.text(x0 + 2.55, 2.16, "the stage other pipelines skip",
             fontsize=34, color=INK, family=SANS, va="center")
-    ax.text(x0, 1.30, f"{N_STAGES} stages, {N_NOTES} notes, 6 tools, no dependencies",
+    ax.text(x0, 1.30, f"{N_STAGES} stages, {N_NOTES} notes, {N_TOOLS} tools, no dependencies",
             fontsize=34, color=MUTE, family=SANS, va="center")
 
 

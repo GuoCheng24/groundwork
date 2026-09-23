@@ -50,6 +50,31 @@ jobs:
             exit 1
           fi
 
+
+      - name: The exact tests reproduce published figures
+        run: python -m groundwork stats selftest
+
+      - name: A scorer that never moves is reported as not moving
+        run: |
+          python -m groundwork noise --n 3 --command 'python -c "print(\"acc 0.75\")"' | tee /tmp/n.txt
+          grep -q "Nothing moved" /tmp/n.txt
+
+      - name: A scoring command that fails is not a measurement
+        run: |
+          if python -m groundwork noise --n 2 --command 'python -c "import sys;sys.exit(3)"'; then
+            echo "::error::a failing scorer was accepted as a measurement"; exit 1
+          fi
+
+      - name: init scaffolds a project whose gate section is first and empty
+        run: |
+          mkdir -p /tmp/proj && cd /tmp/proj
+          python -m groundwork init --name "ci"
+          test -d prereg && test -d archive
+          head -20 PROJECT.md | grep -q "The gate"
+
+      - name: install lists every stage
+        run: python -m groundwork install --list | grep -c "^  [0-9]" | grep -q 7
+
       - name: The archive is well-formed and every cause names a gate
         run: |
           python - <<'PY'

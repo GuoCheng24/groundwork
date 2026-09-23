@@ -13,6 +13,14 @@ Most research memory systems record what worked. The expensive knowledge is in
 what did not, and *why*, because that is what stops the same good idea being
 re-proposed by the same good taste four months later.
 
+```bash
+groundwork ledger kill   --id <slug> --cause <from the closed taxonomy> \
+    --what "..." --settled-by "..." --reopen-if "..."
+groundwork ledger defect --id <slug> --missed-by mechanical|reviewer|figure|both \
+    --what "..." --why "..." --check "..."
+groundwork ledger roll
+```
+
 ## Three files, three jobs
 
 **`archive/`** — one entry per direction that died. Verdict, cause (from

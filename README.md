@@ -35,14 +35,18 @@ Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 > disconnects while the CLI on the same machine is fine, and how to share a GPU
 > node with people who are not you.
 
-| command | what it refuses |
+| command | what it does, or refuses |
 |---|---|
+| `groundwork init` | starts a project whose first section is the gate, **left empty on purpose** |
 | `groundwork gate` | a direction whose ceiling, baseline, random arm or positive control already answers it |
 | `groundwork lit` | an occupancy verdict when the index that would have found the competitor did not answer |
 | `groundwork prereg` | a pre-registration that version control says is younger than its own results |
 | `groundwork cluster` | a card whose free memory is somebody else's leftovers, and one arm split across two GPU models |
 | `groundwork ledger` | a cause of death that is free text nobody can count |
+| `groundwork stats` | the exact interval, the exact paired test, the smallest effect the split can resolve, and BH against BY — so nobody re-implements them |
+| `groundwork noise` | a difference being quoted without the spread of the instrument that produced it |
 | `groundwork reach` | a bot-challenge page being read as a paper |
+| `groundwork install` | attaches the stages to Claude Code, Codex, or anything that reads Markdown |
 | [`doubleblind`](https://github.com/GuoCheng24/doubleblind) | a number that exists in no file, a brief that tells the reviewer what to conclude, a caption nobody can read |
 
 Every one of those refusals exists because the unrefused version shipped.

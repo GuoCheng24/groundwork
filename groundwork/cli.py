@@ -11,9 +11,11 @@ import importlib
 import sys
 
 COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "reach",
-            "lit": "lit", "ledger": "ledger"}
+            "lit": "lit", "ledger": "ledger",
+            "stats": "stats", "noise": "noise",
+            "init": "scaffold", "install": "attach"}
 
-USAGE = """usage: groundwork {gate,prereg,cluster,reach,lit,ledger} ...
+USAGE = """usage: groundwork {init,install,gate,lit,prereg,cluster,stats,noise,ledger,reach} ...
 
   gate     refuse a direction whose ceiling, baseline or controls already answer it
   prereg   scaffold, seal and verify a pre-registration - including that it was
@@ -22,6 +24,10 @@ USAGE = """usage: groundwork {gate,prereg,cluster,reach,lit,ledger} ...
   reach    classify what this machine can actually fetch, and through which door
   lit      literature grounding and occupancy search that can be checked
   ledger   record what died and what got through, and roll it up
+  stats    the exact tests the stages ask for: intervals, paired tests, power, FDR
+  noise    how much your scorer moves on a file that never changes
+  init     start a project whose first section is the gate, and which is empty
+  install  attach the stages to Claude Code, Codex, or anything that reads Markdown
 
 `groundwork <command> --help` for each."""
 
