@@ -8,7 +8,9 @@ also decoration.
 import contextlib
 import io
 import json
+import math
 import os
+import random
 import subprocess
 import sys
 import tempfile
@@ -581,6 +583,58 @@ class Check(unittest.TestCase):
             check.CHECKS = saved
         self.assertEqual(row["verdict"], check.FAIL)
         self.assertIn("the check itself raised", row["detail"])
+
+
+
+class PostTrainingClaims(unittest.TestCase):
+    """The one claim in 20-experiment/post-training.md that is an identity
+    rather than a measurement, guarded so it cannot rot.
+
+    Every other number in that file lives in a published repository; this one
+    is checkable here, so it is checked here.
+    """
+
+    @staticmethod
+    def _zmax(rewards):
+        G = len(rewards)
+        m = sum(rewards) / G
+        var = sum((x - m) ** 2 for x in rewards) / G
+        if var == 0:
+            return 0.0
+        return max(abs(x - m) for x in rewards) / math.sqrt(var)
+
+    def test_group_normalised_advantage_is_bounded_by_sqrt_g_minus_one(self):
+        rnd = random.Random(0)
+        for G in (2, 4, 8, 16, 64):
+            bound = math.sqrt(G - 1)
+            # the extreme configuration attains it, for any outlier size
+            self.assertAlmostEqual(self._zmax([1e9] + [0.0] * (G - 1)), bound, places=6)
+            for _ in range(2000):
+                kind = rnd.choice("clpbs")
+                if kind == "c":        # Cauchy
+                    r = [math.tan(math.pi * (rnd.random() - 0.5)) for _ in range(G)]
+                elif kind == "l":      # Pareto, infinite mean
+                    r = [rnd.paretovariate(0.5) for _ in range(G)]
+                elif kind == "p":      # lognormal, sigma 8
+                    r = [math.exp(rnd.gauss(0, 8)) for _ in range(G)]
+                elif kind == "b":
+                    r = [rnd.choice([-1.0, 1.0]) for _ in range(G)]
+                else:
+                    r = [0.0 if rnd.random() < 0.9 else rnd.gauss(0, 1) for _ in range(G)]
+                self.assertLessEqual(self._zmax(r), bound + 1e-9,
+                                     f"a heavy tail exceeded the bound at G={G}")
+
+    def test_a_group_whose_rewards_are_all_equal_has_no_advantage_at_all(self):
+        """The failure mode the bound does not cover: zero variance, and an
+        epsilon in the denominator deciding the update."""
+        self.assertEqual(self._zmax([0.7] * 8), 0.0)
+
+    def test_the_note_states_the_bound_it_is_guarded_against(self):
+        p = os.path.join(ROOT, "groundwork", "skills", "20-experiment", "post-training.md")
+        with open(p, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("sqrt(G - 1)", text)
+        self.assertIn("Cauchy", text)
 
 
 

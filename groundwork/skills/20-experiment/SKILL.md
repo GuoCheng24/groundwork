@@ -142,6 +142,7 @@ the arms.
 ## In this stage
 
 - [`long-runs.md`](long-runs.md) — the loop has to survive the session that started it
+- [`post-training.md`](post-training.md) — the importance ratio that moves when the policy did not, and the bound that says your advantages cannot be the problem
 - [`hardware.md`](hardware.md) — the card is a variable, and it is worth 1.48 points
 - [`shared-machine.md`](shared-machine.md) — sharing a cluster with people who are not you
 - [`data-hygiene.md`](data-hygiene.md) — the preprocessing that silently happens twice
