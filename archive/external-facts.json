@@ -48,13 +48,13 @@
   },
   {
    "id": "ledger_findings",
-   "value": 21,
-   "rendered": "21 real defects",
+   "value": 22,
+   "rendered": "22 real defects",
    "what": "defects recorded in the doubleblind ledger",
    "repo": "doubleblind",
    "path": "ledger/findings.json",
    "derive": "len(findings)",
-   "as_of": "dc43b96f45e57e0a17e95c9218e7205eb880399b",
+   "as_of": "6dbdb72702020b1b3e966a0ff94bd3e500beed3f",
    "used_in": "README.md"
   },
   {
@@ -65,7 +65,7 @@
    "repo": "doubleblind",
    "path": "ledger/findings.json",
    "derive": "count(findings where caught_by == 'human eye')",
-   "as_of": "dc43b96f45e57e0a17e95c9218e7205eb880399b",
+   "as_of": "6dbdb72702020b1b3e966a0ff94bd3e500beed3f",
    "used_in": "README.md"
   }
  ]
