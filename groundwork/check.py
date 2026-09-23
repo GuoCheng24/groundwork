@@ -47,6 +47,12 @@ WAIVERS = os.path.join("archive", "waivers.json")
 # Anything that should never reach a public repository. Each is a pattern plus
 # what it would leak; all of these have been found in a tracked file at least
 # once, which is why the list is short and specific rather than a regex zoo.
+# Entries are (pattern, description) or (pattern, description, line_veto).
+# A veto is for the patterns that cannot be decided from the match alone: a
+# four-part version of one of the CUDA wheels is, character for character, a
+# valid address in the 10/8 range. The only discriminator is the line it sits
+# on. An earlier version of this shipped with a matrix that tested a version
+# beginning with 12 and therefore never saw it.
 PRIVATE = [
     (r"/(?:public|home|Users)/[a-z][a-z0-9_.-]{2,}/", "an absolute home path, which names the account"),
     (r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b", "a session id"),
@@ -59,7 +65,12 @@ PRIVATE = [
     # that cries wolf on a version pin is a check that gets turned off - found
     # by running an early version of this over five repositories, where the one
     # and only hit was a package version.
-    (r"(?<![\d.])(?:10\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)|172\.(?:1[6-9]|2\d|3[01])\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)|192\.168\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d))(?![\d.])", "an internal (RFC1918) address"),
+    (r"(?<![\d.])(?:10\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)|172\.(?:1[6-9]|2\d|3[01])\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)|192\.168\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d))(?![\d.])",
+     "an internal (RFC1918) address",
+     # A requirements pin is not an address. This costs a real address that
+     # happens to share a line with a version comparison, which has not
+     # happened; crying wolf on every `pip freeze` had, in two repositories.
+     r"(?:==|>=|<=|~=|!=)"),
 ]
 # What counts as private is partly project-specific: a cluster's node names, an
 # internal ticket prefix, a collaborator's initials. A project declares its own
@@ -423,11 +434,18 @@ def check_private(root):
         except OSError:
             continue
         found = []
-        for pat, what in patterns:
-            m = re.search(pat, text)
-            if m:
+        for entry in patterns:
+            pat, what = entry[0], entry[1]
+            veto = entry[2] if len(entry) > 2 else None
+            for m in re.finditer(pat, text):
+                start = text.rfind("\n", 0, m.start()) + 1
+                end = text.find("\n", m.end())
+                line_text = text[start:end if end != -1 else len(text)]
+                if veto and re.search(veto, line_text):
+                    continue
                 line = text[:m.start()].count("\n") + 1
                 found.append(f"{os.path.relpath(f, root)}:{line} {what}")
+                break
         # all of them, not the first: a file that leaks a node name and an
         # internal address has two problems, and fixing the one that happened
         # to sort first leaves the report looking the same next run

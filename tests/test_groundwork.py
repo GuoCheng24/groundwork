@@ -11,6 +11,7 @@ import json
 import math
 import os
 import random
+import re
 import subprocess
 import sys
 import tempfile
@@ -690,15 +691,25 @@ class Check(unittest.TestCase):
         Found by running an early four-number pattern over five repositories:
         the one and only hit in any of them was `nvidia-cublas-cu12==12.8.4.1`.
         """
-        rx = next(p for p, w in check.PRIVATE if "RFC1918" in w)
+        entry = next(e for e in check.PRIVATE if "RFC1918" in e[1])
+        rx, veto = entry[0], entry[2]
+
+        def flagged(line):
+            m = re.search(rx, line)
+            return bool(m) and not re.search(veto, line)
+
         for s_ in (f"ssh {_addr(10, 0, 0, 5)}",
                    f"gateway {_addr(192, 168, 1, 1)}",
                    f"at {_addr(172, 20, 3, 44)}",
                    f"http://{_addr(192, 168, 0, 7)}:8080/x",
                    f"({_addr(10, 1, 2, 3)})",
                    _addr(10, 255, 255, 255)):
-            self.assertRegex(s_, rx, f"missed a real internal address in {s_!r}")
+            self.assertTrue(flagged(s_), f"missed a real internal address in {s_!r}")
         for s_ in (f"nvidia-cublas-cu12=={_addr(12, 8, 4, 1)}",
+                   # the one that got through: a version pin whose first
+                   # component is 10, so it IS a valid 10/8 address
+                   f"nvidia-curand-cu12=={_addr(10, 3, 9, 90)}",
+                   f"nvidia-cusparse-cu12=={_addr(192, 168, 5, 7)}",
                    f"version {_addr(10, 2, 3, 4, 5)}",
                    _addr(1, 10, 0, 1),
                    _addr(192, 169, 1, 1),
@@ -707,7 +718,7 @@ class Check(unittest.TestCase):
                    f"cuda {_addr(12, 8, 90)}",
                    f"torch {_addr(2, 13, 0)}",
                    f"v{_addr(10, 0, 0, 1, 2)}"):
-            self.assertNotRegex(s_, rx, f"cried wolf on {s_!r}")
+            self.assertFalse(flagged(s_), f"cried wolf on {s_!r}")
 
     def test_a_check_that_raises_is_a_failure_not_a_pass(self):
         broken = [("boom", "does it explode", lambda root: 1 / 0)]
