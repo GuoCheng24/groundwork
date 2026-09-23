@@ -1,0 +1,18 @@
+{
+  "name": "groundwork",
+  "description": "A research pipeline for Codex CLI whose first stage can return NO-GO. The same seven stage files the Claude Code plugin uses - there is no separate mirror to drift out of sync - plus command-line tools for the parts that are not advice.",
+  "author": {
+    "name": "Guo Cheng",
+    "url": "https://github.com/GuoCheng24"
+  },
+  "homepage": "https://github.com/GuoCheng24/groundwork",
+  "repository": "https://github.com/GuoCheng24/groundwork",
+  "license": "MIT",
+  "keywords": ["research", "pre-registration", "reproducibility", "experiments", "paper", "codex"],
+  "skills": "./groundwork/skills/",
+  "interface": {
+    "displayName": "groundwork",
+    "shortDescription": "The research stage that returns NO-GO, in ten minutes, before the night is spent",
+    "developerName": "GuoCheng24"
+  }
+}

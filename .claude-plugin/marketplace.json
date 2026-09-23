@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "groundwork",
+  "owner": {
+    "name": "Guo Cheng",
+    "url": "https://github.com/GuoCheng24"
+  },
+  "metadata": {
+    "description": "groundwork - the research pipeline with the stage every other toolkit is missing: one that returns NO-GO, in ten minutes, before the night is spent."
+  },
+  "plugins": [
+    {
+      "name": "groundwork",
+      "source": "./",
+      "description": "Seven gated research stages as skills, each written from a failure that actually happened. The command-line tools (gate, prereg, cluster, shard, watch, probe, check, stats, noise, ledger, lit, reach) install separately with `pip install groundwork-research`, and the skills tell you when to reach for each.",
+      "author": {
+        "name": "Guo Cheng",
+        "url": "https://github.com/GuoCheng24"
+      },
+      "homepage": "https://github.com/GuoCheng24/groundwork",
+      "license": "MIT",
+      "keywords": ["research", "pre-registration", "reproducibility", "experiments", "paper"]
+    }
+  ]
+}

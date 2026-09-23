@@ -19,6 +19,17 @@ git clone https://github.com/GuoCheng24/groundwork && cd groundwork
 python -m groundwork gate --baseline 0.812 --oracle 0.830 --se 0.019      # NO-GO, in ten seconds
 ```
 
+**As a plugin**, inside Claude Code — the seven stages, no clone, no `PATH`:
+
+```
+/plugin marketplace add GuoCheng24/groundwork
+/plugin install groundwork
+```
+
+Codex CLI reads the **same seven files** rather than a parallel mirror, so the
+two cannot drift apart. Add the tools with `pip install groundwork-research`;
+the stages tell you when to reach for each, and work without them.
+
 Python 3.9+, **no dependencies**, nothing to configure. Works with Claude Code,
 Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 
@@ -474,6 +485,8 @@ is careful work and worth using:
 | paper compilation and reference style | **yes** | **yes**, and two files deeper: the failures that *compile cleanly* — a centred over-wide table that never warns, a font declaration that never reaches the preamble, a bibliography hyphen that is not a hyphen |
 | **producing the Word copy** — where a starred table vanishes without a trace, and why extracting the XML text cannot see it | — | **yes** |
 | Overleaf **sync** specifically | **yes** | no — the editor's API is not covered; the LaTeX and Word production path is, in much more depth |
+| **renting GPUs** — vast.ai, Modal, a serverless backend | **yes** | no, and deliberately: this has never been run here, and a file written from a vendor's documentation would be the one file in this repository not backed by something that happened. `cluster` assumes you can ssh to a GPU; if you cannot, ARIS covers that and this does not |
+| **installable as a plugin** | yes | **yes**, and from one source: the Claude Code and Codex manifests point at the *same* seven stage files, so there is no mirror to fall behind |
 | **submission portals** — the field that picks your reviewers, eligibility rules, what anonymity actually leaks | — | **yes** |
 | slides, posters, talks | **yes** | **yes**, two files: the talk, and the production discipline — a deck was 17 pages in one renderer and 11 in another, and the converter is usually installed but not where a plain lookup finds it |
 | theory track | `proof-orchestrator`, `proof-writer` | **yes**, one file: attack a *stated* open problem, and the three ways a result turns out to be known |

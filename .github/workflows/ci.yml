@@ -191,6 +191,47 @@ jobs:
       # not existed since `skills/` moved into the package - including every
       # link in the first stage's row. A dead link on the front page is the
       # first thing a visitor finds.
+      # The manifests point at ./groundwork/skills, which is not where a plugin
+      # normally keeps them. A path that stops resolving installs a plugin with
+      # no skills in it and says nothing.
+      - name: The plugin manifests match what is on disk
+        run: |
+          python - <<'PY'
+          import json, os, re, sys
+          bad = []
+          for man in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json"):
+              d = json.load(open(man))
+              if not d.get("name"):
+                  bad.append(f"{man}: no name")
+              p = d.get("skills")
+              if not p:
+                  bad.append(f"{man}: declares no skills path"); continue
+              path = os.path.normpath(p.lstrip("./"))
+              if not os.path.isdir(path):
+                  bad.append(f"{man}: skills -> {p} does not exist"); continue
+              subs = [x for x in sorted(os.listdir(path)) if os.path.isdir(os.path.join(path, x))]
+              if len(subs) != 7:
+                  bad.append(f"{man}: {len(subs)} stage(s) behind that path, expected 7")
+              for sname in subs:
+                  sk = os.path.join(path, sname, "SKILL.md")
+                  if not os.path.exists(sk):
+                      bad.append(f"{man}: {sname} has no SKILL.md"); continue
+                  head = open(sk, encoding="utf-8").read(600)
+                  if not head.startswith("---\n"):
+                      bad.append(f"{sk}: no frontmatter")
+                  if not re.search(r"^name:\s*\S", head, re.M):
+                      bad.append(f"{sk}: no name in frontmatter")
+              print(f"{man}: {len(subs)} stage(s)")
+          m = json.load(open(".claude-plugin/marketplace.json"))
+          for pl in m["plugins"]:
+              src = os.path.normpath(pl["source"].lstrip("./") or ".")
+              if not os.path.exists(os.path.join(src, ".claude-plugin", "plugin.json")):
+                  bad.append(f"marketplace: source {pl['source']} has no plugin manifest")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          print("manifests consistent")
+          PY
+
       - name: Every relative link resolves
         run: |
           python - <<'PY'
