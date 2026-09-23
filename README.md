@@ -60,7 +60,7 @@ Every one of those refusals exists because the unrefused version shipped.
    └────────────────────── 90-memory: the archive of what died, and why ──────────┘
 ```
 
-Seven stages, forty-seven files. Each stage decides whether you are allowed into
+Seven stages, 49 files. Each stage decides whether you are allowed into
 the next one: a menu asks you to know which skill to call, a gate tells you.
 
 Every file carries the failure that produced its rules, because the rules are
@@ -328,13 +328,13 @@ is careful work and worth using:
 | **producing the Word copy** — where a starred table vanishes without a trace, and why extracting the XML text cannot see it | — | **yes** |
 | Overleaf **sync** specifically | **yes** | no — the editor's API is not covered; the LaTeX and Word production path is, in much more depth |
 | **submission portals** — the field that picks your reviewers, eligibility rules, what anonymity actually leaks | — | **yes** |
-| slides, posters, talks | **yes** | **yes**, with the rendering discipline — a deck was 17 pages in one renderer and 11 in another |
+| slides, posters, talks | **yes** | **yes**, two files: the talk, and the production discipline — a deck was 17 pages in one renderer and 11 in another, and the converter is usually installed but not where a plain lookup finds it |
 | theory track | `proof-orchestrator`, `proof-writer` | **yes**, one file: attack a *stated* open problem, and the three ways a result turns out to be known |
 | grant proposals | **yes** | **yes** — the gate applied before the proposal, "why you" as a checkable question, and the preliminary result that was designed to be reportable either way |
 | **handing a manuscript to a human collaborator** — tracked-change formatting regressions, orphaned equation objects, reference-manager fields, metadata that leaks through the explanation document | — | **yes**, from a manuscript delivered round after round and found unclean each time |
 | **caption audit** — panel letters, a stated direction that is backwards, a colour encoding that contradicts the discussion | — | **yes** |
 
-| patents | five skills | one skill, written from a live prosecution |
+| patents | five skills | **two**, from a live prosecution: the four orderings that cannot be undone, and the disclosure document an attorney actually drafts from |
 
 **If you already use ARIS, the useful move is not to switch.** Run
 `groundwork gate` before its pipeline starts, and the `30-claim` layers before
