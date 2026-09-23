@@ -166,13 +166,57 @@ def cmd_seal(a):
     return 0
 
 
+def find_seal(path, seal=None):
+    """Where the seal actually is.
+
+    Deriving exactly one filename and reporting "no seal" when it is not there
+    accused a sealed pre-registration of being unsealed: the sidecar was
+    `prereg_fullset.sha256` and this looked for `PREREG_fullset.sha256`. A
+    seal can also live in a later document that names this file and quotes its
+    digest - an amendment does that, and it is the stronger form, because the
+    reference sits in the record next to the reason.
+
+    A digest inside the document itself is NOT a seal: a file cannot contain
+    its own digest, so one appearing there belongs to something else.
+    """
+    if seal:
+        return seal if os.path.exists(seal) else None
+    d = os.path.dirname(os.path.abspath(path)) or "."
+    base = os.path.basename(path)
+    stem = os.path.splitext(base)[0].lower()
+    try:
+        entries = sorted(os.listdir(d))
+    except OSError:
+        return None
+    for cand in entries:
+        if cand.lower().endswith(".sha256") and \
+                os.path.splitext(cand)[0].lower().lstrip("_-") == stem.lstrip("_-"):
+            return os.path.join(d, cand)
+    digest = sha256_of(path)
+    for cand in entries:
+        c = os.path.join(d, cand)
+        if not cand.lower().endswith(".md") or os.path.samefile(c, path):
+            continue
+        try:
+            with open(c, encoding="utf-8", errors="replace") as fh:
+                other = fh.read(200_000)
+        except OSError:
+            continue
+        for m in re.finditer(r"\b[0-9a-f]{64}\b", other):
+            window = other[max(0, m.start() - 300):m.end() + 300]
+            if base in window and m.group(0) == digest:
+                return c
+    return None
+
+
 def cmd_verify(a):
     problems, notes = [], []
     text = open(a.path, encoding="utf-8").read()
 
-    seal = a.seal or (os.path.splitext(a.path)[0] + ".sha256")
-    if os.path.exists(seal):
-        want = open(seal, encoding="utf-8").read().split()[0]
+    seal = find_seal(a.path, a.seal)
+    if seal:
+        with open(seal, encoding="utf-8") as fh:
+            want = next((w for w in fh.read().split() if len(w) == 64), "")
         got = sha256_of(a.path)
         if got != want:
             problems.append(f"the document has changed since it was sealed\n"
@@ -180,13 +224,24 @@ def cmd_verify(a):
         else:
             notes.append(f"hash matches {seal}")
     else:
-        problems.append(f"no seal at {seal} - run `prereg seal` and commit it")
+        problems.append(
+            f"no seal found for {os.path.basename(a.path)} - looked for a "
+            f"`.sha256` sidecar beside it (any case) and for a later document "
+            f"quoting its digest. Run `prereg seal {a.path}` and commit it")
 
     have = sections(text)
     for name, why in REQUIRED:
         match = next((k for k in have if k.lower().startswith(name.lower()[:18])), None)
         if match is None:
-            problems.append(f"missing section {name!r} - {why}")
+            # "missing" is an accusation. A document written to another
+            # template has the section under a name this does not recognise,
+            # and saying it is absent sends the author looking for something
+            # they already wrote. Say what was looked for and what is there.
+            problems.append(
+                f"no section named {name!r} - {why}. "
+                f"This document has {len(have)}"
+                + (f" ({', '.join(sorted(have)[:3])}...)" if have else "")
+                + "; if one of them answers this, rename it so the check can see it")
         elif not _filled(have[match]):
             problems.append(f"section {name!r} is still the template - {why}")
     if have:

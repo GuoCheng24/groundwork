@@ -160,52 +160,11 @@ def _has_results(root):
 
 
 def _seal_for(path, text):
-    """Find the seal, wherever it was put.
-
-    A seal has to be **outside** the document: a file cannot contain its own
-    digest. So a sha256 appearing in the text is a digest of something else -
-    the dataset, the scorer, the pre-registration this one amends - and taking
-    it as a self-seal passes an unsealed plan. It did, here, until the sweep
-    was checked against a document whose inline digest belonged to its
-    predecessor.
-
-    Two places are valid: the sidecar `prereg seal` writes, and a quotation in
-    a later document that names this file. The second is the stronger one.
-    """
-    base = os.path.basename(path)
-    stem = os.path.splitext(base)[0].lower()
-    d = os.path.dirname(os.path.abspath(path)) or "."
-    for cand in os.listdir(d):
-        if cand.lower().endswith(".sha256") and \
-                os.path.splitext(cand)[0].lower().lstrip("_-") in (stem, stem.lstrip("_-")):
-            return os.path.join(d, cand)
-    # A seal can live in a later document. An amendment that opens by naming
-    # the plan it amends and quoting its digest has sealed it more strongly
-    # than a sidecar does: the reference is in the record next to the reason.
-    digest = _sha256(path)
-    for cand in sorted(os.listdir(d)):
-        c = os.path.join(d, cand)
-        if not cand.lower().endswith(".md") or os.path.samefile(c, path):
-            continue
-        try:
-            with open(c, encoding="utf-8", errors="replace") as fh:
-                other = fh.read(200_000)
-        except OSError:
-            continue
-        for m in re.finditer(r"\b[0-9a-f]{64}\b", other):
-            window = other[max(0, m.start() - 300):m.end() + 300]
-            if base in window and m.group(0) == digest:
-                return f"quoted in {cand}"
-    return None
-
-
-def _sha256(path):
-    h = hashlib.sha256()
-    with open(path, "rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 16), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
+    """One implementation, in prereg. Two tools in one package disagreeing
+    about whether a file is sealed is a defect in whichever is laxer, and that
+    happened: this one looked properly while `prereg verify` derived a single
+    filename and reported a sealed document as unsealed."""
+    return prereg.find_seal(path)
 
 def check_prereg(root):
     files = sorted(glob.glob(os.path.join(root, "prereg", "PREREG*.md")))

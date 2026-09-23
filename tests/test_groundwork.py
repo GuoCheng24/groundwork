@@ -1052,6 +1052,69 @@ class Probe(unittest.TestCase):
 
 
 
+class Seals(unittest.TestCase):
+    """`prereg verify` said a sealed pre-registration was unsealed, because it
+    derived one filename and the sidecar was written in another case. `check`
+    had already learnt to look properly; two tools in one package disagreeing
+    about the same file is a defect in whichever is laxer."""
+
+    def _doc(self, d, name="PREREG_x.md", body="# p\n\n## What changes\n\nthe budget\n"):
+        os.makedirs(os.path.join(d, "prereg"), exist_ok=True)
+        p = os.path.join(d, "prereg", name)
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        return p
+
+    def test_a_sidecar_in_another_case_is_still_the_seal(self):
+        from groundwork import prereg as pr
+        d = tempfile.mkdtemp()
+        p = self._doc(d)
+        with open(os.path.join(d, "prereg", "prereg_x.sha256"), "w", encoding="utf-8") as fh:
+            fh.write(f"{pr.sha256_of(p)}  PREREG_x.md\n")
+        self.assertIsNotNone(pr.find_seal(p))
+
+    def test_a_later_document_quoting_the_digest_is_a_seal(self):
+        from groundwork import prereg as pr
+        d = tempfile.mkdtemp()
+        p = self._doc(d)
+        with open(os.path.join(d, "prereg", "PREREG_y.md"), "w", encoding="utf-8") as fh:
+            fh.write(f"This amends `PREREG_x.md`, sha256 `{pr.sha256_of(p)}`.\n")
+        self.assertIn("PREREG_y.md", pr.find_seal(p))
+
+    def test_a_stale_quoted_digest_is_not_a_seal(self):
+        from groundwork import prereg as pr
+        d = tempfile.mkdtemp()
+        p = self._doc(d)
+        with open(os.path.join(d, "prereg", "PREREG_y.md"), "w", encoding="utf-8") as fh:
+            fh.write("This amends `PREREG_x.md`, sha256 `" + "a" * 64 + "`.\n")
+        self.assertIsNone(pr.find_seal(p))
+
+    def test_a_digest_inside_the_document_is_not_a_seal(self):
+        """A file cannot contain its own digest."""
+        from groundwork import prereg as pr
+        d = tempfile.mkdtemp()
+        p = self._doc(d, body="# p\n\nThe dataset sha256 is " + "0" * 64 + "\n")
+        self.assertIsNone(pr.find_seal(p))
+
+    def test_an_unrecognised_heading_is_not_reported_as_missing(self):
+        from groundwork import prereg as pr
+        d = tempfile.mkdtemp()
+        p = self._doc(d, body="# p\n\n## Held fixed\n\ngreedy\n\n## The two arms\n\na, b\n")
+        out = io.StringIO()
+        cwd = os.getcwd()
+        os.chdir(d)
+        try:
+            with contextlib.redirect_stdout(out):
+                pr.main(["verify", p])
+        finally:
+            os.chdir(cwd)
+        text = out.getvalue()
+        self.assertNotIn("missing section", text)
+        self.assertIn("no section named", text)
+        self.assertIn("rename it", text)
+
+
+
 class Shard(unittest.TestCase):
     """Ownership, and the restart that silently loses items."""
 
