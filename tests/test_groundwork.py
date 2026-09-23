@@ -5,6 +5,8 @@ here is exercised with an input built to trip it - and the boundary cases that
 must still pass are exercised too, because a gate that refuses everything is
 also decoration.
 """
+import contextlib
+import io
 import json
 import os
 import subprocess
@@ -17,6 +19,7 @@ sys.path.insert(0, ROOT)
 
 from groundwork import attach, cluster, ledger, noise, reach, scaffold, stats  # noqa: E402
 from groundwork import lit  # noqa: E402
+from groundwork import watch  # noqa: E402
 from groundwork import prereg  # noqa: E402
 from groundwork.gate import detectable_effect, required_se, verdict  # noqa: E402
 
@@ -399,6 +402,96 @@ class Attach(unittest.TestCase):
         self.assertEqual(sorted(os.listdir(os.path.join(d, ".claude", "skills"))), first)
         self.assertTrue(all(os.path.islink(os.path.join(d, ".claude", "skills", n))
                             for n in first), "stages must be linked, not copied")
+
+
+class Watch(unittest.TestCase):
+    """The watcher's own failure modes.
+
+    Two of these are regressions for bugs this file found: a process that has
+    exited but not been reaped still answers `os.kill(pid, 0)`, so the first
+    version called a dead job alive; and a child that buffers its output looks
+    exactly like a child that has produced nothing.
+    """
+
+    def setUp(self):
+        self.d = tempfile.mkdtemp()
+        self.cwd = os.getcwd()
+        os.chdir(self.d)
+
+    def tearDown(self):
+        os.chdir(self.cwd)
+
+    def _run(self, argv):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = watch.main(argv)
+        return rc, out.getvalue()
+
+    def test_a_job_that_dies_at_once_is_not_reported_alive(self):
+        rc, out = self._run(["start", "--name", "d", "--alive-after", "3", "--",
+                             sys.executable, "-c", "raise SystemExit('weights not found')"])
+        self.assertEqual(rc, 1)
+        self.assertIn("ALREADY GONE", out)
+        self.assertNotIn("still alive", out)       # the zombie regression
+        self.assertIn("weights not found", out)    # its log, not just a verdict
+
+    def test_the_death_is_recorded_where_a_later_session_will_find_it(self):
+        self._run(["start", "--name", "d", "--alive-after", "3", "--",
+                   sys.executable, "-c", "raise SystemExit(1)"])
+        flag = os.path.join("archive", "runs", "d.DONE")
+        self.assertTrue(os.path.exists(flag), "no flag file: the watch dies with the session")
+        with open(flag, encoding="utf-8") as fh:
+            self.assertIn("died-before", json.load(fh)["verdict"])
+
+    def test_a_live_job_shows_the_config_echoed_in_its_log_head(self):
+        rc, out = self._run(["start", "--name", "a", "--alive-after", "3", "--",
+                             sys.executable, "-u", "-c",
+                             "print('lr=3e-4 epochs=30'); import time; time.sleep(30)"])
+        self.assertEqual(rc, 0)
+        self.assertIn("still alive", out)
+        self.assertIn("lr=3e-4 epochs=30", out)
+        self.assertNotIn("BUFFERING", out)
+        os.kill(watch._read("a")["pid"], 9)
+
+    def test_an_empty_log_head_is_called_buffering_not_silence(self):
+        rc, out = self._run(["start", "--name", "b", "--alive-after", "3", "--",
+                             sys.executable, "-c",
+                             "print('lr=3e-4'); import time; time.sleep(30)"])
+        self.assertEqual(rc, 0)
+        self.assertIn("BUFFERING", out)
+        self.assertIn("PYTHONUNBUFFERED=1", out)
+        os.kill(watch._read("b")["pid"], 9)
+
+    def test_status_calls_trouble_in_the_log_a_failure(self):
+        self._run(["start", "--name", "t", "--alive-after", "3", "--",
+                   sys.executable, "-u", "-c",
+                   "print('step 1'); raise MemoryError('CUDA out of memory')"])
+        rc, out = self._run(["status", "--name", "t"])
+        self.assertEqual(rc, 1, "an OOM in the log must not be reported as a clean end")
+        self.assertIn("TROUBLE IN THE LOG", out)
+        self.assertIn("SCORED", out)   # exited != finished
+        with open(os.path.join("archive", "runs", "t.DONE"), encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh)["verdict"], "trouble-in-log")
+
+    def test_a_clean_end_is_recorded_as_a_clean_end(self):
+        self._run(["start", "--name", "c", "--alive-after", "3", "--",
+                   sys.executable, "-u", "-c", "print('wrote metrics.json')"])
+        rc, out = self._run(["status", "--name", "c"])
+        self.assertEqual(rc, 0)
+        self.assertIn("ended", out)
+        self.assertNotIn("TROUBLE", out)
+
+    def test_a_name_is_not_silently_reused(self):
+        self._run(["start", "--name", "x", "--alive-after", "3", "--",
+                   sys.executable, "-c", "pass"])
+        rc, out = self._run(["start", "--name", "x", "--alive-after", "3", "--",
+                             sys.executable, "-c", "pass"])
+        self.assertEqual(rc, 1)
+        self.assertIn("--force", out)
+
+    def test_an_empty_command_is_refused(self):
+        self.assertEqual(watch.main(["start", "--name", "n"]), 2)
+
 
 
 if __name__ == "__main__":

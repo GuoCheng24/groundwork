@@ -58,6 +58,30 @@ jobs:
           fi
 
 
+      # The watcher's own failure mode: a process that has exited and not been
+      # reaped still answers os.kill(pid, 0), so the first version of this tool
+      # called a dead job alive. Both directions are checked.
+      - name: watch calls a job that died at once dead, not alive
+        run: |
+          mkdir -p /tmp/wproj && cd /tmp/wproj
+          if python -m groundwork watch start --name dead --alive-after 3 --force \
+               -- python -c "raise SystemExit('weights not found')" | tee /tmp/w.txt; then
+            echo "::error::a job that died before the check was reported as started"; exit 1
+          fi
+          grep -q "ALREADY GONE" /tmp/w.txt
+          grep -q "weights not found" /tmp/w.txt
+          test -f archive/runs/dead.DONE
+
+      - name: watch reports an OOM in the log rather than a clean end
+        run: |
+          cd /tmp/wproj
+          python -m groundwork watch start --name oom --alive-after 2 --force \
+            -- python -u -c "print('step 1'); raise MemoryError('CUDA out of memory')" || true
+          if python -m groundwork watch status --name oom | tee /tmp/o.txt; then
+            echo "::error::an OOM in the log was reported as a clean end"; exit 1
+          fi
+          grep -q "TROUBLE IN THE LOG" /tmp/o.txt
+
       - name: The exact tests reproduce published figures
         run: python -m groundwork stats selftest
 
@@ -121,7 +145,7 @@ jobs:
                       continue
                   if name not in linked:
                       bad.append(f"{f} is not linked from {main}")
-          print(f"{len(glob.glob('groundwork/groundwork/skills/*/*.md'))} skill files checked")
+          print(f"{len(glob.glob('groundwork/skills/*/*.md'))} skill files checked")
           if bad:
               print("\n".join(bad)); sys.exit(1)
           PY

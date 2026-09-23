@@ -42,6 +42,7 @@ Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 | `groundwork lit` | an occupancy verdict when the index that would have found the competitor did not answer |
 | `groundwork prereg` | a pre-registration that version control says is younger than its own results |
 | `groundwork cluster` | a card whose free memory is somebody else's leftovers, and one arm split across two GPU models |
+| `groundwork watch` | a run that was never alive, an empty log read as silence rather than buffering, and a watch that dies with the session that set it up |
 | `groundwork ledger` | a cause of death that is free text nobody can count |
 | `groundwork stats` | the exact interval, the exact paired test, the smallest effect the split can resolve, and BH against BY — so nobody re-implements them |
 | `groundwork noise` | a difference being quoted without the spread of the instrument that produced it |
@@ -256,6 +257,35 @@ decoding, the same batch size and the same scorer, on two different GPU models,
 [scored 76.89% and 75.42%](https://github.com/GuoCheng24/ifeval-reproduction) —
 1.48 points from changing nothing but the card. The same arm repeated on a
 second card of the *same* model reproduced 541 of 541 generations byte for byte.
+
+### Then launch it so that it outlives the session
+
+```console
+$ groundwork watch start --name run3 -- python eval.py --shard 0/4
+started run3 (pid 41883)
+
+waiting 90s before believing it started...
+
+IT IS ALREADY GONE (exit 1). The head of its log:
+
+  | weights not found
+```
+
+Ninety seconds, not zero: a job that fails to load its weights looks exactly
+like a job that is training, at launch. When the head of the log is **empty**,
+`watch` says so as *buffering* rather than as silence — those two look
+identical from outside, and only one of them loses everything in a crash.
+
+When the run ends, `groundwork watch status` writes `archive/runs/<name>.DONE`
+with the verdict, and exits non-zero if the log holds a traceback, an OOM, a
+`Killed` or a NaN. The flag file is the point. A watch set up *inside* an agent
+session dies with that session, and its silence is indistinguishable from
+"nothing has happened" — one such watch here went unread for forty hours. A
+file is read by whoever comes next; an intention is not.
+
+The tool's own first version had the bug it exists to catch: `os.kill(pid, 0)`
+succeeds for a process that has exited and **not been reaped**, so a job that
+died one second in was reported as alive. Both directions are now in CI.
 
 ---
 

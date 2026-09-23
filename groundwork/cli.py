@@ -13,9 +13,10 @@ import sys
 COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "reach",
             "lit": "lit", "ledger": "ledger",
             "stats": "stats", "noise": "noise",
-            "init": "scaffold", "install": "attach"}
+            "init": "scaffold", "install": "attach",
+            "watch": "watch"}
 
-USAGE = """usage: groundwork {init,install,gate,lit,prereg,cluster,stats,noise,ledger,reach} ...
+USAGE = """usage: groundwork {init,install,gate,lit,prereg,cluster,watch,stats,noise,ledger,reach} ...
 
   gate     refuse a direction whose ceiling, baseline or controls already answer it
   prereg   scaffold, seal and verify a pre-registration - including that it was
@@ -26,6 +27,7 @@ USAGE = """usage: groundwork {init,install,gate,lit,prereg,cluster,stats,noise,l
   ledger   record what died and what got through, and roll it up
   stats    the exact tests the stages ask for: intervals, paired tests, power, FDR
   noise    how much your scorer moves on a file that never changes
+  watch    launch a long run, confirm it really started, and leave a flag file
   init     start a project whose first section is the gate, and which is empty
   install  attach the stages to Claude Code, Codex, or anything that reads Markdown
 
