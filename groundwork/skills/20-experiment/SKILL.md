@@ -111,7 +111,24 @@ for forty hours. A flag file is read by whoever comes next; an intention is not.
 OOM, a `Killed`, a NaN) and exits non-zero if it finds one, so it can sit in a
 loop or a cron line.
 
-## 5. Analyse the plan that was written first
+## 5. Leave it running, and let it stop itself
+
+```bash
+groundwork night run night-plan.txt --name fullset
+groundwork night report
+```
+
+A plan is one shell command per line, and **the first one that exits non-zero
+ends the night**. That is the opposite of what an overnight loop usually
+optimises, and it is the point: a night is expensive because of what it commits
+you to in the morning. An arm that ran all night on a wrong flag produces a
+table, and the table gets believed.
+
+The morning report says where it stopped, the lines from the log that say why,
+and **which steps therefore never ran** — which is what the morning is still
+free to reconsider. There is a worked plan in `docs/night-plan.txt`.
+
+## 6. Analyse the plan that was written first
 
 Run the pre-stated analysis and report it whichever way it comes out. Then, and
 only then, look at anything else — and label it exploratory.

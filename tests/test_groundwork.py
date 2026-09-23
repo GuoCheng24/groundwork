@@ -20,6 +20,7 @@ sys.path.insert(0, ROOT)
 from groundwork import attach, cluster, ledger, noise, reach, scaffold, stats  # noqa: E402
 from groundwork import lit  # noqa: E402
 from groundwork import check  # noqa: E402
+from groundwork import night  # noqa: E402
 from groundwork import probe  # noqa: E402
 from groundwork import shard  # noqa: E402
 from groundwork import watch  # noqa: E402
@@ -580,6 +581,94 @@ class Check(unittest.TestCase):
             check.CHECKS = saved
         self.assertEqual(row["verdict"], check.FAIL)
         self.assertIn("the check itself raised", row["detail"])
+
+
+
+class Night(unittest.TestCase):
+    """The property that matters is what did NOT run."""
+
+    def setUp(self):
+        self.d = tempfile.mkdtemp()
+        self.cwd = os.getcwd()
+        os.chdir(self.d)
+
+    def tearDown(self):
+        os.chdir(self.cwd)
+
+    def _plan(self, text):
+        p = os.path.join(self.d, "plan.txt")
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        return p
+
+    def _run(self, argv):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = night.main(argv)
+        return rc, out.getvalue()
+
+    def test_nothing_downstream_of_a_failed_step_runs(self):
+        plan = self._plan(
+            f'[a] {sys.executable} -c "open(\'a.flag\',\'w\').close()"\n'
+            f'[b] {sys.executable} -c "raise SystemExit(\'NO-GO.\')"\n'
+            f'[c] {sys.executable} -c "open(\'c.flag\',\'w\').close()"\n')
+        rc, _out = self._run(["run", plan, "--name", "n1"])
+        self.assertEqual(rc, 1)
+        self.assertTrue(os.path.exists("a.flag"))
+        self.assertFalse(os.path.exists("c.flag"),
+                         "a step after the failure ran; the night did not stop")
+
+    def test_the_report_says_what_stopped_it_and_what_never_ran(self):
+        plan = self._plan(
+            f'[gate] {sys.executable} -c "print(\'NO-GO.\'); raise SystemExit(1)"\n'
+            f'[train] {sys.executable} -c "pass"\n')
+        self._run(["run", plan, "--name", "n2"])
+        with open(os.path.join("archive", "night", "n2", "REPORT.md"), encoding="utf-8") as fh:
+            rep = fh.read()
+        self.assertIn("It stopped at `gate`", rep)
+        self.assertIn("NO-GO.", rep, "the report does not carry the reason")
+        self.assertIn("did not run", rep, "the report hides the steps that never ran")
+        self.assertIn("--from gate", rep, "the report does not say how to continue")
+
+    def test_a_clean_night_does_not_claim_the_result_is_right(self):
+        plan = self._plan(f'[a] {sys.executable} -c "pass"\n')
+        rc, out = self._run(["run", plan, "--name", "n3"])
+        self.assertEqual(rc, 0)
+        self.assertIn("not that", out.lower())
+
+    def test_resuming_skips_what_came_before(self):
+        plan = self._plan(
+            f'[a] {sys.executable} -c "open(\'a.flag\',\'w\').close()"\n'
+            f'[b] {sys.executable} -c "open(\'b.flag\',\'w\').close()"\n')
+        rc, _ = self._run(["run", plan, "--name", "n4", "--from", "b"])
+        self.assertEqual(rc, 0)
+        self.assertFalse(os.path.exists("a.flag"), "a skipped step ran")
+        self.assertTrue(os.path.exists("b.flag"))
+
+    def test_resuming_from_a_step_that_does_not_exist_is_refused(self):
+        plan = self._plan(f'[a] {sys.executable} -c "pass"\n')
+        self.assertEqual(night.main(["run", plan, "--from", "nope"]), 2)
+
+    def test_a_malformed_line_is_refused_by_line_number(self):
+        plan = self._plan("[a] ok\nnot a step\n")
+        with self.assertRaises(ValueError) as cm:
+            night.parse(plan)
+        self.assertIn(":2:", str(cm.exception))
+
+    def test_two_steps_with_one_name_are_refused(self):
+        plan = self._plan("[a] one\n[a] two\n")
+        with self.assertRaises(ValueError) as cm:
+            night.parse(plan)
+        self.assertIn("twice", str(cm.exception))
+
+    def test_comments_and_blank_lines_are_not_steps(self):
+        plan = self._plan("# a night\n\n[a] one\n   # indented comment\n[b] two\n")
+        self.assertEqual([n for n, _c in night.parse(plan)], ["a", "b"])
+
+    def test_a_plan_with_no_steps_is_refused(self):
+        plan = self._plan("# only comments\n")
+        with self.assertRaises(ValueError):
+            night.parse(plan)
 
 
 

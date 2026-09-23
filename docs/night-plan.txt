@@ -1,0 +1,26 @@
+# A real night: the full-set arms of a benchmark reproduction.
+#
+# Every line is a shell command, and the first one that exits non-zero ends the
+# night. Each tool below is built to exit non-zero at the right moment, which is
+# what makes the plan a gate chain rather than a script:
+#
+#   prereg verify   the plan is sealed, complete, and older than its results
+#   cluster plan    the cards are actually free, and one arm is not split
+#                   across two GPU models
+#   shard merge     no id disagrees, and the total is the number expected
+#   noise           the scorer's own spread, before any difference is quoted
+#   check           every gate that applies to this project
+#
+# Run it with:   groundwork night run docs/night-plan.txt --name fullset
+# Read it with:  groundwork night report
+
+[prereg]   groundwork prereg verify prereg/PREREG_fullset.md --results results/metrics_budget.json
+[capacity] groundwork cluster survey --nodes gpu01 gpu02 --need-gb 20
+[cv]       bash scripts/run_fullset_shard.sh cvbench 5
+[mv]       bash scripts/run_fullset_shard.sh mathvista 4
+[merge-cv] groundwork shard merge 'results/cvbench_*_s*.jsonl' --expect 2638 -o results/cvbench_full.jsonl
+[merge-mv] groundwork shard merge 'results/mathvista_*_s*.jsonl' --expect 1000 -o results/mathvista_full.jsonl
+[extract]  python scripts/llm_extract.py results/cvbench_full.jsonl results/mathvista_full.jsonl
+[noise]    groundwork noise --n 10 --command 'python scripts/extractor_noise_probe.py results/mathvista_full.jsonl'
+[analyse]  python scripts/taichu_summary.py
+[check]    groundwork check

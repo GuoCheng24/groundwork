@@ -49,6 +49,7 @@ Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 | command | what it does, or refuses |
 |---|---|
 | `groundwork init` | starts a project whose first section is the gate, **left empty on purpose** |
+| `groundwork night` | an overnight loop optimised for not stopping — here the first non-zero exit ends the night, and the morning report says which steps therefore never ran |
 | `groundwork check` | a sweep that reports a pass because there was nothing to check, and an exemption that quietly disarms the check next to it |
 | `groundwork gate` | a direction whose ceiling, baseline, random arm or positive control already answers it |
 | `groundwork lit` | an occupancy verdict when the index that would have found the competitor did not answer |
@@ -407,6 +408,48 @@ forward past its own results and the tool called a correctly pre-registered
 study a write-up. And a `sha256` appearing inside a document was being taken as
 its seal — impossible, since a file cannot contain its own digest; the digest
 in that document belonged to the plan it amended.
+
+---
+
+## The night
+
+Every toolkit in this space has an overnight loop, and the thing they all
+optimise is *not stopping*. That is backwards. A night is expensive because of
+what it commits you to in the morning, not because of the GPU hours: an arm
+that ran all night on a wrong flag produces a table, and the table gets
+believed.
+
+```console
+$ groundwork night run docs/night-plan.txt --name fullset
+
+[prereg] groundwork prereg verify prereg/PREREG_fullset.md --results results/
+  rc=0  0.0 min
+
+[capacity] groundwork cluster survey --nodes gpu01 gpu02 --need-gb 20
+  rc=1  0.2 min
+  | 0 idle card(s) across 2 reachable node(s).
+
+The night stopped at [capacity]. That is the tool working: the step exited
+non-zero and nothing downstream ran on top of it.
+```
+
+`night` runs a plan in order and **the first step that exits non-zero ends
+it**. Every tool here is built to exit non-zero at the right moment — `gate` on
+a direction with no headroom, `prereg verify` on a plan younger than its
+results, `shard merge` on a hole or a disagreement, `noise` on a scorer that
+fails, `check` on a gate with nothing behind it — and `night` is what makes
+those exits matter while you are asleep.
+
+What you read in the morning is a report that says where it stopped, the lines
+from the log that say why, **which steps therefore never ran**, and the one
+command that continues after you have fixed it. The steps that did not run are
+the point: they are what the morning is still free to reconsider.
+
+A worked plan is in [`docs/night-plan.txt`](docs/night-plan.txt) — the full-set
+arms of a benchmark reproduction, gate chain and all.
+
+And when every step passes, the report says so in the only way that is true:
+*the commands succeeded, which is not the same as the result being right.*
 
 ---
 

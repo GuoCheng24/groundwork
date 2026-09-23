@@ -63,6 +63,21 @@ A machine whose clock jumps backwards can make a cleanup job delete files it
 considers expired, including session transcripts. Anything precious is committed
 to version control, not left in a working directory with a timestamp.
 
+## A chain of steps, not one step
+
+When the night is a sequence - launch, wait, merge, score, summarise - put it in
+a plan and let the first failure end it:
+
+```bash
+groundwork night run night-plan.txt
+```
+
+The value is not the automation, which is a shell script. It is that every step
+in the chain is a command built to **exit non-zero at the right moment**, so a
+plan that fails at step two leaves steps three to nine unrun and says so. The
+alternative is a morning with numbers that were computed on top of something
+that had already gone wrong.
+
 ## What "finished" means
 
 A run is finished when its output has been **scored** and the numbers are on

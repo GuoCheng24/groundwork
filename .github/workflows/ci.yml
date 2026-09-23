@@ -160,6 +160,23 @@ jobs:
           fi
           grep -q "DIFFERENT CONTENT" /tmp/s2.txt
 
+      # The property is what did NOT run. A night that carries on past a failed
+      # gate is worse than no night at all: the numbers downstream get computed
+      # on top of something already known to be wrong.
+      - name: night stops at the first non-zero exit
+        run: |
+          mkdir -p /tmp/nproj && cd /tmp/nproj && rm -rf archive
+          printf '[a] touch a.flag\n[gate] python -m groundwork gate --baseline 0.812 --oracle 0.830 --se 0.019\n[c] touch c.flag\n' > plan.txt
+          if python -m groundwork night run plan.txt --name ci > /tmp/n.txt 2>&1; then
+            cat /tmp/n.txt; echo "::error::the night did not stop at a NO-GO"; exit 1
+          fi
+          cat /tmp/n.txt
+          test -f a.flag
+          if [ -f c.flag ]; then echo "::error::a step after the failure ran"; exit 1; fi
+          grep -q "It stopped at .gate." archive/night/ci/REPORT.md
+          grep -q "did not run" archive/night/ci/REPORT.md
+          grep -q "NO-GO" archive/night/ci/REPORT.md
+
       - name: The exact tests reproduce published figures
         run: python -m groundwork stats selftest
 

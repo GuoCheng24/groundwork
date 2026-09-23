@@ -16,11 +16,12 @@ COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "
             "stats": "stats", "noise": "noise",
             "init": "scaffold", "install": "attach",
             "watch": "watch", "probe": "probe", "check": "check",
-            "shard": "shard"}
+            "shard": "shard", "night": "night"}
 
-USAGE = """usage: groundwork {init,install,check,gate,lit,prereg,probe,cluster,shard,watch,stats,noise,ledger,reach} ...
+USAGE = """usage: groundwork {init,install,check,night,gate,lit,prereg,probe,cluster,shard,watch,stats,noise,ledger,reach} ...
 
   check    run every gate over a project at once; `n/a` is reported, not passed
+  night    run a plan unattended and STOP at the first gate that says stop
   gate     refuse a direction whose ceiling, baseline or controls already answer it
   prereg   scaffold, seal and verify a pre-registration - including that it was
            committed before the results it governs
