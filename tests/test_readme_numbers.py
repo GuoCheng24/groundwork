@@ -83,6 +83,11 @@ def _derive(fact, repo_dir):
         return d["context"]["fresh_eyes_run_1"]["findings_returned"]
     if i == "fresh_eyes_verified":
         return d["context"]["fresh_eyes_run_1"]["findings_verified"]
+    if i == "taichu_unclosed_credited":
+        return round((d["accuracy_pct"] - d["accuracy_unclosed_as_wrong_pct"])
+                     * d["n"] / 100)
+    if i == "taichu_mv_n":
+        return d["n"]
     raise AssertionError(f"no derivation for {i!r} - add one rather than skipping it")
 
 

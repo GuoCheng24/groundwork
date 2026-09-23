@@ -504,7 +504,7 @@ Not a bibliography — repositories where these rules run in CI on every push.
 |---|---|
 | [batch-logprob-gap](https://github.com/GuoCheng24/batch-logprob-gap) | the same measurement on three GPUs across two architectures; the effect is on all three and fp32 removes it on all three; the control is a re-run of the original card that must reproduce it cell for cell |
 | [ifeval-reproduction](https://github.com/GuoCheng24/ifeval-reproduction) | a pre-registration chain CI re-hashes on every push; an official scorer measured against itself — ten runs on one unchanged file span 0.37 points and disagree on 2 prompts of 541 |
-| [taichu-eval-reproduction](https://github.com/GuoCheng24/taichu-eval-reproduction) | a reproduction whose verdict turned on how eleven truncated generations were counted, and which says so |
+| [taichu-eval-reproduction](https://github.com/GuoCheng24/taichu-eval-reproduction) | a reproduction whose verdict turns on **16 truncated generations** — the card's number is inside the interval under one scoring and outside it under the other, measured on all 1,000 items rather than argued from a subsample, and the page says so |
 | [doubleblind](https://github.com/GuoCheng24/doubleblind) | the three claim layers, each with a test asserting the defect it *cannot* catch |
 
 ---

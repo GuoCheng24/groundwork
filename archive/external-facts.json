@@ -67,6 +67,28 @@
    "derive": "count(findings where caught_by == 'human eye')",
    "as_of": "6dbdb72702020b1b3e966a0ff94bd3e500beed3f",
    "used_in": "README.md"
+  },
+  {
+   "id": "taichu_unclosed_credited",
+   "value": 16,
+   "rendered": "**16 truncated generations**",
+   "what": "truncated generations the extractor credits, on which the MathVista verdict turns",
+   "repo": "taichu-eval-reproduction",
+   "path": "results/metrics_fullset_mathvista.json",
+   "derive": "round((accuracy_pct - accuracy_unclosed_as_wrong_pct) * n / 100)",
+   "as_of": "89f61c160c92ec3349acb4df11267875894ac96d",
+   "used_in": "README.md"
+  },
+  {
+   "id": "taichu_mv_n",
+   "value": 1000,
+   "rendered": "all 1,000 items",
+   "what": "items in the MathVista full-set measurement",
+   "repo": "taichu-eval-reproduction",
+   "path": "results/metrics_fullset_mathvista.json",
+   "derive": "n",
+   "as_of": "89f61c160c92ec3349acb4df11267875894ac96d",
+   "used_in": "README.md"
   }
  ]
 }
