@@ -83,6 +83,22 @@ will be worth a paper. It says only that the ceiling, the baseline and the
 controls have not already answered the question. Everything it passes still has
 to survive `30-claim`.
 
+## Before you start, and again before you push
+
+```bash
+groundwork check
+```
+
+runs every gate in these stages over the project at once and prints, for each,
+one of three verdicts. The third one is the point: `n/a` means the gate had
+nothing to look at. On a project that is under way that is usually the finding,
+not the relief - a sweep that is mostly `n/a` is telling you the work is not
+under any of these gates yet.
+
+A gate that genuinely does not apply is waived in `archive/waivers.json`, with
+a reason, and the reason is reprinted on every run. An exemption with no reason
+waives nothing: a flat allow-list is how a repository disarms its own checks.
+
 ## In this stage
 
 - [`two-toolboxes.md`](two-toolboxes.md) — where originality actually comes from, and what to do when you only have one toolbox

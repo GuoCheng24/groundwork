@@ -85,7 +85,7 @@ pre-registered "clean hardware test" that was not clean until a control existed.
 
 | stage | what it decides | notes, each written from a failure |
 |---|---|---|
-| [`00-gate`](groundwork/groundwork/skills/00-gate/) | Gate — the four numbers that decide | [`breakthrough`](groundwork/groundwork/skills/00-gate/breakthrough.md) · [`ceiling-first`](groundwork/groundwork/skills/00-gate/ceiling-first.md) · [`metric-validity`](groundwork/groundwork/skills/00-gate/metric-validity.md) · [`positive-control`](groundwork/groundwork/skills/00-gate/positive-control.md) · [`two-toolboxes`](groundwork/groundwork/skills/00-gate/two-toolboxes.md) |
+| [`00-gate`](groundwork/skills/00-gate/) | Gate — the four numbers that decide | [`breakthrough`](groundwork/skills/00-gate/breakthrough.md) · [`ceiling-first`](groundwork/skills/00-gate/ceiling-first.md) · [`metric-validity`](groundwork/skills/00-gate/metric-validity.md) · [`positive-control`](groundwork/skills/00-gate/positive-control.md) · [`two-toolboxes`](groundwork/skills/00-gate/two-toolboxes.md) |
 | [`10-direction`](groundwork/skills/10-direction/) | Direction — candidates, not ideas | [`kill-argument`](groundwork/skills/10-direction/kill-argument.md) · [`lit-review`](groundwork/skills/10-direction/lit-review.md) · [`occupancy`](groundwork/skills/10-direction/occupancy.md) · [`originality`](groundwork/skills/10-direction/originality.md) · [`venue-fit`](groundwork/skills/10-direction/venue-fit.md) |
 | [`20-experiment`](groundwork/skills/20-experiment/) | Experiment — sealed first, then launched | [`ablations`](groundwork/skills/20-experiment/ablations.md) · [`data-hygiene`](groundwork/skills/20-experiment/data-hygiene.md) · [`hardware`](groundwork/skills/20-experiment/hardware.md) · [`implementation`](groundwork/skills/20-experiment/implementation.md) · [`long-runs`](groundwork/skills/20-experiment/long-runs.md) · [`shared-machine`](groundwork/skills/20-experiment/shared-machine.md) |
 | [`30-claim`](groundwork/skills/30-claim/) | Claim — three layers, blind to different things | [`citations`](groundwork/skills/30-claim/citations.md) · [`integrity`](groundwork/skills/30-claim/integrity.md) · [`review-loop`](groundwork/skills/30-claim/review-loop.md) · [`statistics`](groundwork/skills/30-claim/statistics.md) |
@@ -149,7 +149,7 @@ tuned**. Given the same budget, the final gain over that baseline was
 
 So the rule has a second half, and it is the half that matters: *the baseline
 gets the same tuning budget as the method.* A baseline nobody tried to make win
-is a strawman with error bars. See [`groundwork/skills/00-gate/ceiling-first.md`](groundwork/groundwork/skills/00-gate/ceiling-first.md).
+is a strawman with error bars. See [`groundwork/skills/00-gate/ceiling-first.md`](groundwork/skills/00-gate/ceiling-first.md).
 
 ## The archive: ten ways a direction dies
 

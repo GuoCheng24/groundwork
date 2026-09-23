@@ -20,15 +20,29 @@ does not remember an intention.
 
 ## Foreground work dies with the shell
 
-Launch detached (`nohup`), then do three things that take ninety seconds and
-save hours:
+```bash
+groundwork watch start --name run3 -- python eval.py --shard 0/4
+groundwork watch status --wait          # block until it ends, then write the flag
+```
+
+That is the tool for the three things below; do them by hand if you prefer, but
+do them. Launch detached (`nohup`), then:
 
 1. confirm the process is alive at ~90 s — not at launch, when everything looks
    fine, but after the model has had time to fail to load;
 2. read the **head** of the log, where the configuration is echoed. A run with a
    wrong flag looks identical to a right one until it finishes;
 3. check that output is actually appearing, not buffered. A harness that writes
-   at the end is a harness that loses everything to a crash.
+   at the end is a harness that loses everything to a crash. An empty log head
+   is nearly always buffering rather than silence — a process whose stdout is
+   not a terminal buffers it — so relaunch under `PYTHONUNBUFFERED=1` rather
+   than concluding that nothing has happened.
+
+A trap in the checking itself: `os.kill(pid, 0)` succeeds for a process that
+has **exited and not been reaped**. A job that died one second after launch
+answers that probe exactly like a job that is training, so a hand-written
+aliveness check reports the death as health. Ask the child (`Popen.poll()`), or
+read the state letter in `/proc/<pid>/stat` and treat `Z` as dead.
 
 ## Resume has to be designed, not hoped for
 

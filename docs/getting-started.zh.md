@@ -192,12 +192,14 @@ claude            # 或者 codex
 
 | 阶段 | 让它做什么 | 工具 |
 |---|---|---|
-| 决定做不做 | 天花板、**调过参的**平凡基线、随机臂、正对照 | [`groundwork gate`](../groundwork/groundwork/skills/00-gate/) |
+| 动手之前 | 这台机器到底能做什么，以及**哪些东西装了但不在 `PATH` 上** | `groundwork probe` |
+| 决定做不做 | 天花板、**调过参的**平凡基线、随机臂、正对照 | [`groundwork gate`](../groundwork/skills/00-gate/) |
 | 查文献 | 谁已经占了这个 claim，以及**你能不能判断** | [`groundwork lit`](../groundwork/skills/10-direction/) |
 | 做实验 | 先封印预注册，再摊到空闲 GPU 上跑 | [`prereg`](../groundwork/skills/20-experiment/) · `cluster` |
 | 定结论 | 三层互相看不见对方盲区的核查 | [`doubleblind`](https://github.com/GuoCheng24/doubleblind) |
 | 写论文 | 先 claim 再散文，图要审，表要生成 | [`40-write`](../groundwork/skills/40-write/) |
 | 投稿 | 硬规格写成会失败的脚本；rebuttal | [`50-submit`](../groundwork/skills/50-submit/) |
+| 随时，以及推送之前 | 把上面每一道闸门在项目上一次跑完 | `groundwork check` |
 
 最值钱的一个习惯：**先让它做那件"可能直接终结这个课题"的便宜事。** agent 会非常
 乐意花你一周去建一个**天花板在第一天就是关着的**东西——不是它不小心，而是**没有
@@ -207,16 +209,26 @@ claude            # 或者 codex
 
 ## 五、迟早会咬你的几件事
 
-**长任务会随终端一起死。** 后台起，90 秒确认还活着，并读日志开头（配置在那里回显）：
+**长任务会随终端一起死；而"根本没起来"和"正在训练"在启动那一刻长得一模一样。**
+后台起，**等 90 秒再相信它**，并读日志开头（配置在那里回显）：
 
 ```bash
-nohup python train.py > run.log 2>&1 &
-sleep 90 && head -20 run.log && ps -p $! >/dev/null && echo 还活着
+groundwork watch start --name run1 -- python train.py --epochs 30
+groundwork watch status          # 结束时会写下 archive/runs/run1.DONE
 ```
 
-**会话里设的监听，随会话一起死。** "一小时后帮我看一眼"**不持久**。放进系统定时器，
-让它写一个**标志文件**，并把这个文件名写进项目笔记里当作开工第一件要查的事。
-有一次按会话内方式设的监听，**四十小时没人读**。
+想手动做也行：`nohup python train.py > run.log 2>&1 &`，然后 `sleep 90`、
+`head -20 run.log`，再确认进程还在——但**要用 `ps -p` 去确认，别用发 0 号信号**。
+一个**已经退出、但还没被回收的进程**，对 0 号信号的回答和活着时一模一样，于是一个
+死掉的任务会被读成健康的。
+
+**日志是空的，几乎从来不是"安静"，而是缓冲。** 输出不是终端时进程会缓冲，于是"正常
+跑着"和"什么都没产出"看起来完全一样——而一旦崩溃，缓冲区里的东西全部丢失。用
+`PYTHONUNBUFFERED=1` 重起，或者让你的脚本每写一条就 flush。
+
+**会话里设的监听，随会话一起死。** "一小时后帮我看一眼"**不持久**。要写一个**标志
+文件**（`watch` 干的就是这件事），并把这个文件名写进项目笔记里当作开工第一件要查的
+事。有一次按会话内方式设的监听，**四十小时没人读**。
 
 **断线不会丢上下文。** 这些工具边跑边把对话追加落盘。重连接着聊；进程真死了就用
 `--continue` / `--resume` 重建。只丢那一次正在飞的请求。
@@ -234,6 +246,12 @@ pip install -i <你的镜像> <包名>
 **下载自哪个仓库**走，不是跟着域名走——**一个受限频道的镜像仍然是那个受限频道**。
 社区频道和公共包索引是安全的。
 
+**"没装"通常其实是"不在 `PATH` 上"。** 这台机器上 `which soffice` 返回空了好几周，
+而 LibreOffice 一直躺在共享盘**八层目录**之下；那段时间文档一直用一个近似渲染器在
+核验，而它会**低估**文字溢出。在集群上，下结论之前先问**软件目录**——`module avail`；
+还要记得：一次**跑超时的**文件系统搜索是**没搜完**，不是"不存在"。
+`groundwork probe` 会把这几件事都做了，并且明确告诉你哪句是哪句。
+
 **环境是个静默变量。** 产生结果的版本号要**从运行时读出来记下**，别凭记忆——见
 [`../skills/20-experiment/hardware.md`](../groundwork/skills/20-experiment/hardware.md)：
 同样的权重、同样的随机种子、贪心解码，**换一张显卡差了 1.48 个点**。
@@ -243,11 +261,14 @@ pip install -i <你的镜像> <包名>
 ## 六、这台机器不是你一个人的
 
 ```bash
-python -m groundwork cluster survey --nodes gpu01 gpu02 gpu03
+groundwork probe                                          # 本节点
+groundwork cluster survey --nodes gpu01 gpu02 gpu03       # 其它节点
 ```
 
 - **绝不写死设备号。** 启动时挑最闲的卡。
 - **别为了"礼貌"把小模型默认丢给 CPU。** CPU 也是共享的，而且更慢。
+- **`/dev/shm` 就是内存。** dataloader 把它填满，用掉的是 `free` 还在报"可用"的那部分
+  RAM。`probe` 会把它的大小和占用和 GPU 一起打出来。
 - **不只看显存，要看主机内存**，尤其在起多路并发之前。内核的 OOM killer 报的是
   **最后一个申请内存的进程**，不是占得最多的那个——所以既别看到自己名字就认罪，
   也别因此免责，**去查全节点排行**。
@@ -258,7 +279,7 @@ python -m groundwork cluster survey --nodes gpu01 gpu02 gpu03
 ## 接下来读什么
 
 - [`../README.md`](../README.md) —— 这个仓库是干什么的。
-- [`../groundwork/skills/00-gate/SKILL.md`](../groundwork/groundwork/skills/00-gate/SKILL.md) —— 决定一个方向值不值
+- [`../groundwork/skills/00-gate/SKILL.md`](../groundwork/skills/00-gate/SKILL.md) —— 决定一个方向值不值
   一周的那四个数。**动手之前先读这个。**
 - [`../archive/causes-of-death.json`](../archive/causes-of-death.json) —— 一个研究
   方向死掉的十种方式，以及各自那个能更早终结它的廉价检验。

@@ -216,12 +216,14 @@ one stage at a time.
 
 | stage | ask for | the tool |
 |---|---|---|
-| deciding what to work on | the ceiling, the tuned baseline, a random arm, a positive control | [`groundwork gate`](../groundwork/groundwork/skills/00-gate/) |
+| before anything | what this machine can actually do, and what is installed but not on `PATH` | `groundwork probe` |
+| deciding what to work on | the ceiling, the tuned baseline, a random arm, a positive control | [`groundwork gate`](../groundwork/skills/00-gate/) |
 | the literature | who already occupies this claim, and can you tell | [`groundwork lit`](../groundwork/skills/10-direction/) |
 | the experiment | a sealed pre-registration, then a launch across idle GPUs | [`groundwork prereg`](../groundwork/skills/20-experiment/), `cluster` |
 | the claims | three layers that are blind to different defects | [`doubleblind`](https://github.com/GuoCheng24/doubleblind) |
 | the paper | claims first, figures audited, tables generated | [`40-write`](../groundwork/skills/40-write/) |
 | submission | hard specs as a file that fails; the rebuttal | [`50-submit`](../groundwork/skills/50-submit/) |
+| any time, and before you push | every gate above, run at once over the project | `groundwork check` |
 
 The single highest-value habit: **ask it to do the cheap thing that could end
 the project, first.** An agent will happily spend your week building something
@@ -232,18 +234,30 @@ nothing asked.
 
 ## Part 5 — Things that will bite you
 
-**A long job dies with your terminal.** Launch detached, confirm it is alive at
-ninety seconds, and read the head of the log where the configuration is echoed:
+**A long job dies with your terminal, and a job that never started looks the
+same as one that is training.** Launch detached, wait ninety seconds before
+believing it, and read the head of the log where the configuration is echoed:
 
 ```bash
-nohup python train.py > run.log 2>&1 &
-sleep 90 && head -20 run.log && ps -p $! >/dev/null && echo alive
+groundwork watch start --name run1 -- python train.py --epochs 30
+groundwork watch status          # and it writes archive/runs/run1.DONE
 ```
 
+If you would rather do it by hand, `nohup python train.py > run.log 2>&1 &`
+then `sleep 90`, `head -20 run.log`, and check the process is still there —
+but check it with `ps -p`, not by sending signal 0, because a process that has
+exited and not been reaped still answers that probe. A dead job then reads as
+a healthy one.
+
+**An empty log is almost never silence.** A process whose output is not a
+terminal buffers it, so a working run and a run that has produced nothing look
+identical — and a crash loses the buffer. Relaunch with `PYTHONUNBUFFERED=1`,
+or make your harness flush after every record.
+
 **A watch set up inside a session dies with the session.** "Check on this in an
-hour" is not durable. Put it in the system scheduler and have it write a **flag
-file**, then name that file in your project notes as the first thing to check.
-One watch set up the session-local way went unread for forty hours.
+hour" is not durable. Write a **flag file** — which is what `watch` does — and
+name that file in your project notes as the first thing to check. One watch set
+up the session-local way went unread for forty hours.
 
 **Your conversation survives a dropped connection.** These tools append the
 transcript to disk as they go. Reconnect and continue; if the process died, the
@@ -265,6 +279,14 @@ repository you download from, not the domain you download through. A mirror of a
 restricted channel is still that restricted channel. Community channels and the
 public package index are safe.
 
+**"It is not installed" is usually "it is not on `PATH`".** `which soffice`
+returned nothing here for weeks while LibreOffice sat eight directories deep
+under a shared mount, and documents were checked with an approximate renderer
+that under-reported overflowing text the whole time. On a cluster, ask the
+catalogue — `module avail` — before concluding anything, and remember that a
+filesystem search which ran out of time is an unfinished search, not an
+absence. `groundwork probe` does all of that and says which is which.
+
 **The environment is a silent variable.** Record the versions that produced a
 result, from the runtime rather than from memory — see
 [`../skills/20-experiment/hardware.md`](../groundwork/skills/20-experiment/hardware.md),
@@ -278,12 +300,15 @@ points apart.
 Somebody else is on that node.
 
 ```bash
-python -m groundwork cluster survey --nodes gpu01 gpu02 gpu03
+groundwork probe                                          # this node
+groundwork cluster survey --nodes gpu01 gpu02 gpu03       # the others
 ```
 
 - **Never hard-code a device.** Pick the idlest card at start-up.
 - **Do not default a small model to the CPU to be polite.** The CPU is shared
   too, and it is slower.
+- **`/dev/shm` is memory.** A dataloader that fills it is using RAM that `free`
+  reports as available. `probe` prints its size and use next to the GPUs.
 - **Check host memory, not just GPU memory**, before launching anything
   concurrent. The kernel's out-of-memory killer names the process that asked for
   memory last, not the one holding the most — so neither plead guilty on seeing
@@ -295,7 +320,7 @@ python -m groundwork cluster survey --nodes gpu01 gpu02 gpu03
 ## Where to go next
 
 - [`../README.md`](../README.md) — what this repository is for.
-- [`../groundwork/skills/00-gate/SKILL.md`](../groundwork/groundwork/skills/00-gate/SKILL.md) — the four numbers
+- [`../groundwork/skills/00-gate/SKILL.md`](../groundwork/skills/00-gate/SKILL.md) — the four numbers
   that decide whether a direction is worth a week. Read this one before you
   start anything.
 - [`../archive/causes-of-death.json`](../archive/causes-of-death.json) — ten ways

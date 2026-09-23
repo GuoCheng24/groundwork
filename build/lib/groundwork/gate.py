@@ -28,6 +28,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
 import math
 import sys
 
@@ -113,6 +115,42 @@ def verdict(baseline, oracle, se, random_arm=None, positive_control=None,
     return (not blocking), lines, facts
 
 
+def record(path, lines, go, facts):
+    """File the verdict in the project's gate section.
+
+    The section exists and is left empty by `init`, which means the verdict has
+    to be pasted in by hand - and a step that is manual at the exact moment you
+    most want to get on with the work is a step that does not happen. Writing
+    under the heading, rather than appending to the file, is the whole point:
+    a verdict at the bottom of the document is not in the gate section, and
+    every reader and every check looks in the section.
+    """
+    import datetime
+    if not os.path.exists(path):
+        return f"{path} does not exist - run `groundwork init` first"
+    with open(path, encoding="utf-8") as fh:
+        text = fh.read()
+    heads = [(m.start(), m.end(), m.group(1))
+             for m in re.finditer(r"^##\s+(.*?)\s*$", text, re.M)]
+    idx = next((i for i, (_s, _e, t) in enumerate(heads) if "gate" in t.lower()), None)
+    if idx is None:
+        return f"{path} has no section whose heading mentions the gate; nothing written"
+    body_start = heads[idx][1]
+    body_end = heads[idx + 1][0] if idx + 1 < len(heads) else len(text)
+    when = datetime.date.today().isoformat()
+    block = ("\n\n**Verdict: " + ("GO" if go else "NO-GO") + f"**, recorded {when}.\n\n"
+             + "\n".join("- " + ln for ln in lines) + "\n")
+    if not go:
+        block += "\n" + "\n".join("- **blocking:** " + b for b in facts["blocking"]) + "\n"
+        block += ("\nRecord it in `archive/` with its cause so it stays dead: "
+                  "`groundwork ledger kill`.\n")
+    block += ("\nThis says only that the ceiling, the baseline and the controls have "
+              "not\nalready answered the question.\n\n")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(text[:body_start] + block + text[body_end:])
+    return f"recorded in the gate section of {path}"
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(
         prog="groundwork gate",
@@ -127,6 +165,9 @@ def main(argv=None):
     ap.add_argument("--positive-control-floor", type=float)
     ap.add_argument("--multiple", type=float, default=HEADROOM_MULTIPLE)
     ap.add_argument("--json", help="write the decision here")
+    ap.add_argument("--record", nargs="?", const="PROJECT.md", metavar="PROJECT.md",
+                    help="file the verdict into the project's gate section, replacing "
+                         "the template there (default PROJECT.md)")
     a = ap.parse_args(argv)
 
     if a.config:
@@ -164,6 +205,8 @@ def main(argv=None):
         with open(a.json, "w", encoding="utf-8") as fh:
             json.dump(facts, fh, indent=1)
         print(f"\nwrote {a.json}")
+    if a.record:
+        print("\n" + record(a.record, lines, go, facts))
     return 0 if go else 1
 
 

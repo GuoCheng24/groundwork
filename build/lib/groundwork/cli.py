@@ -4,6 +4,7 @@
     groundwork gate    ...   should this direction be started at all
     groundwork prereg  ...   is the pre-registration real, and older than the results
     groundwork cluster ...   where is the idle capacity, and how to split across it
+    groundwork check   ...   run every gate over a project, and say which do not apply
 
 Each subcommand is a standalone script under tools/ and can be run directly.
 """
@@ -13,19 +14,23 @@ import sys
 COMMANDS = {"gate": "gate", "prereg": "prereg", "cluster": "cluster", "reach": "reach",
             "lit": "lit", "ledger": "ledger",
             "stats": "stats", "noise": "noise",
-            "init": "scaffold", "install": "attach"}
+            "init": "scaffold", "install": "attach",
+            "watch": "watch", "probe": "probe", "check": "check"}
 
-USAGE = """usage: groundwork {init,install,gate,lit,prereg,cluster,stats,noise,ledger,reach} ...
+USAGE = """usage: groundwork {init,install,check,gate,lit,prereg,probe,cluster,watch,stats,noise,ledger,reach} ...
 
+  check    run every gate over a project at once; `n/a` is reported, not passed
   gate     refuse a direction whose ceiling, baseline or controls already answer it
   prereg   scaffold, seal and verify a pre-registration - including that it was
            committed before the results it governs
+  probe    what this machine can actually do, including what is installed off PATH
   cluster  survey idle GPUs across nodes, pick the ones that fit, plan shards
   reach    classify what this machine can actually fetch, and through which door
   lit      literature grounding and occupancy search that can be checked
   ledger   record what died and what got through, and roll it up
   stats    the exact tests the stages ask for: intervals, paired tests, power, FDR
   noise    how much your scorer moves on a file that never changes
+  watch    launch a long run, confirm it really started, and leave a flag file
   init     start a project whose first section is the gate, and which is empty
   install  attach the stages to Claude Code, Codex, or anything that reads Markdown
 

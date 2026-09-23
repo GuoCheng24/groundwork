@@ -39,6 +39,22 @@ pre-registration committed after its results is a write-up.
 
 ## 2. Find the capacity that is actually free
 
+Start with the machine you are on, because what it can do is usually
+underestimated:
+
+```bash
+groundwork probe            # GPUs, /dev/shm, what is installed off PATH, isolation
+```
+
+`which X` answers for `PATH`, not for the machine. LibreOffice was declared
+unavailable here for weeks on that evidence while it sat eight directories deep
+under a shared mount; `ninja` was missing from `PATH` while an inference stack's
+JIT backend needed it. On a cluster, `module avail` is the real catalogue. And
+"no root, so no containers" was false: unprivileged user namespaces, `bwrap`
+and `fuse-overlayfs` were all available to an ordinary account.
+
+Then look outward:
+
 ```bash
 groundwork cluster survey --nodes gpu01 gpu02 gpu03 gpu04
 groundwork cluster plan --nodes gpu01 gpu03 --need-gb 20 --shards 4 \
@@ -64,11 +80,29 @@ Three habits, each learnt by losing a night:
   two shards restarted at different points then take the same item while a third
   is taken by nobody — silently, because every shard file looks complete alone.
 
-Launch detached (`nohup`), confirm the process is alive at 90 seconds, and read
-the head of the log. A background job nobody looked at for an hour is an hour
-you may have to spend again.
+## 4. Launch it so that it outlives this session
 
-## 4. Analyse the plan that was written first
+```bash
+groundwork watch start --name run3 -- python eval.py --shard 0/4
+groundwork watch status                 # what happened, and write the flag file
+```
+
+`watch` launches detached, waits ninety seconds **before believing it started**
+— a job that fails to load its weights looks exactly like one that is training,
+at launch — then prints the head of the log where the configuration is echoed.
+An empty head is reported as buffering, not as silence, because those two look
+identical and only one of them loses everything in a crash.
+
+When the run ends it writes `archive/runs/<name>.DONE` with the verdict. That
+file is the point: a watch set up *inside* a session dies with the session, and
+its silence is indistinguishable from "nothing has happened" — one went unread
+for forty hours. A flag file is read by whoever comes next; an intention is not.
+
+`status` greps the log for the things that end runs quietly (a traceback, an
+OOM, a `Killed`, a NaN) and exits non-zero if it finds one, so it can sit in a
+loop or a cron line.
+
+## 5. Analyse the plan that was written first
 
 Run the pre-stated analysis and report it whichever way it comes out. Then, and
 only then, look at anything else — and label it exploratory.
