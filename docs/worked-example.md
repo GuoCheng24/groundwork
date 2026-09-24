@@ -1,8 +1,8 @@
 # A worked example — one direction, from idea to killed, in one afternoon
 
 Everything below is a real sequence you can type. It ends in a NO-GO, which is
-the outcome this pipeline exists to produce cheaply and the one no other
-walkthrough shows you.
+the outcome this pipeline exists to produce cheaply and the one walkthroughs
+rarely show you.
 
 The made-up direction: *"a learned module that repairs the connectivity of
 segmented structures should beat the usual post-processing."*
