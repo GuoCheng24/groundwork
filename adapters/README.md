@@ -64,16 +64,23 @@ point is that the reviewer has not seen the work.
 ```bash
 curl -s https://api.deepseek.com/chat/completions \
   -H "Authorization: Bearer $DEEPSEEK_API_KEY" -H 'Content-Type: application/json' \
-  -d "$(jq -Rs '{model:"deepseek-reasoner",messages:[{role:"user",content:.}]}' packet.md)"
+  -d "$(jq -Rs '{model:"'${DEEPSEEK_MODEL:?set DEEPSEEK_MODEL}'",messages:[{role:"user",content:.}]}' packet.md)"
 ```
+
+Model names change: `deepseek-reasoner` is no longer in DeepSeek's model list.
+Set `DEEPSEEK_MODEL` from [the current one](https://api-docs.deepseek.com/quick_start/pricing)
+(`deepseek-v4-pro` as of 2026-09).
 
 ## Kimi / Moonshot
 
 ```bash
 curl -s https://api.moonshot.cn/v1/chat/completions \
   -H "Authorization: Bearer $MOONSHOT_API_KEY" -H 'Content-Type: application/json' \
-  -d "$(jq -Rs '{model:"kimi-k2-turbo-preview",messages:[{role:"user",content:.}]}' packet.md)"
+  -d "$(jq -Rs '{model:"'${KIMI_MODEL:?set KIMI_MODEL}'",messages:[{role:"user",content:.}]}' packet.md)"
 ```
+
+The `kimi-k2` series was discontinued on 2026-05-25. Set `KIMI_MODEL` from
+[the current list](https://platform.kimi.ai/docs/models.md) (`kimi-k3` as of 2026-09).
 
 ## Anything OpenAI-compatible
 
