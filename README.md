@@ -27,8 +27,10 @@ python -m groundwork gate --baseline 0.812 --oracle 0.830 --se 0.019      # NO-G
 ```
 
 Codex CLI reads the **same seven files** rather than a parallel mirror, so the
-two cannot drift apart. Add the tools with `pip install groundwork-research`;
-the stages tell you when to reach for each, and work without them.
+two cannot drift apart. The stages name the command-line tools and work without
+them; to add the tools, install from the clone above with `pip install -e .`
+(`groundwork-research` is not on PyPI yet, and an install line that 404s is
+worse than no install line).
 
 Python 3.9+, **no dependencies**, nothing to configure. Works with Claude Code,
 Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.

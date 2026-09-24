@@ -164,5 +164,36 @@ class External(unittest.TestCase):
                           "the recorded values were checked, the sources were not")
 
 
+class InstallLines(unittest.TestCase):
+    """An install line that 404s is worse than no install line.
+
+    The README told readers to `pip install groundwork-research` for a package
+    that was never published: PyPI returns 404 for it, and the plugin
+    marketplace description said the same thing. This does not reach the
+    network - it checks that any `pip install <name>` in the README names a
+    package this repository actually publishes.
+    """
+
+    def test_no_install_line_names_an_unpublished_package(self):
+        import configparser
+        published = set()
+        pj = os.path.join(ROOT, "pyproject.toml")
+        if os.path.exists(pj):
+            with open(pj, encoding="utf-8") as fh:
+                m = re.search(r'^\s*name\s*=\s*"([^"]+)"', fh.read(), re.M)
+            if m:
+                published.add(m.group(1))
+        # ...but naming it in pyproject is not publishing it. Until this
+        # repository has a release on PyPI, no install line may name it.
+        claimed = set(re.findall(r"pip install ([A-Za-z][A-Za-z0-9_.-]+)", readme()))
+        claimed -= {"-e"}
+        bad = sorted(claimed & published)
+        self.assertFalse(bad, f"the README says `pip install {' '.join(bad)}`, which is "
+                              "this package's own name and is not published on PyPI - the "
+                              "command 404s for every reader. Publish it, or tell readers "
+                              "to install from the clone.")
+
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
