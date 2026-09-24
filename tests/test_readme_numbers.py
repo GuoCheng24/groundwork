@@ -101,6 +101,19 @@ class Internal(unittest.TestCase):
         self.assertEqual(int(m.group(1)), notes)
 
 
+
+    def test_the_readme_has_no_relative_links(self):
+        """This README becomes the PyPI project page, where a relative link is
+        a dead link — and a release's description cannot be changed without a
+        new version. 51 of its 64 links were relative when that was noticed.
+
+        The stage notes keep THEIR relative links: they are read next to each
+        other, on GitHub and inside the installed package.
+        """
+        rel = [t for t in re.findall(r"\[[^\]]*\]\(([^)\s]+)\)", readme())
+               if not t.startswith(("http://", "https://", "#", "mailto:"))]
+        self.assertEqual(rel, [], "relative links in the README are dead on PyPI")
+
     def test_the_committed_inventory_matches_what_is_on_disk(self):
         """`archive/inventory.json` exists so that a page elsewhere can check a
         count it cannot compute: raw.githubusercontent.com serves files, not

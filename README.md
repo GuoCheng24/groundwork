@@ -36,8 +36,8 @@ Python 3.9+, **no dependencies**, nothing to configure. Works with Claude Code,
 Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.
 
 > **Never used a coding agent before?**
-> → [**Getting started**](docs/getting-started.md) · [**上手指南（中文）**](docs/getting-started.zh.md)
-> → [**A worked example**](docs/worked-example.md) — one direction, from idea to
+> → [**Getting started**](https://github.com/GuoCheng24/groundwork/blob/main/docs/getting-started.md) · [**上手指南（中文）**](https://github.com/GuoCheng24/groundwork/blob/main/docs/getting-started.zh.md)
+> → [**A worked example**](https://github.com/GuoCheng24/groundwork/blob/main/docs/worked-example.md) — one direction, from idea to
 > killed, in an afternoon. It ends in a NO-GO, which is the outcome this exists
 > to produce cheaply and the one no other walkthrough shows you.
 >
@@ -100,13 +100,13 @@ pre-registered "clean hardware test" that was not clean until a control existed.
 
 | stage | what it decides | notes, each written from a failure |
 |---|---|---|
-| [`00-gate`](groundwork/skills/00-gate/) | Gate — the four numbers that decide | [`breakthrough`](groundwork/skills/00-gate/breakthrough.md) · [`ceiling-first`](groundwork/skills/00-gate/ceiling-first.md) · [`metric-validity`](groundwork/skills/00-gate/metric-validity.md) · [`positive-control`](groundwork/skills/00-gate/positive-control.md) · [`two-toolboxes`](groundwork/skills/00-gate/two-toolboxes.md) |
-| [`10-direction`](groundwork/skills/10-direction/) | Direction — candidates, not ideas | [`kill-argument`](groundwork/skills/10-direction/kill-argument.md) · [`lit-review`](groundwork/skills/10-direction/lit-review.md) · [`occupancy`](groundwork/skills/10-direction/occupancy.md) · [`originality`](groundwork/skills/10-direction/originality.md) · [`venue-fit`](groundwork/skills/10-direction/venue-fit.md) |
-| [`20-experiment`](groundwork/skills/20-experiment/) | Experiment — sealed first, then launched | [`ablations`](groundwork/skills/20-experiment/ablations.md) · [`data-hygiene`](groundwork/skills/20-experiment/data-hygiene.md) · [`post-training`](groundwork/skills/20-experiment/post-training.md) · [`hardware`](groundwork/skills/20-experiment/hardware.md) · [`implementation`](groundwork/skills/20-experiment/implementation.md) · [`long-runs`](groundwork/skills/20-experiment/long-runs.md) · [`shared-machine`](groundwork/skills/20-experiment/shared-machine.md) |
-| [`30-claim`](groundwork/skills/30-claim/) | Claim — three layers, blind to different things | [`citations`](groundwork/skills/30-claim/citations.md) · [`integrity`](groundwork/skills/30-claim/integrity.md) · [`review-loop`](groundwork/skills/30-claim/review-loop.md) · [`statistics`](groundwork/skills/30-claim/statistics.md) |
-| [`40-write`](groundwork/skills/40-write/) | Write — from claims, not from results | [`build`](groundwork/skills/40-write/build.md) · [`captions`](groundwork/skills/40-write/captions.md) · [`claims`](groundwork/skills/40-write/claims.md) · [`diagrams`](groundwork/skills/40-write/diagrams.md) · [`figures`](groundwork/skills/40-write/figures.md) · [`structure`](groundwork/skills/40-write/structure.md) · [`theory`](groundwork/skills/40-write/theory.md) |
-| [`50-submit`](groundwork/skills/50-submit/) | Submit — and everything after | [`compliance`](groundwork/skills/50-submit/compliance.md) · [`delivery`](groundwork/skills/50-submit/delivery.md) · [`patent`](groundwork/skills/50-submit/patent.md) · [`rebuttal`](groundwork/skills/50-submit/rebuttal.md) · [`resubmit`](groundwork/skills/50-submit/resubmit.md) · [`talks`](groundwork/skills/50-submit/talks.md) |
-| [`90-memory`](groundwork/skills/90-memory/) | Memory — the archive is the asset | [`postmortems`](groundwork/skills/90-memory/postmortems.md) · [`wiki`](groundwork/skills/90-memory/wiki.md) |
+| [`00-gate`](https://github.com/GuoCheng24/groundwork/tree/main/groundwork/skills/00-gate) | Gate — the four numbers that decide | [`breakthrough`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/00-gate/breakthrough.md) · [`ceiling-first`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/00-gate/ceiling-first.md) · [`metric-validity`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/00-gate/metric-validity.md) · [`positive-control`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/00-gate/positive-control.md) · [`two-toolboxes`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/00-gate/two-toolboxes.md) |
+| [`10-direction`](https://github.com/GuoCheng24/groundwork/tree/main/groundwork/skills/10-direction) | Direction — candidates, not ideas | [`kill-argument`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/10-direction/kill-argument.md) · [`lit-review`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/10-direction/lit-review.md) · [`occupancy`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/10-direction/occupancy.md) · [`originality`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/10-direction/originality.md) · [`venue-fit`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/10-direction/venue-fit.md) |
+| [`20-experiment`](https://github.com/GuoCheng24/groundwork/tree/main/groundwork/skills/20-experiment) | Experiment — sealed first, then launched | [`ablations`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/20-experiment/ablations.md) · [`data-hygiene`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/20-experiment/data-hygiene.md) · [`post-training`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/20-experiment/post-training.md) · [`hardware`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/20-experiment/hardware.md) · [`implementation`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/20-experiment/implementation.md) · [`long-runs`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/20-experiment/long-runs.md) · [`shared-machine`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/20-experiment/shared-machine.md) |
+| [`30-claim`](https://github.com/GuoCheng24/groundwork/tree/main/groundwork/skills/30-claim) | Claim — three layers, blind to different things | [`citations`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/30-claim/citations.md) · [`integrity`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/30-claim/integrity.md) · [`review-loop`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/30-claim/review-loop.md) · [`statistics`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/30-claim/statistics.md) |
+| [`40-write`](https://github.com/GuoCheng24/groundwork/tree/main/groundwork/skills/40-write) | Write — from claims, not from results | [`build`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/40-write/build.md) · [`captions`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/40-write/captions.md) · [`claims`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/40-write/claims.md) · [`diagrams`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/40-write/diagrams.md) · [`figures`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/40-write/figures.md) · [`structure`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/40-write/structure.md) · [`theory`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/40-write/theory.md) |
+| [`50-submit`](https://github.com/GuoCheng24/groundwork/tree/main/groundwork/skills/50-submit) | Submit — and everything after | [`compliance`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/50-submit/compliance.md) · [`delivery`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/50-submit/delivery.md) · [`patent`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/50-submit/patent.md) · [`rebuttal`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/50-submit/rebuttal.md) · [`resubmit`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/50-submit/resubmit.md) · [`talks`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/50-submit/talks.md) |
+| [`90-memory`](https://github.com/GuoCheng24/groundwork/tree/main/groundwork/skills/90-memory) | Memory — the archive is the asset | [`postmortems`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/90-memory/postmortems.md) · [`wiki`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/90-memory/wiki.md) |
 
 ## The gate: four numbers, ten minutes, before anything
 
@@ -164,11 +164,11 @@ tuned**. Given the same budget, the final gain over that baseline was
 
 So the rule has a second half, and it is the half that matters: *the baseline
 gets the same tuning budget as the method.* A baseline nobody tried to make win
-is a strawman with error bars. See [`groundwork/skills/00-gate/ceiling-first.md`](groundwork/skills/00-gate/ceiling-first.md).
+is a strawman with error bars. See [`groundwork/skills/00-gate/ceiling-first.md`](https://github.com/GuoCheng24/groundwork/blob/main/groundwork/skills/00-gate/ceiling-first.md).
 
 ## The archive: ten ways a direction dies
 
-[`archive/causes-of-death.json`](archive/causes-of-death.json) records ten, each
+[`archive/causes-of-death.json`](https://github.com/GuoCheng24/groundwork/blob/main/archive/causes-of-death.json) records ten, each
 with the cheap test that would have ended it sooner and what it cost when it did
 not. They are not hypothetical:
 
@@ -456,7 +456,7 @@ from the log that say why, **which steps therefore never ran**, and the one
 command that continues after you have fixed it. The steps that did not run are
 the point: they are what the morning is still free to reconsider.
 
-A worked plan is in [`docs/night-plan.txt`](docs/night-plan.txt) — the full-set
+A worked plan is in [`docs/night-plan.txt`](https://github.com/GuoCheng24/groundwork/blob/main/docs/night-plan.txt) — the full-set
 arms of a benchmark reproduction, gate chain and all.
 
 And when every step passes, the report says so in the only way that is true:
@@ -513,7 +513,7 @@ Not a bibliography — repositories where these rules run in CI on every push.
 
 ## Using it with your agent
 
-The stages are plain Markdown under [`skills/`](groundwork/skills/) — no framework, no MCP
+The stages are plain Markdown under [`skills/`](https://github.com/GuoCheng24/groundwork/tree/main/groundwork/skills) — no framework, no MCP
 server, no second subscription.
 
 - **Claude Code** — `ln -s .../groundwork/skills/* .claude/skills/`, then ask
@@ -522,7 +522,7 @@ server, no second subscription.
 - **DeepSeek / Kimi / any OpenAI-compatible endpoint** — the skill file is the
   system prompt; the tools are shell commands.
 
-See [`adapters/`](adapters/) for the exact invocations, including how to get a
+See [`adapters/`](https://github.com/GuoCheng24/groundwork/tree/main/adapters) for the exact invocations, including how to get a
 reviewer that is genuinely a *different* model for the claim stage.
 
 ---
