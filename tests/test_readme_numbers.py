@@ -238,7 +238,12 @@ class InstallLines(unittest.TestCase):
         """
         known = {"groundwork-research", "doubleblind-audit"}
         offenders = []
+        # skills ship in the wheel; docs ship in the sdist; the README ships in
+        # both. The first version of this check covered the first and the
+        # third and missed a `pip install doubleblind` in docs/worked-example.md
+        # - the same blind spot, one directory over.
         for f in sorted(glob.glob(os.path.join(ROOT, "groundwork", "skills", "*", "*.md"))
+                        + glob.glob(os.path.join(ROOT, "docs", "*.md"))
                         + [README]):
             with open(f, encoding="utf-8") as fh:
                 text = fh.read()

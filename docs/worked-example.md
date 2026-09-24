@@ -134,7 +134,7 @@ FAIL results.json was committed BEFORE the pre-registration was committed.
 Then the claims:
 
 ```bash
-pip install doubleblind
+pip install doubleblind-audit     # the command is still `doubleblind`
 doubleblind trace README.md --data results/ --derive 'python scripts/metrics.py'
 doubleblind review README.md --data results/ --agent codex     # a different model
 doubleblind render figures/main.py                             # what a reader sees
