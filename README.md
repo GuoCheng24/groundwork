@@ -1,6 +1,7 @@
 # groundwork ⛰️🔬
 
 [![ci](https://github.com/GuoCheng24/groundwork/actions/workflows/ci.yml/badge.svg)](https://github.com/GuoCheng24/groundwork/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/groundwork-research?label=PyPI&color=0b6e4f)](https://pypi.org/project/groundwork-research/)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![deps](https://img.shields.io/badge/dependencies-none-2e7d32)](#)
 [![licence](https://img.shields.io/badge/licence-MIT-green)](https://github.com/GuoCheng24/groundwork/blob/main/LICENSE)
@@ -28,9 +29,11 @@ python -m groundwork gate --baseline 0.812 --oracle 0.830 --se 0.019      # NO-G
 
 Codex CLI reads the **same seven files** rather than a parallel mirror, so the
 two cannot drift apart. The stages name the command-line tools and work without
-them; to add the tools, install from the clone above with `pip install -e .`
-(`groundwork-research` is not on PyPI yet, and an install line that 404s is
-worse than no install line).
+them; to add the tools:
+
+```bash
+pip install groundwork-research
+```
 
 Python 3.9+, **no dependencies**, nothing to configure. Works with Claude Code,
 Codex CLI, DeepSeek, Kimi, or any agent that reads Markdown and runs a shell.

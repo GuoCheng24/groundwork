@@ -12,7 +12,7 @@
     {
       "name": "groundwork",
       "source": "./",
-      "description": "Seven gated research stages as skills, each written from a failure that actually happened. The command-line tools (gate, prereg, cluster, shard, watch, probe, check, stats, noise, ledger, lit, reach) install separately from a clone with `pip install -e .`, and the skills tell you when to reach for each.",
+      "description": "Seven gated research stages as skills, each written from a failure that actually happened. The command-line tools (check, cluster, gate, ledger, lit, night, noise, prereg, probe, reach, shard, stats, watch) install separately with `pip install groundwork-research`, and the skills tell you when to reach for each.",
       "author": {
         "name": "Guo Cheng",
         "url": "https://github.com/GuoCheng24"

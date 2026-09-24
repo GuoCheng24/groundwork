@@ -202,33 +202,51 @@ class External(unittest.TestCase):
 
 
 class InstallLines(unittest.TestCase):
-    """An install line that 404s is worse than no install line.
+    """What the README and the plugin manifest tell a reader to type.
 
-    The README told readers to `pip install groundwork-research` for a package
-    that was never published: PyPI returns 404 for it, and the plugin
-    marketplace description said the same thing. This does not reach the
-    network - it checks that any `pip install <name>` in the README names a
-    package this repository actually publishes.
+    The README once said `pip install groundwork-research` for a package that
+    had never been published: PyPI returned 404, and the plugin marketplace
+    description said the same thing, so both routes a reader might take ended
+    in "No matching distribution found". It is published now, so the rule is
+    no longer "must not name it" but "must name it exactly" - a hyphen for an
+    underscore is the same 404.
     """
 
-    def test_no_install_line_names_an_unpublished_package(self):
-        import configparser
-        published = set()
-        pj = os.path.join(ROOT, "pyproject.toml")
-        if os.path.exists(pj):
-            with open(pj, encoding="utf-8") as fh:
-                m = re.search(r'^\s*name\s*=\s*"([^"]+)"', fh.read(), re.M)
-            if m:
-                published.add(m.group(1))
-        # ...but naming it in pyproject is not publishing it. Until this
-        # repository has a release on PyPI, no install line may name it.
+    def _dist_name(self):
+        with open(os.path.join(ROOT, "pyproject.toml"), encoding="utf-8") as fh:
+            return re.search(r'^\s*name\s*=\s*"([^"]+)"', fh.read(), re.M).group(1)
+
+    def test_every_install_line_names_this_package_exactly(self):
+        name = self._dist_name()
         claimed = set(re.findall(r"pip install ([A-Za-z][A-Za-z0-9_.-]+)", readme()))
-        claimed -= {"-e"}
-        bad = sorted(claimed & published)
-        self.assertFalse(bad, f"the README says `pip install {' '.join(bad)}`, which is "
-                              "this package's own name and is not published on PyPI - the "
-                              "command 404s for every reader. Publish it, or tell readers "
-                              "to install from the clone.")
+        wrong = sorted(c for c in claimed if c.lower().replace("_", "-")
+                       == name.lower().replace("_", "-") and c != name)
+        self.assertEqual(wrong, [], f"the README writes {wrong} where PyPI has {name!r}; "
+                                    "a hyphen for an underscore is still a 404")
+        self.assertIn(name, claimed,
+                      f"the README no longer tells anyone how to install {name}")
+
+    def test_the_plugin_manifest_says_the_same_thing(self):
+        with open(os.path.join(ROOT, ".claude-plugin", "marketplace.json"),
+                  encoding="utf-8") as fh:
+            desc = json.load(fh)["plugins"][0]["description"]
+        self.assertIn(f"pip install {self._dist_name()}", desc)
+
+    def test_the_manifest_lists_the_commands_that_exist(self):
+        """It listed twelve of fifteen, and the missing one was the newest.
+
+        A hand-kept list in prose is a list that goes stale; `init` and
+        `install` are left out on purpose because they are not tools you reach
+        for mid-project.
+        """
+        from groundwork import cli
+        with open(os.path.join(ROOT, ".claude-plugin", "marketplace.json"),
+                  encoding="utf-8") as fh:
+            desc = json.load(fh)["plugins"][0]["description"]
+        for c in cli.COMMANDS:
+            if c in ("init", "install"):
+                continue
+            self.assertIn(c, desc, f"`groundwork {c}` exists and the manifest omits it")
 
 
 
