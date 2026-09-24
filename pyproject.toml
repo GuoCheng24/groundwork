@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "groundwork-research"
-version = "0.1.1"
+version = "0.1.2"
 description = "The research pipeline for coding agents that spends its first ten minutes trying to kill your project: a gate that returns NO-GO, a pre-registration version control can date, and an archive of how directions actually die."
 readme = "README.md"
 requires-python = ">=3.9"

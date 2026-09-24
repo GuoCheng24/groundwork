@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "groundwork",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A research pipeline whose first stage can return NO-GO. Seven gated stages - gate, direction, experiment, claim, write, submit, memory - plus command-line tools for the parts that are not advice: a pre-registration version control can date, idle-GPU placement, shard ownership that survives a restart, and a scorer's own noise floor. No dependencies, no MCP server, no API key.",
   "author": {
     "name": "Guo Cheng",
