@@ -1,0 +1,9 @@
+# The sdist ships the tests, so it has to ship what the tests read. Without
+# this, `archive/` is left out and tests/test_readme_numbers.py fails on an
+# unpacked sdist looking for archive/inventory.json - a package that ships a
+# test suite it cannot run.
+include README.md LICENSE
+recursive-include archive *.json
+recursive-include tests *.py
+recursive-include docs *.md *.py *.txt
+recursive-include groundwork/skills *.md
