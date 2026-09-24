@@ -489,7 +489,7 @@ is the one you have stopped checking.
 | the rendered figure | labels that read as one word; a caption unreadable at the size it will be seen | whether the shape a reader takes from the figure is the shape the data supports |
 
 Implemented in [**doubleblind**](https://github.com/GuoCheng24/doubleblind),
-installable on its own. Its ledger records 22 real defects with the layer that
+installable on its own. Its ledger records 23 real defects with the layer that
 missed each one; 10 were caught by a person looking at the rendered artifact,
 which is the number the third layer exists to shrink.
 

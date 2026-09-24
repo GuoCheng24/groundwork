@@ -48,13 +48,13 @@
   },
   {
    "id": "ledger_findings",
-   "value": 22,
-   "rendered": "22 real defects",
+   "value": 23,
+   "rendered": "23 real defects",
    "what": "defects recorded in the doubleblind ledger",
    "repo": "doubleblind",
    "path": "ledger/findings.json",
    "derive": "len(findings)",
-   "as_of": "6dbdb72702020b1b3e966a0ff94bd3e500beed3f",
+   "as_of": "2d387a95d4e1b93710f72f1cd5af2a5efbca8945",
    "used_in": "README.md"
   },
   {
