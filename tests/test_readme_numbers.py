@@ -226,6 +226,30 @@ class InstallLines(unittest.TestCase):
         self.assertIn(name, claimed,
                       f"the README no longer tells anyone how to install {name}")
 
+
+    def test_no_shipped_file_tells_anyone_to_install_the_wrong_package(self):
+        """The guard looked at README.md while the wheel ships fifty more.
+
+        `30-claim/SKILL.md` said `pip install doubleblind`, which is an
+        unrelated project on PyPI by another author, and that file went out
+        inside 0.1.0 — a published package telling its readers to install
+        somebody else's. Every markdown file that ships is checked now, and
+        every install target must be a package this project actually means.
+        """
+        known = {"groundwork-research", "doubleblind-audit"}
+        offenders = []
+        for f in sorted(glob.glob(os.path.join(ROOT, "groundwork", "skills", "*", "*.md"))
+                        + [README]):
+            with open(f, encoding="utf-8") as fh:
+                text = fh.read()
+            for m in re.finditer(r"pip install ([A-Za-z][A-Za-z0-9_.\[\]-]+)", text):
+                pkg = m.group(1).split("[")[0]
+                if pkg not in known:
+                    line = text[:m.start()].count("\n") + 1
+                    offenders.append(f"{os.path.relpath(f, ROOT)}:{line} -> {pkg}")
+        self.assertEqual(offenders, [], "shipped files naming a package that is not ours: "
+                                        + "; ".join(offenders))
+
     def test_the_plugin_manifest_says_the_same_thing(self):
         with open(os.path.join(ROOT, ".claude-plugin", "marketplace.json"),
                   encoding="utf-8") as fh:

@@ -21,10 +21,12 @@ Three layers catch this, and **no two of them catch the same defects**.
 | the rendered figure | labels that read as one word; a caption unreadable at the size it will be seen; a character the font could not draw | whether the shape a reader takes from the figure is the shape the data supports |
 
 All three are implemented in [`doubleblind`](https://github.com/GuoCheng24/doubleblind),
-which is standard library only apart from the figure layer:
+which is standard library only apart from the figure layer. The distribution
+carries a suffix because the bare name on PyPI belongs to an unrelated project;
+what you type is still `doubleblind`:
 
 ```bash
-pip install doubleblind
+pip install doubleblind-audit
 doubleblind trace README.md --data results/ --derive 'python scripts/metrics.py'
 doubleblind review README.md --data results/ --agent codex
 doubleblind render figures/main.py
