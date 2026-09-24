@@ -110,7 +110,11 @@ class Internal(unittest.TestCase):
         The stage notes keep THEIR relative links: they are read next to each
         other, on GitHub and inside the installed package.
         """
-        rel = [t for t in re.findall(r"\[[^\]]*\]\(([^)\s]+)\)", readme())
+        # `[![badge](img-url)](target)` nests brackets, and a pattern that
+        # stops at the first `]` matches the IMAGE url and never sees the
+        # target. The licence badge pointed at a bare `LICENSE` and this check
+        # reported zero relative links. Every `](...)` is examined instead.
+        rel = [t for t in re.findall(r"\]\(([^)\s]+)\)", readme())
                if not t.startswith(("http://", "https://", "#", "mailto:"))]
         self.assertEqual(rel, [], "relative links in the README are dead on PyPI")
 

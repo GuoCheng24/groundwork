@@ -3,7 +3,7 @@
 [![ci](https://github.com/GuoCheng24/groundwork/actions/workflows/ci.yml/badge.svg)](https://github.com/GuoCheng24/groundwork/actions/workflows/ci.yml)
 [![python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![deps](https://img.shields.io/badge/dependencies-none-2e7d32)](#)
-[![licence](https://img.shields.io/badge/licence-MIT-green)](LICENSE)
+[![licence](https://img.shields.io/badge/licence-MIT-green)](https://github.com/GuoCheng24/groundwork/blob/main/LICENSE)
 [![stars](https://img.shields.io/github/stars/GuoCheng24/groundwork?style=flat&color=gold)](https://github.com/GuoCheng24/groundwork/stargazers)
 
 **Your agent can hand you a paper by morning. The harder question is whether the
