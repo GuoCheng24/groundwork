@@ -1,0 +1,35 @@
+{
+ "note": "What this repository contains, written down so that a page quoting it can check it. A count of files in a directory cannot be fetched over raw.githubusercontent.com, so a profile page that quotes one is quoting memory. tests/test_readme_numbers.py regenerates this and fails if it has drifted.",
+ "stages": 7,
+ "stage_names": [
+  "00-gate",
+  "10-direction",
+  "20-experiment",
+  "30-claim",
+  "40-write",
+  "50-submit",
+  "90-memory"
+ ],
+ "notes": 43,
+ "skill_files": 7,
+ "markdown_files": 50,
+ "commands": [
+  "check",
+  "cluster",
+  "gate",
+  "init",
+  "install",
+  "ledger",
+  "lit",
+  "night",
+  "noise",
+  "prereg",
+  "probe",
+  "reach",
+  "shard",
+  "stats",
+  "watch"
+ ],
+ "n_commands": 15,
+ "causes_of_death": 10
+}

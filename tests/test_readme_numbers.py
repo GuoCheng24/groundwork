@@ -100,6 +100,26 @@ class Internal(unittest.TestCase):
         self.assertEqual(stages, 7, "'Seven stages' and the directory count disagree")
         self.assertEqual(int(m.group(1)), notes)
 
+
+    def test_the_committed_inventory_matches_what_is_on_disk(self):
+        """`archive/inventory.json` exists so that a page elsewhere can check a
+        count it cannot compute: raw.githubusercontent.com serves files, not
+        directory listings, so a profile quoting "43 stage notes" is quoting
+        memory unless the number is committed. This is what makes it evidence.
+        """
+        with open(os.path.join(ROOT, "archive", "inventory.json"), encoding="utf-8") as fh:
+            inv = json.load(fh)
+        md = glob.glob(os.path.join(ROOT, "groundwork", "skills", "*", "*.md"))
+        skills = [f for f in md if os.path.basename(f) == "SKILL.md"]
+        from groundwork import cli
+        self.assertEqual(inv["stages"], len(skills))
+        self.assertEqual(inv["markdown_files"], len(md))
+        self.assertEqual(inv["notes"], len(md) - len(skills))
+        self.assertEqual(inv["n_commands"], len(cli.COMMANDS))
+        self.assertEqual(sorted(inv["commands"]), sorted(cli.COMMANDS))
+        with open(os.path.join(ROOT, "archive", "causes-of-death.json"), encoding="utf-8") as fh:
+            self.assertEqual(inv["causes_of_death"], len(json.load(fh)["causes"]))
+
     def test_the_archive_really_records_ten_causes(self):
         with open(os.path.join(ROOT, "archive", "causes-of-death.json"), encoding="utf-8") as fh:
             causes = json.load(fh)["causes"]
