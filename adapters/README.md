@@ -17,7 +17,30 @@ done
 
 Then ask for a stage by name, or invoke the tools directly. For the claim
 stage's zero-context reviewer, a sub-agent starts with no conversation history
-by construction — so only the model has to be chosen explicitly:
+by construction — but not with nothing. It still loads your `CLAUDE.md` files,
+any `AGENTS.md` loaded as project instructions, and a git-status snapshot, which
+is exactly where an author writes down what the result is supposed to mean.
+(A fork started with `/subtask` is the other kind: it inherits the whole
+conversation, so it is never the reviewer.)
+
+For a reviewer that sees the packet and nothing else, define it once as a
+project sub-agent (Claude Code 2.1.271 or later for `omitClaudeMd`):
+
+```markdown
+---
+name: blind-reviewer
+description: Reviews a sealed packet with no project context. Use only when handed a packet.
+tools: Read
+omitClaudeMd: true
+model: sonnet   # anything but the model that produced the artifact
+---
+Review the packet you are given. You know nothing else about this project.
+```
+
+Save it as `.claude/agents/blind-reviewer.md`, launch it from a directory that
+holds the packet alone, and record which model ran. Without the definition, the
+general-purpose agent with an explicit `model` still works; it just reads your
+instructions first:
 
 ```python
 Agent(subagent_type='general-purpose',

@@ -21,6 +21,16 @@ groundwork ledger defect --id <slug> --missed-by mechanical|reviewer|figure|both
 groundwork ledger roll
 ```
 
+## In Claude Code: one index, not two
+
+Claude Code keeps its own auto memory: a `MEMORY.md` index, one line per
+memory, and a topic file behind each line; the first 200 lines or 25 KB of the
+index load into every session. Use that as the index described below rather
+than keeping a second one. Two indexes drift, and only one of them is loaded.
+
+What auto memory does not give you is structure. Keep the archive and the
+ledger as the files below, and put one line in `MEMORY.md` pointing at each.
+
 ## Three files, three jobs
 
 **`archive/`** — one entry per direction that died. Verdict, cause (from

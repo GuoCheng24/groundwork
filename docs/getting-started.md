@@ -27,8 +27,9 @@ system-wide.
 ## Part 1 — A machine with normal internet
 
 ```bash
-# Claude Code
-npm install -g @anthropic-ai/claude-code
+# Claude Code - the native installer, which is what Anthropic recommends and
+# which updates itself; npm also works but needs Node.js 22 or later
+curl -fsSL https://claude.ai/install.sh | bash
 claude          # first run walks you through signing in
 
 # Codex CLI
@@ -36,8 +37,8 @@ npm install -g @openai/codex
 codex           # same
 ```
 
-No npm? Both ship standalone installers; check their documentation rather than
-installing a system-wide Node.
+No npm for Codex? It ships a standalone installer too; check its documentation
+rather than installing a system-wide Node.
 
 Then, in any project directory:
 

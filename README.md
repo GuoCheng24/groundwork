@@ -527,6 +527,20 @@ server, no second subscription.
 See [`adapters/`](https://github.com/GuoCheng24/groundwork/tree/main/adapters) for the exact invocations, including how to get a
 reviewer that is genuinely a *different* model for the claim stage.
 
+### What Claude Code now does itself
+
+Several things this repository used to be the only way to get are built into
+Claude Code now. Where one is, use it; groundwork keeps only the part the
+built-in does not do.
+
+| built into Claude Code | what it does | what groundwork adds |
+|---|---|---|
+| auto memory | a `MEMORY.md` index and topic files; the first 200 lines or 25 KB load into every session | `90-memory` uses that index instead of keeping a second one, and adds the structure it lacks: an archive of dead directions with a closed cause taxonomy, and a defect ledger |
+| `/deep-research` | web research that cross-checks its sources | `lit` asks the scholarly indices directly and refuses an occupancy verdict when the primary index did not answer |
+| sub-agents, `/code-review` | a fresh-context worker; a multi-agent review of a code diff | the claim stage reviews a *document's claims*, on a different model, with your project instructions withheld |
+| Workflows, background sessions, `claude agents` | orchestrating and watching many agent sessions | `night` is not an agent: a plain shell plan that stops at the first non-zero exit and says which steps never ran. Use either, or both |
+| `claude plugin eval` | scores a plugin against a run without it | nothing yet: this plugin does not ship an eval suite |
+
 ---
 
 ## What is here, and what is not
@@ -538,19 +552,20 @@ pipeline that never returns NO-GO is selling something.
 It is also not, today, a drop-in replacement for the largest generative
 toolkits. Honestly, side by side with
 [ARIS](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep), which
-is careful work and worth using:
+is careful work and worth using — as of its main branch on 2026-09-18, 87
+skills; it moves fast, so check a row before quoting it:
 
 | | ARIS | groundwork |
 |---|---|---|
-| a stage that returns **NO-GO** before the work | — | **yes**, from four measurements |
+| a stage that returns **NO-GO** before the work | — (`novelty-check` and `kill-argument` judge an idea or a draft; none measures a ceiling or a baseline first) | **yes**, from four measurements |
 | an archive of **how directions die**, each with the test that would have caught it | failed ideas as anti-repetition memory | **ten causes**, with the cheap test and the cost |
 | pre-registration **version control can date** | — | **yes**, and it fails when the results are older |
 | **multi-node idle-GPU placement**, shard ownership that survives a restart | one configured server, vast.ai, Modal | **yes**, and it refuses to split one arm across two GPU models |
 | **checking a training run** | `training-check` | narrower and measured: one file on RL post-training, where the importance ratio leaves `[0.9, 1.1]` for 1.8–60.0% of tokens **with the policy unchanged**, flips the PPO clip decision for 1.68–10.11%, and — across six GRPO arms, two seeds, 150 steps — does **not** reach the reward. Both halves, because the first half alone sells a week of fp32 plumbing |
 | **launching a long run and being sure it started** | `run-experiment`, `monitor-experiment`, an experiment queue | **yes**, and the check is the point: ninety seconds before believing it, the log head read back, an empty head called buffering rather than silence, and a flag file that outlives the session so the watch is not an intention |
-| **finding out what the machine can actually do** | — | **yes** — including what is installed but not on `PATH`, the module catalogue, whether isolation without root is available, and which large mounts it did *not* search |
+| **finding out what the machine can actually do** | `system-profile` profiles the performance of a script or GPU | **yes** — including what is installed but not on `PATH`, the module catalogue, whether isolation without root is available, and which large mounts it did *not* search |
 | **running every gate at once, over a project** | `meta-optimize` over an event log | **yes**, `check` — and it reports `n/a` as loudly as `FAIL`, because a sweep that passes for want of anything to check has told you the opposite of the truth |
-| verification layers **blind to different defects**, each with a test asserting what it cannot catch | an LLM review gate with an un-forgeable reviewer-identity chain | **three layers**, no MCP required |
+| verification layers **blind to different defects**, each with a test asserting what it cannot catch | zero-context, cross-model audits of the claims (`paper-claim-audit`), the citations (`citation-audit`) and the experiments (`experiment-audit`), behind a review gate with an un-forgeable reviewer-identity chain | **three layers**, one of them a recompute with no model in it, each with a test naming what it cannot catch; no MCP required |
 | literature **ingestion** (OpenAlex, Crossref, arXiv, Semantic Scholar) | **yes, several skills** | **yes**, one tool — re-ranked, and it **refuses an occupancy verdict when the primary index is silent**, because a spent quota and an empty literature look identical |
 | a **record that compounds** — what died, what got through, what converted into a check | `meta-optimize` reads an event log | **yes**, `ledger`, with a closed taxonomy so the causes can be counted |
 | paper compilation and reference style | **yes** | **yes**, and two files deeper: the failures that *compile cleanly* — a centred over-wide table that never warns, a font declaration that never reaches the preamble, a bibliography hyphen that is not a hyphen |
@@ -565,7 +580,6 @@ is careful work and worth using:
 | grant proposals | **yes** | **yes** — the gate applied before the proposal, "why you" as a checkable question, and the preliminary result that was designed to be reportable either way |
 | **handing a manuscript to a human collaborator** — tracked-change formatting regressions, orphaned equation objects, reference-manager fields, metadata that leaks through the explanation document | — | **yes**, from a manuscript delivered round after round and found unclean each time |
 | **caption audit** — panel letters, a stated direction that is backwards, a colour encoding that contradicts the discussion | — | **yes** |
-
 | patents | five skills | **two**, from a live prosecution: the four orderings that cannot be undone, and the disclosure document an attorney actually drafts from |
 
 **If you already use ARIS, the useful move is not to switch.** Run

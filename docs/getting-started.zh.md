@@ -23,8 +23,9 @@
 ## 一、能正常上网的机器
 
 ```bash
-# Claude Code
-npm install -g @anthropic-ai/claude-code
+# Claude Code —— 用官方推荐的原生安装器,会自动更新;
+# npm 也能装,但要求 Node.js 22 及以上
+curl -fsSL https://claude.ai/install.sh | bash
 claude          # 第一次运行会引导你登录
 
 # Codex CLI
@@ -32,7 +33,7 @@ npm install -g @openai/codex
 codex
 ```
 
-没有 npm 就用它们各自的独立安装包，别为此装一个系统级 Node。
+Codex 没有 npm 也有独立安装包，查它的文档，别为此装一个系统级 Node。
 
 然后在任意项目目录里：
 

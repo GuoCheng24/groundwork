@@ -1319,8 +1319,8 @@ class Watch(unittest.TestCase):
 
 class TestVersionAgrees(unittest.TestCase):
     """0.1.1 went to PyPI with __version__ still "0.1.0": pyproject.toml was bumped
-    and the module was not, and CITATION.cff said 0.1.0 as well. Three places name
-    the version; this holds them to one."""
+    and the module was not, and CITATION.cff and the plugin manifest said 0.1.0 as
+    well. Four places name the version; this holds them to one."""
 
     def test_module_pyproject_and_citation_agree(self):
         import groundwork
@@ -1328,9 +1328,14 @@ class TestVersionAgrees(unittest.TestCase):
             declared = re.search(r'^version = "([^"]+)"', fh.read(), re.M)
         with open(os.path.join(ROOT, "CITATION.cff"), encoding="utf-8") as fh:
             cited = re.search(r"^version: (\S+)", fh.read(), re.M)
-        self.assertTrue(declared and cited, "a version declaration has gone missing")
+        # The Claude Code plugin manifest is the fourth place, and the one
+        # `claude plugin details` reports: it said 0.1.0 after 0.1.1 shipped.
+        with open(os.path.join(ROOT, ".claude-plugin", "plugin.json"), encoding="utf-8") as fh:
+            plugin = json.load(fh).get("version")
+        self.assertTrue(declared and cited and plugin, "a version declaration has gone missing")
         self.assertEqual(groundwork.__version__, declared.group(1))
         self.assertEqual(cited.group(1), declared.group(1))
+        self.assertEqual(plugin, declared.group(1))
 
 
 if __name__ == "__main__":
